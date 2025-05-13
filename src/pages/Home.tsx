@@ -1,6 +1,9 @@
 import './../styles/Home.css';
+import usePageTitle from '../hooks/usePageTitle';
+
 
 function Home() {
+     usePageTitle('Home');
     return (
         <div className="home">
             <div className="hero">
