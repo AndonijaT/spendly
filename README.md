@@ -1,49 +1,54 @@
-# Spendly
+# React + TypeScript + Vite
 
-Spendly je spletna aplikacija za osebno upravljanje financ, namenjena ročnemu beleženju prihodkov in stroškov, ustvarjanju proračunov po kategorijah in spremljanju napredka z interaktivnimi grafi. 
+This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
 
-## Tehnologije
+Currently, two official plugins are available:
 
-- React + Vite (Frontend)
-- Firebase (Auth, Firestore, Hosting)
-- Chart.js (grafi)
-- PWA podpora
+- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
+- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
 
-## 🛠 Funkcionalnosti (po iteracijah)
+## Expanding the ESLint configuration
 
-### 1. iteracija
-- [ ] GitHub repozitorij + Kanban tabla
-- [ ] Inicializacija projekta
-- [ ] Firebase setup + povezava
-- [ ] UI layout + navigacija
-- [ ] Registracija/prijava uporabnika z 2FA
+If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
 
-### 2. iteracija
-- [ ] Vnos prihodkov/stroškov
-- [ ] Shramba v bazo
-- [ ] Kategorizacija
-- [ ] Seznam transakcij + datumi
+```js
+export default tseslint.config({
+  extends: [
+    // Remove ...tseslint.configs.recommended and replace with this
+    ...tseslint.configs.recommendedTypeChecked,
+    // Alternatively, use this for stricter rules
+    ...tseslint.configs.strictTypeChecked,
+    // Optionally, add this for stylistic rules
+    ...tseslint.configs.stylisticTypeChecked,
+  ],
+  languageOptions: {
+    // other options...
+    parserOptions: {
+      project: ['./tsconfig.node.json', './tsconfig.app.json'],
+      tsconfigRootDir: import.meta.dirname,
+    },
+  },
+})
+```
 
-### 3. iteracija
-- [ ] Ustvarjanje proračunskih "kuvert"
-- [ ] Spremljanje napredka porabe
-- [ ] Obvestila o prekoračitvi
+You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
 
-### 4. iteracija
-- [ ] Interaktivni grafi (Chart.js)
-- [ ] Uvoz/izvoz CSV/PDF
-- [ ] Validacije in dodelan UI
+```js
+// eslint.config.js
+import reactX from 'eslint-plugin-react-x'
+import reactDom from 'eslint-plugin-react-dom'
 
-### 5. iteracija
-- [ ] Dvo-uporabniški dostop do istega računa
-- [ ] Testiranje in predstavitev
-
-## 📁 Arhitektura
-- `/src/components`
-- `/src/pages`
-- `/src/services`
-- Firebase config v `.env` datoteki (ni vključena v repozitorij)
-
-
-## 🧑‍💻 Avtor
-Andonija Todorova – [andonija.todorova@student.um.si](mailto:andonija.todorova@student.um.si)
+export default tseslint.config({
+  plugins: {
+    // Add the react-x and react-dom plugins
+    'react-x': reactX,
+    'react-dom': reactDom,
+  },
+  rules: {
+    // other rules...
+    // Enable its recommended typescript rules
+    ...reactX.configs['recommended-typescript'].rules,
+    ...reactDom.configs.recommended.rules,
+  },
+})
+```
