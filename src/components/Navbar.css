@@ -1,0 +1,48 @@
+.navbar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1000;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: transparent; /* if it's a hero video */
+  padding: 1rem 2rem;
+}
+
+
+.navbar-logo a {
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: white;
+  text-decoration: none;
+}
+
+.navbar-links {
+  list-style: none;
+  display: flex;
+  gap: 2rem;
+  margin: 0;
+  padding: 0;
+}
+
+.navbar-links a,
+.account-button {
+  color: white;
+  background: none;
+  border: none;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  text-decoration: none;
+}
+
+.navbar-links a:hover,
+.account-button:hover {
+  text-decoration: underline;
+}
+
+.account-button {
+  font-family: inherit;
+}

@@ -1,24 +1,41 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import App from './App.tsx';
-import Login from './pages/Login.tsx';
-import Register from './pages/Register.tsx';
-import Dashboard from './pages/Dashboard.tsx';
-import Budget from './pages/Budget.tsx';
-import Statistics from './pages/Statistics.tsx';
-import NotFound from './pages/NotFound.tsx';
+
+import Layout from './components/Layout';
+import App from './App'; // Still splash + home
+import Login from './pages/Login';
+import Register from './pages/Register';
+import Dashboard from './pages/Dashboard';
+import Budget from './pages/Budget';
+import Statistics from './pages/Statistics';
+import NotFound from './pages/NotFound';
+import About from './pages/About';
+import Features from './pages/Features';
+import Contact from './pages/Contact';
+import Account from './pages/Account';
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
     <Router>
       <Routes>
-        <Route path="/" element={<App />} />
+        {/* All pages that should show the global Navbar */}
+        <Route path="/" element={<Layout />}>
+          <Route index element={<App />} /> {/* splash + home */}
+          <Route path="about" element={<About />} />
+          <Route path="features" element={<Features />} />
+          <Route path="contact" element={<Contact />} />
+          <Route path="account" element={<Account />} />
+          <Route path="dashboard" element={<Dashboard />} />
+          <Route path="budget" element={<Budget />} />
+          <Route path="statistics" element={<Statistics />} />
+        </Route>
+
+        {/* Auth routes (separate, without layout if needed) */}
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
-        <Route path="/dashboard" element={<Dashboard />} />
-        <Route path="/budget" element={<Budget />} />
-        <Route path="/statistics" element={<Statistics />} />
+
+        {/* Catch all */}
         <Route path="*" element={<NotFound />} />
       </Routes>
     </Router>
