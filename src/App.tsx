@@ -1,13 +1,15 @@
-import './App.css'
+import { useState } from 'react';
+import SplashScreen from './components/SplashScreen';
+import Home from './pages/Home';
 
 function App() {
-  return (
-    <div style={{ padding: "2rem" }}>
-      <h1>Spendly</h1>
-      <p>Welcome to your personal finance tracker!</p>
-    </div>
+  const [showSplash, setShowSplash] = useState(true);
+
+  return showSplash ? (
+    <SplashScreen onFinish={() => setShowSplash(false)} />
+  ) : (
+    <Home />
   );
 }
 
 export default App;
-

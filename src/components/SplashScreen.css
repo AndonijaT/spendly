@@ -1,0 +1,22 @@
+.splash {
+  background: white;
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  animation: fadeOut 1s ease-in 3s forwards;
+}
+
+.splash-logo {
+  width: 120px;
+  animation: popIn 0.6s ease-in-out;
+}
+
+@keyframes popIn {
+  0% { transform: scale(0); opacity: 0; }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+@keyframes fadeOut {
+  to { opacity: 0; visibility: hidden; }
+}
