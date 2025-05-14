@@ -2,7 +2,7 @@ import { initializeApp } from 'firebase/app';
 import { getAuth } from 'firebase/auth';
 import { onAuthStateChanged } from 'firebase/auth';
 import { useEffect, useState } from 'react';
-
+import { getStorage } from 'firebase/storage';
 const firebaseConfig = {
   apiKey: "AIzaSyA0WIq67lltQMsI6baO1pvcSCNVErvt2HQ",
   authDomain: "spendly-f30b5.firebaseapp.com",
@@ -15,7 +15,7 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 export const auth = getAuth(app);
-
+export const storage = getStorage(app);
 export function useAuth() {
   const [user, setUser] = useState<null | any>(null);
   const [loading, setLoading] = useState(true);

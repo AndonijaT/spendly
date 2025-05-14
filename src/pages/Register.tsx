@@ -3,6 +3,7 @@ import { createUserWithEmailAndPassword, signInWithPopup, GoogleAuthProvider } f
 import { auth } from '../firebase/firebaseConfig';
 import { useNavigate, Link } from 'react-router-dom';
 import '../styles/AuthForm.css';
+import { toast } from 'react-toastify';
 
 function Register() {
     const [email, setEmail] = useState('');
@@ -14,8 +15,10 @@ function Register() {
         e.preventDefault();
         try {
             await createUserWithEmailAndPassword(auth, email, password);
+            toast.success('Account created!');
             navigate('/account');
         } catch (err: any) {
+            toast.error('Registration failed.');
             setError(err.message);
         }
     };
@@ -23,8 +26,10 @@ function Register() {
     const handleGoogleSignup = async () => {
         try {
             await signInWithPopup(auth, new GoogleAuthProvider());
+            toast.success('Signed up with Google!');
             navigate('/account');
         } catch (err: any) {
+            toast.error('Google signup failed.');
             setError(err.message);
         }
     };

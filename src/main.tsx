@@ -14,10 +14,14 @@ import About from './pages/About';
 import Features from './pages/Features';
 import Contact from './pages/Contact';
 import Account from './pages/Account';
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
     <Router>
+        <ToastContainer position="top-right" autoClose={3000} pauseOnHover theme="light" />
       <Routes>
         {/* All pages that should show the global Navbar */}
         <Route path="/" element={<Layout />}>

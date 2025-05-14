@@ -3,6 +3,8 @@ import { signInWithEmailAndPassword, signInWithPopup, GoogleAuthProvider, sendPa
 import { auth } from '../firebase/firebaseConfig';
 import { useNavigate, Link } from 'react-router-dom';
 import '../styles/AuthForm.css';
+import { toast } from 'react-toastify';
+
 
 function Login() {
   const [email, setEmail] = useState('');
@@ -11,21 +13,25 @@ function Login() {
   const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    try {
-      await signInWithEmailAndPassword(auth, email, password);
-      navigate('/');
-    } catch (err: any) {
-      setError(err.message);
-    }
-  };
+  e.preventDefault();
+  try {
+    await signInWithEmailAndPassword(auth, email, password);
+    toast.success('Welcome back!');
+    navigate('/');
+  } catch (err: any) {
+    toast.error('Invalid email or password.');
+    setError(err.message);
+  }
+};
+
 
   const handleForgotPassword = async () => {
     if (!email) return setError('Please enter your email first.');
     try {
       await sendPasswordResetEmail(auth, email);
-      alert('Password reset email sent!');
+      toast.info('Password reset email sent!');
     } catch (err: any) {
+      toast.error('Could not send reset email.');
       setError(err.message);
     }
   };
@@ -33,8 +39,10 @@ function Login() {
   const handleGoogleLogin = async () => {
     try {
       await signInWithPopup(auth, new GoogleAuthProvider());
+      toast.success('Signed in with Google!');
       navigate('/');
     } catch (err: any) {
+      toast.error('Google login failed.');
       setError(err.message);
     }
   };
