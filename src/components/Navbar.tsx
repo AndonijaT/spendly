@@ -1,13 +1,14 @@
 import { Link, useNavigate } from 'react-router-dom';
 import './Navbar.css';
+import { useAuth } from '../firebase/firebaseConfig'; // or separate auth hook
+
 
 function Navbar() {
-  // TODO: Replace with real auth check later
-  const isLoggedIn = false;
+  const { user } = useAuth();
   const navigate = useNavigate();
 
   const handleAccountClick = () => {
-    if (isLoggedIn) {
+    if (user) {
       navigate('/account');
     } else {
       navigate('/login');
