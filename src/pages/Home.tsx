@@ -1,15 +1,17 @@
-// src/pages/Home.tsx
 import { useEffect, useState } from 'react';
 import { onAuthStateChanged } from 'firebase/auth';
 import { auth } from '../firebase/firebaseConfig';
 import usePageTitle from '../hooks/usePageTitle';
-import { useNavigate } from 'react-router-dom';
 import './../styles/Home.css';
+import Modal from '../components/Modal';
+import LoginForm from '../components/LoginForm';
+import RegisterForm from '../components/RegisterForm';
 
 function Home() {
   usePageTitle('Home');
   const [isGuest, setIsGuest] = useState(true);
-  const navigate = useNavigate();
+  const [showAuthModal, setShowAuthModal] = useState(false);
+  const [authMode, setAuthMode] = useState<'login' | 'register'>('register');
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
@@ -17,6 +19,11 @@ function Home() {
     });
     return () => unsubscribe();
   }, []);
+
+  const openRegisterModal = () => {
+    setAuthMode('register');
+    setShowAuthModal(true);
+  };
 
   return (
     <div className="home">
@@ -26,7 +33,6 @@ function Home() {
           Your browser does not support the video tag.
         </video>
 
-        {/* Only show hero text for guests */}
         {isGuest && (
           <div className="hero-text">
             <h1>The smarter way to manage money</h1>
@@ -34,12 +40,28 @@ function Home() {
               Spendly helps you track every expense, plan smarter budgets, and
               achieve your savings goals — all in one beautifully simple app.
             </p>
-            <button className="cta-button" onClick={() => navigate('/register')}>
+            <button className="cta-button" onClick={openRegisterModal}>
               Get started
             </button>
           </div>
         )}
       </div>
+
+      {showAuthModal && (
+        <Modal onClose={() => setShowAuthModal(false)}>
+          {authMode === 'register' ? (
+            <RegisterForm
+              onSuccess={() => setShowAuthModal(false)}
+              switchToLogin={() => setAuthMode('login')}
+            />
+          ) : (
+            <LoginForm
+              onSuccess={() => setShowAuthModal(false)}
+              switchToRegister={() => setAuthMode('register')}
+            />
+          )}
+        </Modal>
+      )}
     </div>
   );
 }

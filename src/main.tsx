@@ -3,9 +3,7 @@ import ReactDOM from 'react-dom/client';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 
 import Layout from './components/Layout';
-import App from './App'; // Still splash + home
-import Login from './pages/Login';
-import Register from './pages/Register';
+import App from './App'; 
 import Dashboard from './pages/Dashboard';
 import Budget from './pages/Budget';
 import Statistics from './pages/Statistics';
@@ -36,8 +34,7 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
         </Route>
 
         {/* Auth routes (separate, without layout if needed) */}
-        <Route path="/login" element={<Login />} />
-        <Route path="/register" element={<Register />} />
+        
 
         {/* Catch all */}
         <Route path="*" element={<NotFound />} />
