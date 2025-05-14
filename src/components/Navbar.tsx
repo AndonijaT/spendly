@@ -1,7 +1,6 @@
 import { Link, useNavigate } from 'react-router-dom';
 import './Navbar.css';
-import { useAuth } from '../firebase/firebaseConfig'; // or separate auth hook
-
+import { useAuth } from '../firebase/firebaseConfig'; // adjust if needed
 
 function Navbar() {
   const { user } = useAuth();
@@ -25,7 +24,17 @@ function Navbar() {
         <li><Link to="/about">About Us</Link></li>
         <li><Link to="/features">Features</Link></li>
         <li><Link to="/contact">Contact Us</Link></li>
-        <li><button className="account-button" onClick={handleAccountClick}>Account</button></li>
+
+        {/* ✅ Show Dashboard only if logged in */}
+        {user && (
+          <li><Link to="/dashboard">Dashboard</Link></li>
+        )}
+
+        <li>
+          <button className="account-button" onClick={handleAccountClick}>
+            Account
+          </button>
+        </li>
       </ul>
     </nav>
   );
