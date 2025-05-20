@@ -12,7 +12,7 @@ import {
 import { auth } from '../firebase/firebaseConfig';
 import { toast } from 'react-toastify';
 
-function LoginForm({ onSuccess, switchToRegister }: { onSuccess: () => void; switchToRegister: () => void }) {
+function LoginForm({ onSuccess, switchToRegister, switchToForgot, }: { onSuccess: () => void; switchToRegister: () => void;   switchToForgot: () => void; }) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
@@ -83,6 +83,16 @@ function LoginForm({ onSuccess, switchToRegister }: { onSuccess: () => void; swi
         <img src="/google-icon.png" alt="Google" style={{ width: '20px', marginRight: '8px' }} />
         Continue with Google
       </button>
+
+<p className="form-footer">
+  Forgot password?{' '}
+  <span onClick={switchToForgot} className="form-link">Reset</span>
+</p>
+
+
+
+
+
 
       <p className="form-footer">
         Don’t have an account?{' '}

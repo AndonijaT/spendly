@@ -6,12 +6,13 @@ import Modal from './Modal';
 import LoginForm from './LoginForm';
 import RegisterForm from './RegisterForm';
 import './Navbar.css';
+import ForgotPasswordForm from '../components/ForgotPasswordForm';
 
 function Navbar() {
   const { user } = useAuth();
   const navigate = useNavigate();
   const [showAuthModal, setShowAuthModal] = useState(false);
-  const [authMode, setAuthMode] = useState<'login' | 'register'>('login');
+  const [authMode, setAuthMode] = useState<'login' | 'register'| 'forgot'>('login');
 
   const handleAccountClick = () => {
     if (user) {
@@ -38,21 +39,26 @@ function Navbar() {
         </ul>
       </nav>
 
-      {showAuthModal && (
-        <Modal onClose={() => setShowAuthModal(false)}>
-          {authMode === 'login' ? (
-            <LoginForm
-              onSuccess={() => setShowAuthModal(false)}
-              switchToRegister={() => setAuthMode('register')}
-            />
-          ) : (
-            <RegisterForm
-              onSuccess={() => setShowAuthModal(false)}
-              switchToLogin={() => setAuthMode('login')}
-            />
-          )}
-        </Modal>
-      )}
+       {showAuthModal && (
+  <Modal onClose={() => setShowAuthModal(false)}>
+    {authMode === 'register' && (
+      <RegisterForm
+        onSuccess={() => setShowAuthModal(false)}
+        switchToLogin={() => setAuthMode('login')}
+      />
+    )}
+    {authMode === 'login' && (
+      <LoginForm
+        onSuccess={() => setShowAuthModal(false)}
+        switchToRegister={() => setAuthMode('register')}
+        switchToForgot={() => setAuthMode('forgot')} //  new prop to LoginForm
+      />
+    )}
+    {authMode === 'forgot' && (
+      <ForgotPasswordForm onBack={() => setAuthMode('login')} />
+    )}
+  </Modal>
+)}
     </>
   );
 }

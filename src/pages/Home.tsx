@@ -6,12 +6,13 @@ import './../styles/Home.css';
 import Modal from '../components/Modal';
 import LoginForm from '../components/LoginForm';
 import RegisterForm from '../components/RegisterForm';
+import ForgotPasswordForm from '../components/ForgotPasswordForm';
 
 function Home() {
   usePageTitle('Home');
   const [isGuest, setIsGuest] = useState(true);
   const [showAuthModal, setShowAuthModal] = useState(false);
-  const [authMode, setAuthMode] = useState<'login' | 'register'>('register');
+  const [authMode, setAuthMode] = useState<'login' | 'register'| 'forgot'>('register');
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
@@ -48,20 +49,26 @@ function Home() {
       </div>
 
       {showAuthModal && (
-        <Modal onClose={() => setShowAuthModal(false)}>
-          {authMode === 'register' ? (
-            <RegisterForm
-              onSuccess={() => setShowAuthModal(false)}
-              switchToLogin={() => setAuthMode('login')}
-            />
-          ) : (
-            <LoginForm
-              onSuccess={() => setShowAuthModal(false)}
-              switchToRegister={() => setAuthMode('register')}
-            />
-          )}
-        </Modal>
-      )}
+  <Modal onClose={() => setShowAuthModal(false)}>
+    {authMode === 'register' && (
+      <RegisterForm
+        onSuccess={() => setShowAuthModal(false)}
+        switchToLogin={() => setAuthMode('login')}
+      />
+    )}
+    {authMode === 'login' && (
+      <LoginForm
+        onSuccess={() => setShowAuthModal(false)}
+        switchToRegister={() => setAuthMode('register')}
+        switchToForgot={() => setAuthMode('forgot')} //  new prop to LoginForm
+      />
+    )}
+    {authMode === 'forgot' && (
+      <ForgotPasswordForm onBack={() => setAuthMode('login')} />
+    )}
+  </Modal>
+)}
+
     </div>
   );
 }
