@@ -4,6 +4,8 @@ import {
   createUserWithEmailAndPassword,
   updateProfile,
   sendEmailVerification,
+  signInWithPopup,
+  GoogleAuthProvider,
 } from 'firebase/auth';
 import { auth } from '../firebase/firebaseConfig';
 import { toast } from 'react-toastify';
@@ -40,7 +42,15 @@ const handleSignup = async (e: React.FormEvent) => {
       toast.error('Something went wrong. Please try again.');
     }
   }
-};
+}; const handleGoogleSignup = async () => {
+    try {
+      const provider = new GoogleAuthProvider();
+      await signInWithPopup(auth, provider);
+      onSuccess();
+    } catch (err: any) {
+      toast.error('Google sign-up failed.');
+    }
+  };
 
   return (
     <form onSubmit={handleSignup} className="auth-form">
@@ -51,6 +61,10 @@ const handleSignup = async (e: React.FormEvent) => {
       <button type="submit">Sign Up</button>
 
       <div className="auth-separator">or</div>
+ <button className="google-btn" type="button" onClick={handleGoogleSignup}>
+        <img src="/google-icon.png" alt="Google" style={{ width: '20px', marginRight: '8px' }} />
+        Continue with Google
+      </button>
 
       <p className="form-footer">
         Already have an account?{' '}
