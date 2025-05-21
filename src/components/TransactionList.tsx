@@ -20,11 +20,11 @@ export default function TransactionList() {
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
       if (!user) {
-        console.log("❌ Uporabnik ni prijavljen");
+        console.log("❌ User not logged in");
         return;
       }
 
-      console.log("✅ UID uporabnika:", user.uid);
+      console.log("✅ Logged in UID:", user.uid);
 
       try {
         const q = query(
@@ -45,13 +45,13 @@ export default function TransactionList() {
           items.push({ id: doc.id, ...data });
         });
 
-        console.log("🔄 TRANSAKCIJE:", items);
+        console.log("🔄 TRANSACTIONS:", items);
         console.log("💰 BALANCE:", total);
 
         setTransactions(items);
         setBalance(total);
       } catch (err) {
-        console.error("🚨 Napaka pri branju transakcij:", err);
+        console.error("🚨 Error while reading transactions:", err);
       }
     });
 
@@ -60,7 +60,7 @@ export default function TransactionList() {
 
   return (
     <div className="transaction-list">
-      <h2>Stanje: {balance.toFixed(2)} €</h2>
+      <h2>Balance: {balance.toFixed(2)} €</h2>
       <ul>
         {transactions.map((tx) => (
           <li key={tx.id} className={tx.type}>

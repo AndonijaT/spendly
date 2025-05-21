@@ -19,7 +19,7 @@ export default function AddTransactionModal({ onClose }: { onClose: () => void }
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const user = auth.currentUser;
-    if (!user) return toast.error("Ni prijavljenega uporabnika");
+    if (!user) return toast.error("User not logged in");
 
     try {
       await addDoc(collection(db, 'users', user.uid, 'transactions'), {
@@ -29,10 +29,10 @@ export default function AddTransactionModal({ onClose }: { onClose: () => void }
         amount: parseFloat(amount),
         timestamp: serverTimestamp(),
       });
-      toast.success("Transakcija dodana!");
+      toast.success("Transaction added!");
       onClose();
     } catch (err) {
-      toast.error("Napaka pri shranjevanju.");
+      toast.error("Error saving.");
       console.error(err);
     }
   };
@@ -40,7 +40,7 @@ export default function AddTransactionModal({ onClose }: { onClose: () => void }
   return (
     <div className="modal-backdrop">
       <div className="modal-card">
-        <h2>Dodaj transakcijo</h2>
+        <h2>Add transaction</h2>
 
         <div className="type-toggle">
           <button
@@ -58,10 +58,10 @@ export default function AddTransactionModal({ onClose }: { onClose: () => void }
         </div>
 
         <form onSubmit={handleSubmit}>
-          <label>Način:
+          <label>Method:
             <select value={method} onChange={(e) => setMethod(e.target.value as 'cash' | 'card')}>
-              <option value="cash">Gotovina</option>
-              <option value="card">Kartica</option>
+              <option value="cash">Cash</option>
+              <option value="card">Card</option>
             </select>
           </label>
 
@@ -81,24 +81,24 @@ export default function AddTransactionModal({ onClose }: { onClose: () => void }
           )}
 
           {type === 'income' && (
-            <label>Vir:
+            <label>Source:
               <select value={category} onChange={(e) => setCategory(e.target.value)} required>
-                <option value="">Izberi</option>
-                <option value="plača">Plača</option>
-                <option value="štipendija">Štipendija</option>
-                <option value="donacija">Donacija</option>
-                <option value="drugo">Drugo</option>
+                <option value="">Choose</option>
+                <option value="salary">Salary</option>
+                <option value="scholarship">Scholarship</option>
+                <option value="donation">Donation</option>
+                <option value="other">Other</option>
               </select>
             </label>
           )}
 
-          <label>Znesek (€):
+          <label>Amount (€):
             <input type="number" value={amount} onChange={(e) => setAmount(e.target.value)} required />
           </label>
 
           <div className="form-buttons">
-            <button type="submit">Dodaj</button>
-            <button type="button" onClick={onClose} className="cancel">Prekliči</button>
+            <button type="submit">Add</button>
+            <button type="button" onClick={onClose} className="cancel">Cancel</button>
           </div>
         </form>
       </div>
