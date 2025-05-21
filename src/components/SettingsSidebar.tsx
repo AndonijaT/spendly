@@ -2,9 +2,10 @@ import '../styles/SettingsSidebar.css'
 import { useState } from 'react';
 import { auth, db } from '../firebase/firebaseConfig';
 import { deleteDoc, collection, getDocs, doc } from 'firebase/firestore';
+import { useLanguage } from '../context/LanguageContext';
 
 export default function SettingsSidebar({ onClose }: { onClose: () => void }) {
-  const [language, setLanguage] = useState<'en' | 'sl'>('en');
+const { language, setLanguage, t } = useLanguage();
   const [currency, setCurrency] = useState<'EUR' | 'USD' | 'MKD'>('EUR');
 
   const handleDeleteAll = async () => {
@@ -31,7 +32,7 @@ export default function SettingsSidebar({ onClose }: { onClose: () => void }) {
 
         <div className="setting-group">
           <label>Language</label>
-          <select value={language} onChange={(e) => setLanguage(e.target.value as 'en' | 'sl')}>
+<select value={language} onChange={(e) => setLanguage(e.target.value as 'en' | 'sl')}>
             <option value="en">English</option>
             <option value="sl">Slovenian</option>
           </select>

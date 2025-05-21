@@ -14,10 +14,12 @@ import Contact from './pages/Contact';
 import Account from './pages/Account';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import { LanguageProvider } from './context/LanguageContext';
 
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
+        <LanguageProvider>
     <Router>
         <ToastContainer position="top-right" autoClose={3000} pauseOnHover theme="light" />
       <Routes>
@@ -40,5 +42,7 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
         <Route path="*" element={<NotFound />} />
       </Routes>
     </Router>
+        </LanguageProvider>
+
   </React.StrictMode>
 );

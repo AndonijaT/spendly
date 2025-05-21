@@ -2,7 +2,8 @@ import { useState } from 'react';
 import { db, auth } from '../firebase/firebaseConfig';
 import { addDoc, collection, serverTimestamp } from 'firebase/firestore';
 import { toast } from 'react-toastify';
-import './/../styles/AddTransactionModal.css';
+import '../styles/AddTransactionModal.css';
+import { useLanguage } from '../context/LanguageContext';
 
 const categories = [
   "groceries", "home", "eating out", "food delivery", "coffee", "car", "health",
@@ -15,11 +16,12 @@ export default function AddTransactionModal({ onClose }: { onClose: () => void }
   const [method, setMethod] = useState<'cash' | 'card'>('cash');
   const [category, setCategory] = useState('');
   const [amount, setAmount] = useState('');
+  const { t } = useLanguage();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const user = auth.currentUser;
-    if (!user) return toast.error("User not logged in");
+    if (!user) return toast.error(t('userNotLoggedIn'));
 
     try {
       await addDoc(collection(db, 'users', user.uid, 'transactions'), {
@@ -29,10 +31,10 @@ export default function AddTransactionModal({ onClose }: { onClose: () => void }
         amount: parseFloat(amount),
         timestamp: serverTimestamp(),
       });
-      toast.success("Transaction added!");
+      toast.success(t('transactionAdded'));
       onClose();
     } catch (err) {
-      toast.error("Error saving.");
+      toast.error(t('errorSaving'));
       console.error(err);
     }
   };
@@ -40,28 +42,28 @@ export default function AddTransactionModal({ onClose }: { onClose: () => void }
   return (
     <div className="modal-backdrop">
       <div className="modal-card">
-        <h2>Add transaction</h2>
+        <h2>{t('addTransaction')}</h2>
 
         <div className="type-toggle">
           <button
             className={type === 'expense' ? 'active' : ''}
             onClick={() => setType('expense')}
           >
-            Strošek
+            {t('expense')}
           </button>
           <button
             className={type === 'income' ? 'active' : ''}
             onClick={() => setType('income')}
           >
-            Prihodek
+            {t('income')}
           </button>
         </div>
 
         <form onSubmit={handleSubmit}>
-          <label>Method:
+          <label>{t('method')}:
             <select value={method} onChange={(e) => setMethod(e.target.value as 'cash' | 'card')}>
-              <option value="cash">Cash</option>
-              <option value="card">Card</option>
+              <option value="cash">{t('cash')}</option>
+              <option value="card">{t('card')}</option>
             </select>
           </label>
 
@@ -74,31 +76,31 @@ export default function AddTransactionModal({ onClose }: { onClose: () => void }
                   onClick={() => setCategory(cat)}
                 >
                   <img src={`/categories/${cat.replace(/ /g, '_')}.png`} alt={cat} />
-                  <span>{cat}</span>
+                  <span>{t(cat)}</span>
                 </div>
               ))}
             </div>
           )}
 
           {type === 'income' && (
-            <label>Source:
+            <label>{t('source')}:
               <select value={category} onChange={(e) => setCategory(e.target.value)} required>
-                <option value="">Choose</option>
-                <option value="salary">Salary</option>
-                <option value="scholarship">Scholarship</option>
-                <option value="donation">Donation</option>
-                <option value="other">Other</option>
+                <option value="">{t('choose')}</option>
+                <option value="salary">{t('salary')}</option>
+                <option value="scholarship">{t('scholarship')}</option>
+                <option value="donation">{t('donation')}</option>
+                <option value="other">{t('other')}</option>
               </select>
             </label>
           )}
 
-          <label>Amount (€):
+          <label>{t('amount')}:
             <input type="number" value={amount} onChange={(e) => setAmount(e.target.value)} required />
           </label>
 
           <div className="form-buttons">
-            <button type="submit">Add</button>
-            <button type="button" onClick={onClose} className="cancel">Cancel</button>
+            <button type="submit">{t('add')}</button>
+            <button type="button" onClick={onClose} className="cancel">{t('cancel')}</button>
           </div>
         </form>
       </div>
