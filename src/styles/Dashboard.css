@@ -3,7 +3,9 @@
   flex-direction: column;
   align-items: center;
   padding: 1rem;
+  padding-top: 80px; /* ⬅️ ADDED to push below navbar */
 }
+
 
 .dashboard-header {
   display: flex;
@@ -11,6 +13,7 @@
   width: 100%;
   font-size: 1.5rem;
   padding: 0.5rem 1rem;
+  
 }
 
 .icon {

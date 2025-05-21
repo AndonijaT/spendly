@@ -59,3 +59,18 @@
   text-decoration: none;
   vertical-align: baseline;
 }
+/* override white text on dark background */
+.navbar-light {
+  background-color: white;
+}
+
+.navbar-light .navbar-logo a,
+.navbar-light .navbar-links a,
+.navbar-light .account-button {
+  color: #222 !important;
+}
+
+.navbar-light .navbar-links a:hover,
+.navbar-light .account-button:hover {
+  text-decoration: underline;
+}
