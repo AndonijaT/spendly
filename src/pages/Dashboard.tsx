@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import AddTransactionModal from '../components/AddTransactionModal';
 import '../styles/Dashboard.css';
+import TransactionList from '../components/TransactionList';
 
 export default function Dashboard() {
   const [showModal, setShowModal] = useState(false);
@@ -20,6 +21,7 @@ export default function Dashboard() {
       <div className="plus-button" onClick={() => setShowModal(true)}>
         +
       </div>
+<TransactionList />
 
       {showModal && (
         <AddTransactionModal onClose={() => setShowModal(false)} />

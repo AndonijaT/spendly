@@ -31,3 +31,22 @@
   margin: 2rem;
   cursor: pointer;
 }
+.plus-button {
+  font-size: 3rem;
+  background-color: #d2b109;
+  color: white;
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 2rem;
+  cursor: pointer;
+  transition: transform 0.2s ease;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+}
+
+.plus-button:hover {
+  transform: scale(1.15);
+}

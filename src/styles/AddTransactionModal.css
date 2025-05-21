@@ -23,3 +23,99 @@
   flex-direction: column;
   gap: 1rem;
 }
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 999;
+}
+
+.modal-card {
+  background: white;
+  border-radius: 16px;
+  padding: 2rem;
+  width: 90%;
+  max-width: 480px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+}
+
+h2 {
+  margin-top: 0;
+  text-align: center;
+}
+
+.type-toggle {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.type-toggle button {
+  padding: 0.5rem 1rem;
+  border: 2px solid #ccc;
+  border-radius: 12px;
+  background: none;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+.type-toggle button.active {
+  background-color: #d2b109;
+  color: white;
+  border-color: #d2b109;
+}
+
+form {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.category-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
+  gap: 0.75rem;
+}
+
+.category-item {
+  border: 2px solid #eee;
+  border-radius: 12px;
+  padding: 0.5rem;
+  text-align: center;
+  cursor: pointer;
+  transition: transform 0.2s ease;
+}
+
+.category-item:hover {
+  transform: scale(1.05);
+}
+
+.category-item.selected {
+  border-color: #d2b109;
+  background-color: #fff8d3;
+}
+
+.category-item img {
+  width: 40px;
+  height: 40px;
+  object-fit: contain;
+}
+
+.form-buttons {
+  display: flex;
+  justify-content: space-between;
+}
+
+button.cancel {
+  background-color: #ccc;
+  color: black;
+}
+
+button[type="submit"] {
+  background-color: #d2b109;
+  color: white;
+}
