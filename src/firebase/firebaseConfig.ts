@@ -3,6 +3,7 @@ import { getAuth } from 'firebase/auth';
 import { onAuthStateChanged } from 'firebase/auth';
 import { useEffect, useState } from 'react';
 import { getStorage } from 'firebase/storage';
+import { getFirestore } from 'firebase/firestore'; // ← DODAJ TO
 
 const firebaseConfig = {
   apiKey: "AIzaSyA0WIq67lltQMsI6baO1pvcSCNVErvt2HQ",
@@ -17,6 +18,7 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 export const auth = getAuth(app);
 export const storage = getStorage(app);
+export const db = getFirestore(app); // ← DODAJ TO
 
 export function useAuth() {
   const [user, setUser] = useState<null | any>(null);

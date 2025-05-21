@@ -1,0 +1,33 @@
+.dashboard-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 1rem;
+}
+
+.dashboard-header {
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+  font-size: 1.5rem;
+  padding: 0.5rem 1rem;
+}
+
+.icon {
+  cursor: pointer;
+  font-size: 1.5rem;
+}
+
+.plus-button {
+  font-size: 3rem;
+  background-color: #d2b109;
+  color: white;
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 2rem;
+  cursor: pointer;
+}
