@@ -96,3 +96,17 @@
   border-radius: 0.5rem;
   cursor: pointer;
 }
+.signout-btn {
+  background-color: #e74c3c;
+  color: white;
+  border: none;
+  padding: 10px 16px;
+  font-size: 16px;
+  border-radius: 6px;
+  cursor: pointer;
+  margin-top: 20px;
+}
+
+.signout-btn:hover {
+  background-color: #c0392b;
+}

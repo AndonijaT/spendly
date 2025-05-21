@@ -13,6 +13,7 @@ import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { auth, storage } from '../firebase/firebaseConfig';
 import { toast } from 'react-toastify';
 import '../styles/AccountPage.css';
+import { signOut } from 'firebase/auth';
 
 declare global {
     interface Window {
@@ -73,6 +74,15 @@ function Account() {
             toast.error('Error saving changes.');
         }
     };
+const handleSignOut = async () => {
+  try {
+    await signOut(auth);
+    toast.success('Signed out successfully.');
+    window.location.href = '/'; // optional: redirect to homepage
+  } catch {
+    toast.error('Sign out failed.');
+  }
+};
 
   const setupRecaptcha = () => {
     if (!window.recaptchaVerifier) {
@@ -216,8 +226,17 @@ function Account() {
                         </>
                     )}
                 </div>
-            </div>
+                  {/* ✅ Sign Out Section */}
+    <div className="account-section">
+      <button className="signout-btn" onClick={handleSignOut}>
+        Sign Out
+      </button>
+    </div>
+  </div>
+        
+            
         );
+        
     }
 
     export default Account;
