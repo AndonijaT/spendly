@@ -28,3 +28,13 @@
 .transaction-list li.expense {
   background-color: #ffe6e6;
 }
+.refresh-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 1.2rem;
+  transition: transform 0.2s ease;
+}
+
+.refresh-btn:hover {
+  transform: rotate(90deg);

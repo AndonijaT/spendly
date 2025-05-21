@@ -17,50 +17,57 @@ export default function TransactionList() {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [balance, setBalance] = useState(0);
 
+  const fetchTransactions = async (userId: string) => {
+    try {
+      const q = query(
+        collection(db, 'users', userId, 'transactions'),
+        orderBy('timestamp', 'desc')
+      );
+      const snapshot = await getDocs(q);
+      const items: Transaction[] = [];
+      let total = 0;
+
+      snapshot.forEach((doc) => {
+        const data = doc.data() as Omit<Transaction, 'id'>;
+        const amount = Number(data.amount);
+        if (data.type === 'income') total += amount;
+        else total -= amount;
+
+        items.push({ id: doc.id, ...data });
+      });
+
+      setTransactions(items);
+      setBalance(total);
+    } catch (err) {
+      console.error("🚨 Error fetching transactions:", err);
+    }
+  };
+
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (user) => {
-      if (!user) {
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      if (user) {
+        fetchTransactions(user.uid);
+      } else {
         console.log("❌ User not logged in");
-        return;
-      }
-
-      console.log("✅ Logged in UID:", user.uid);
-
-      try {
-        const q = query(
-          collection(db, 'users', user.uid, 'transactions'),
-          orderBy('timestamp', 'desc')
-        );
-
-        const snapshot = await getDocs(q);
-        const items: Transaction[] = [];
-        let total = 0;
-
-        snapshot.forEach((doc) => {
-          const data = doc.data() as Omit<Transaction, 'id'>;
-          const amount = Number(data.amount);
-          if (data.type === 'income') total += amount;
-          else total -= amount;
-
-          items.push({ id: doc.id, ...data });
-        });
-
-        console.log("🔄 TRANSACTIONS:", items);
-        console.log("💰 BALANCE:", total);
-
-        setTransactions(items);
-        setBalance(total);
-      } catch (err) {
-        console.error("🚨 Error while reading transactions:", err);
       }
     });
 
     return () => unsubscribe();
   }, []);
 
+  const handleRefresh = () => {
+    const user = auth.currentUser;
+    if (user) {
+      fetchTransactions(user.uid);
+    }
+  };
+
   return (
     <div className="transaction-list">
-      <h2>Balance: {balance.toFixed(2)} €</h2>
+      <div className="balance-header">
+        <h2>Balance: {balance.toFixed(2)} €</h2>
+        <button className="refresh-btn" onClick={handleRefresh} title="Refresh list">🔄</button>
+      </div>
       <ul>
         {transactions.map((tx) => (
           <li key={tx.id} className={tx.type}>
@@ -71,4 +78,23 @@ export default function TransactionList() {
       </ul>
     </div>
   );
+}
+.balance-header {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.refresh-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 1.2rem;
+  transition: transform 0.2s ease;
+}
+
+.refresh-btn:hover {
+  transform: rotate(90deg);
 }
