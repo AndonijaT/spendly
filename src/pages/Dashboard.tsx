@@ -3,10 +3,12 @@ import AddTransactionModal from '../components/AddTransactionModal';
 import '../styles/Dashboard.css';
 import TransactionList from '../components/TransactionList';
 import TransactionHistory from './TransactionHistory';
+import SettingsSidebar from '../components/SettingsSidebar';
 
 export default function Dashboard() {
   const [showModal, setShowModal] = useState(false);
   const [showHistory, setShowHistory] = useState(false);
+const [showSettings, setShowSettings] = useState(false);
 
   return (
     <div className="dashboard-container">
@@ -15,9 +17,10 @@ export default function Dashboard() {
           ⏰
         </span>
         <h1>Spendly</h1>
-        <span className="icon right" onClick={() => alert('Open settings')}>
-          ⚙️
-        </span>
+<span className="icon right" onClick={() => setShowSettings(true)}>
+  ⚙️
+</span>
+
       </header>
 
       <div className="plus-button" onClick={() => setShowModal(true)}>
@@ -31,6 +34,7 @@ export default function Dashboard() {
       )}
 
       {showHistory && <TransactionHistory onClose={() => setShowHistory(false)} />}
+{showSettings && <SettingsSidebar onClose={() => setShowSettings(false)} />}
 
     </div>
   );

@@ -79,22 +79,3 @@ export default function TransactionList() {
     </div>
   );
 }
-.balance-header {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.5rem;
-  margin-bottom: 1rem;
-}
-
-.refresh-btn {
-  background: none;
-  border: none;
-  cursor: pointer;
-  font-size: 1.2rem;
-  transition: transform 0.2s ease;
-}
-
-.refresh-btn:hover {
-  transform: rotate(90deg);
-}
