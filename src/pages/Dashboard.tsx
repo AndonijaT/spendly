@@ -22,10 +22,11 @@ const [showSettings, setShowSettings] = useState(false);
 </span>
 
       </header>
-
+<h1 > Add Transaction</h1>
       <div className="plus-button" onClick={() => setShowModal(true)}>
         +
       </div>
+
       <TransactionList />
 
       {showModal && (

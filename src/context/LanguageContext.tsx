@@ -57,7 +57,12 @@ const translations: Record<Language, Record<string, string>> = {
         education: "Education",
         business: "Business",
         charity: "Charity",
-        pets: "Pets"
+        pets: "Pets",
+        confirmErase: "Are you sure?",
+eraseSuccess: "All transactions erased.",
+yes: "Yes",
+ok: "OK"
+
 
     },
     sl: {
@@ -118,7 +123,12 @@ const translations: Record<Language, Record<string, string>> = {
         education: "Izobraževanje",
         business: "Posel",
         charity: "Dobrodelnost",
-        pets: "Hišni ljubljenčki"
+        pets: "Hišni ljubljenčki",
+        confirmErase: "Ali ste prepričani?",
+eraseSuccess: "Vse transakcije so bile izbrisane.",
+yes: "Da",
+ok: "V redu"
+
     }
 };
 
