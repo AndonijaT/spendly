@@ -1,42 +1,121 @@
-import { useState } from 'react';
-import AddTransactionModal from '../components/AddTransactionModal';
+import { useEffect, useState } from 'react';
+import { collection, getDocs } from 'firebase/firestore';
+import { auth, db } from '../firebase/firebaseConfig';
+import { Pie } from 'react-chartjs-2';
+import 'chart.js/auto';
 import '../styles/Dashboard.css';
-import TransactionList from '../components/TransactionList';
-import TransactionHistory from './TransactionHistory';
-import SettingsSidebar from '../components/SettingsSidebar';
+import { format } from 'date-fns';
+import AddTransactionModal from '../components/AddTransactionModal';
+
+type Transaction = {
+  id: string;
+  type: 'income' | 'expense';
+  category: string;
+  amount: number;
+  timestamp: { seconds: number };
+};
 
 export default function Dashboard() {
-  const [showModal, setShowModal] = useState(false);
-  const [showHistory, setShowHistory] = useState(false);
-const [showSettings, setShowSettings] = useState(false);
+  const [transactions, setTransactions] = useState<Transaction[]>([]);
+  const [selectedMonth, setSelectedMonth] = useState(() => format(new Date(), 'yyyy-MM'));
+  const [incomeTotal, setIncomeTotal] = useState(0);
+  const [expenseTotal, setExpenseTotal] = useState(0);
+const [showAddModal, setShowAddModal] = useState(false);
+
+  useEffect(() => {
+    const fetchTransactions = async () => {
+      const user = auth.currentUser;
+      if (!user) return;
+
+      const snapshot = await getDocs(collection(db, 'users', user.uid, 'transactions'));
+      const allData: Transaction[] = [];
+
+      snapshot.forEach((doc) => {
+        const data = doc.data();
+        allData.push({ id: doc.id, ...data } as Transaction);
+      });
+
+      // Filter by selected month
+      const filtered = allData.filter((tx) => {
+        if (!tx.timestamp?.seconds) return false;
+        const date = new Date(tx.timestamp.seconds * 1000);
+        return format(date, 'yyyy-MM') === selectedMonth;
+      });
+
+      setTransactions(filtered);
+
+      let income = 0;
+      let expenses = 0;
+
+      filtered.forEach((tx) => {
+        const amt = Number(tx.amount);
+        if (tx.type === 'income') income += amt;
+        else expenses += amt;
+      });
+
+      setIncomeTotal(income);
+      setExpenseTotal(expenses);
+    };
+
+    fetchTransactions();
+  }, [selectedMonth]);
+
+  const expenseByCategory = transactions
+    .filter((tx) => tx.type === 'expense')
+    .reduce((acc, tx) => {
+      acc[tx.category] = (acc[tx.category] || 0) + tx.amount;
+      return acc;
+    }, {} as Record<string, number>);
+
+  const pieData = {
+    labels: Object.keys(expenseByCategory),
+    datasets: [
+      {
+        label: 'Expenses',
+        data: Object.values(expenseByCategory),
+        backgroundColor: [
+          '#ff6384', '#36a2eb', '#ffcd56', '#4bc0c0',
+          '#9966ff', '#ff9f40', '#c9cbcf', '#cc65fe',
+        ],
+        borderWidth: 1,
+      },
+    ],
+  };
 
   return (
-    <div className="dashboard-container">
-      <header className="dashboard-header">
-        <span className="icon left" onClick={() => setShowHistory(true)}>
-          ⏰
-        </span>
-        <h1>Spendly</h1>
-<span className="icon right" onClick={() => setShowSettings(true)}>
-  ⚙️
-</span>
+  <div className="dashboard-container">
+    <h1 className="dashboard-title">Your Dashboard</h1>
 
-      </header>
-<h1 > Add Transaction</h1>
-      <div className="plus-button" onClick={() => setShowModal(true)}>
-        +
-      </div>
-
-      <TransactionList />
-
-      {showModal && (
-        <AddTransactionModal onClose={() => setShowModal(false)} />
-        
-      )}
-
-      {showHistory && <TransactionHistory onClose={() => setShowHistory(false)} />}
-{showSettings && <SettingsSidebar onClose={() => setShowSettings(false)} />}
-
+    <div className="month-picker">
+      <label>Select Month: </label>
+      <input
+        type="month"
+        value={selectedMonth}
+        onChange={(e) => setSelectedMonth(e.target.value)}
+      />
     </div>
-  );
+
+    <div className="summary-row">
+      <div className="summary-box income">Income: +{incomeTotal.toFixed(2)} €</div>
+      <div className="summary-box expense">Expenses: -{expenseTotal.toFixed(2)} €</div>
+      <div className="summary-box balance">Balance: {(incomeTotal - expenseTotal).toFixed(2)} €</div>
+    </div>
+
+    <div className="chart-section">
+      <h3>Expenses by Category</h3>
+      <div className="chart-wrapper">
+        <Pie data={pieData} />
+      </div>
+    </div>
+
+    <div className="floating-add" onClick={() => setShowAddModal(true)}>
+      +
+    </div>
+
+    {showAddModal && (
+      <AddTransactionModal onClose={() => setShowAddModal(false)} />
+    )}
+  </div>
+);
+
 }

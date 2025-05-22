@@ -1,55 +1,95 @@
 .dashboard-container {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding: 1rem;
-  padding-top: 80px; /* ⬅️ ADDED to push below navbar */
+  padding: 2rem;
+  padding-top: 6rem; /* ⬅️ makes sure content starts below navbar */
+  max-width: 1000px;
+  margin: auto;
 }
 
+.month-picker {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 2rem;
+  font-size: 1rem;
+}
 
-.dashboard-header {
+.month-picker label {
+  font-weight: bold;
+}
+
+.month-picker input[type="month"] {
+  padding: 0.4rem 0.6rem;
+  font-size: 1rem;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+}
+
+.summary-row {
   display: flex;
   justify-content: space-between;
-  width: 100%;
-  font-size: 1.5rem;
-  padding: 0.5rem 1rem;
-  
+  margin-bottom: 2rem;
+  gap: 1rem;
+  flex-wrap: wrap;
 }
 
-.icon {
-  cursor: pointer;
-  font-size: 1.5rem;
+.summary-box {
+  flex: 1;
+  padding: 1rem;
+  border-radius: 8px;
+  text-align: center;
+  font-weight: bold;
+  font-size: 1.1rem;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
 }
 
-.plus-button {
-  font-size: 3rem;
-  background-color: #d2b109;
-  color: white;
+.income {
+  background-color: #e8f5e9;
+  color: #2e7d32;
+}
+
+.expense {
+  background-color: #ffebee;
+  color: #c62828;
+}
+
+.balance {
+  background-color: #e3f2fd;
+  color: #1565c0;
+}
+
+.chart-section {
+  margin-top: 2rem;
+}
+.chart-wrapper {
+  max-width: 400px;  /* Adjust this as needed */
+  max-height: 400px;
+  margin: 0 auto;
+}
+.chart-section {
+  margin-top: 2rem;
+  text-align: center;
+}
+.floating-add {
+  position: fixed;
+  bottom: 2rem;
+  left: 2rem;
   width: 60px;
   height: 60px;
   border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin: 2rem;
-  cursor: pointer;
-}
-.plus-button {
-  font-size: 3rem;
   background-color: #d2b109;
   color: white;
-  width: 64px;
-  height: 64px;
-  border-radius: 50%;
+  font-size: 2rem;
+  font-weight: bold;
   display: flex;
-  align-items: center;
   justify-content: center;
-  margin: 2rem;
+  align-items: center;
   cursor: pointer;
-  transition: transform 0.2s ease;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+  z-index: 1000;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
-.plus-button:hover {
+.floating-add:hover {
   transform: scale(1.15);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.3);
 }
