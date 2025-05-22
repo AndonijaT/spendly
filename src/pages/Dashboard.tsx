@@ -7,6 +7,7 @@ import '../styles/Dashboard.css';
 import { format, parse } from 'date-fns';
 import AddTransactionModal from '../components/AddTransactionModal';
 import { useNavigate } from 'react-router-dom';
+import SettingsSidebar from '../components/SettingsSidebar';
 
 type Transaction = {
   id: string;
@@ -24,6 +25,7 @@ export default function Dashboard() {
   const [showAddModal, setShowAddModal] = useState(false);
   const navigate = useNavigate();
   const showAllButton = transactions.length > 10;
+const [showSettings, setShowSettings] = useState(false);
 
   const recentTransactions = [...transactions]
     .sort((a, b) => b.timestamp.seconds - a.timestamp.seconds)
@@ -171,6 +173,15 @@ export default function Dashboard() {
       {showAddModal && (
         <AddTransactionModal onClose={() => setShowAddModal(false)} />
       )}
+      <div className="floating-settings" onClick={() => setShowSettings(true)}>
+  ⚙️
+</div>
+
+{showSettings && (
+  <SettingsSidebar onClose={() => setShowSettings(false)} />
+)}
+
     </div>
+    
   );
 }
