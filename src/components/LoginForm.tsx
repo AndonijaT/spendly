@@ -1,20 +1,26 @@
-// src/components/LoginForm.tsx
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
     signInWithEmailAndPassword,
     signInWithPopup,
     GoogleAuthProvider,
     getMultiFactorResolver,
     PhoneAuthProvider,
-    PhoneMultiFactorGenerator
+    PhoneMultiFactorGenerator,
+    RecaptchaVerifier
 } from 'firebase/auth';
 import { auth } from '../firebase/firebaseConfig';
 import { toast } from 'react-toastify';
 import './../styles/LoginForm.css';
-import { RecaptchaVerifier } from 'firebase/auth';
-import { RecaptchaVerifier as ModularRecaptchaVerifier, type Auth } from 'firebase/auth';
 
-function LoginForm({ onSuccess, switchToRegister, switchToForgot, }: { onSuccess: () => void; switchToRegister: () => void; switchToForgot: () => void; }) {
+function LoginForm({
+    onSuccess,
+    switchToRegister,
+    switchToForgot,
+}: {
+    onSuccess: () => void;
+    switchToRegister: () => void;
+    switchToForgot: () => void;
+}) {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
@@ -22,67 +28,95 @@ function LoginForm({ onSuccess, switchToRegister, switchToForgot, }: { onSuccess
     const [verificationId, setVerificationId] = useState('');
     const [mfaVisible, setMfaVisible] = useState(false);
     const [smsCode, setSmsCode] = useState('');
-    console.log('typeof RecaptchaVerifier:', RecaptchaVerifier.length);
+    const [loading, setLoading] = useState(false);
+    const [isLoading, setIsLoading] = useState(false);
+
+   useEffect(() => {
+    if (!window.recaptchaVerifier && typeof window !== 'undefined') {
+        window.recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
+            size: 'invisible',
+            callback: () => {
+                console.log('reCAPTCHA solved');
+            },
+        });
+
+        window.recaptchaVerifier.render().catch((err) => {
+            console.error('Failed to render reCAPTCHA:', err);
+        });
+    }
+}, []);
+
 
     const handleLogin = async (e: React.FormEvent) => {
-        e.preventDefault();
-        try {
-            const userCred = await signInWithEmailAndPassword(auth, email, password);
+  e.preventDefault();
+  if (loading) return;
+  setLoading(true);
+  setError('');
 
-            if (!userCred.user.emailVerified) {
-                await auth.signOut();
-                setError('');
-                toast.error("Please verify your email before logging in.");
-                return;
-            }
+  try {
+    const userCred = await signInWithEmailAndPassword(auth, email, password);
 
-            onSuccess();
-        } catch (err: any) {
-            console.log(auth);
+    if (!userCred.user.emailVerified) {
+      await auth.signOut();
+      toast.error('Please verify your email before logging in.');
+      return;
+    }
 
-            if (err.code === 'auth/multi-factor-auth-required') {
-                try {
-                    const resolver = getMultiFactorResolver(auth, err);
-                    
-                    
-                    if (window.recaptchaVerifier) {
-                            window.recaptchaVerifier.clear?.(); // Clear if already exists
-                            window.recaptchaVerifier = undefined;
-                        }
+    onSuccess(); // 🎉
+  } catch (err: any) {
+    // MFA flow
+    if (err.code === 'auth/multi-factor-auth-required') {
+      setError('');
+      try {
+        const resolver = getMultiFactorResolver(auth, err);
+        const phoneInfoOptions = {
+          multiFactorHint: resolver.hints[0],
+          session: resolver.session,
+        };
 
-                    
-                    const recaptcha = new RecaptchaVerifier(auth, 'recaptcha-container', { size: 'invisible' });
+        const phoneProvider = new PhoneAuthProvider(auth);
+        const verificationId = await phoneProvider.verifyPhoneNumber(
+          phoneInfoOptions,
+          window.recaptchaVerifier
+        );
 
-                    await recaptcha.render(); // ✅ ensures reCAPTCHA is injected into DOM
+        setResolver(resolver);
+        setVerificationId(verificationId);
+        setMfaVisible(true);
+        return;
+      } catch (verifyErr: any) {
+        toast.error('Failed to send SMS verification code.');
+        return;
+      }
+    }
 
-                    const phoneInfoOptions = {
-                        multiFactorHint: resolver.hints[0],
-                        session: resolver.session,
-                    };
+    // Soft catch for network failure
+    if (err.code === 'auth/network-request-failed') {
+      console.warn('[Network] Firebase login delayed:', err.message);
+      toast.warning('Network slow… retrying silently.');
 
-                    const phoneProvider = new PhoneAuthProvider(auth);
-                    const verificationId = await phoneProvider.verifyPhoneNumber(phoneInfoOptions, recaptcha);
+      // Retry silently after delay
+      setTimeout(() => handleLogin(e), 2000);
+      return;
+    }
 
-                    setResolver(resolver);
-                    setVerificationId(verificationId);
-                    setMfaVisible(true); // show custom input modal
-                } catch (err: any) {
-                    console.error(err)
-                    toast.error('Failed to send SMS verification code.');
-                }
-            } else {
-                setError(err.message);
-            }
-        }
-    };
+    setError(err.message); // Other real errors
+  } finally {
+    setLoading(false);
+  }
+};
+
 
 
     const handleGoogleLogin = async () => {
+        setLoading(true);
         try {
             await signInWithPopup(auth, new GoogleAuthProvider());
             onSuccess();
         } catch (err: any) {
             setError(err.message);
+        } finally {
+            setLoading(false);
         }
     };
 
@@ -105,73 +139,77 @@ function LoginForm({ onSuccess, switchToRegister, switchToForgot, }: { onSuccess
             toast.error('Invalid code. Please try again.');
         }
     };
-return (
-  <>
-    <form onSubmit={handleLogin} className="auth-form">
-      <h2>Log In</h2>
-      <input
-        type="email"
-        placeholder="Email"
-        onChange={(e) => setEmail(e.target.value)}
-        required
-      />
-      <input
-        type="password"
-        placeholder="Password"
-        onChange={(e) => setPassword(e.target.value)}
-        required
-      />
-      <button type="submit">Log In</button>
 
-      <div className="auth-separator">or</div>
-
-      <button className="google-btn" type="button" onClick={handleGoogleLogin}>
-        <img
-          src="/google-icon.png"
-          alt="Google"
-          style={{ width: '20px', marginRight: '8px' }}
-        />
-        Continue with Google
-      </button>
-
-      <p className="form-footer">
-        Forgot password?{' '}
-        <span onClick={switchToForgot} className="form-link">
-          Reset
-        </span>
-      </p>
-
-      <p className="form-footer">
-        Don’t have an account?{' '}
-        <span onClick={switchToRegister} className="form-link">
-          Sign up
-        </span>
-      </p>
-
-      {error && <p className="error-msg">{error}</p>}
-
-      {/* ✅ MFA SMS input */}
-      {mfaVisible && (
-        <div className="mfa-verification">
-          <input
-            type="text"
-            placeholder="Enter SMS code"
-            value={smsCode}
-            onChange={(e) => setSmsCode(e.target.value)}
-          />
-          <button type="button" onClick={handleVerifySMS}>
-            Verify Code
-          </button>
-        </div>
-      )}
-    </form>
-
-    {/* ✅ reCAPTCHA must stay outside form */}
-    <div id="recaptcha-container"></div>
-  </>
-);
+    return (
+        <>
+            <form onSubmit={handleLogin} className="auth-form">
+                <h2>Log In</h2>
+                <input
+                    id="login-email"
+                    name="email"
+                    type="email"
+                    placeholder="Email"
+                    onChange={(e) => setEmail(e.target.value)}
+                    required
+                />
+                <input
+                    id="login-password"
+                    name="password"
+                    type="password"
+                    placeholder="Password"
+                    onChange={(e) => setPassword(e.target.value)}
+                    required
+                />
+                <button type="submit" disabled={loading}>
+                    {loading ? 'Logging in…' : 'Log In'}
+                </button>
 
 
+                <div className="auth-separator">or</div>
+
+                <button className="google-btn" type="button" onClick={handleGoogleLogin} disabled={loading}>
+                    <img
+                        src="/google-icon.png"
+                        alt="Google"
+                        style={{ width: '20px', marginRight: '8px' }}
+                    />
+                    Continue with Google
+                </button>
+
+                <p className="form-footer">
+                    Forgot password?{' '}
+                    <span onClick={switchToForgot} className="form-link">
+                        Reset
+                    </span>
+                </p>
+
+                <p className="form-footer">
+                    Don’t have an account?{' '}
+                    <span onClick={switchToRegister} className="form-link">
+                        Sign up
+                    </span>
+                </p>
+
+                {error && <p className="error-msg">{error}</p>}
+
+                {mfaVisible && (
+                    <div className="mfa-verification">
+                        <input
+                            type="text"
+                            placeholder="Enter SMS code"
+                            value={smsCode}
+                            onChange={(e) => setSmsCode(e.target.value)}
+                        />
+                        <button type="button" onClick={handleVerifySMS}>
+                            Verify Code
+                        </button>
+                    </div>
+                )}
+            </form>
+
+            <div id="recaptcha-container"></div>
+        </>
+    );
 }
 
 export default LoginForm;
