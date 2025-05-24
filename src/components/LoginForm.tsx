@@ -11,6 +11,8 @@ import {
 import { auth } from '../firebase/firebaseConfig';
 import { toast } from 'react-toastify';
 import './../styles/LoginForm.css';
+import { signInWithRedirect } from 'firebase/auth'; // ✅ Correct
+
 
 function LoginForm({
     onSuccess,
@@ -108,17 +110,27 @@ function LoginForm({
 
 
 
-    const handleGoogleLogin = async () => {
-        setLoading(true);
-        try {
-            await signInWithPopup(auth, new GoogleAuthProvider());
-            onSuccess();
-        } catch (err: any) {
-            setError(err.message);
-        } finally {
-            setLoading(false);
-        }
-    };
+const handleGoogleLogin = async () => {
+  setLoading(true);
+  const provider = new GoogleAuthProvider();
+  try {
+    await signInWithPopup(auth, provider);
+    onSuccess();
+  } catch (err: any) {
+    if (err.code === 'auth/popup-blocked' || err.code === 'auth/popup-closed-by-user') {
+      toast.info('Falling back to redirect login…');
+      await signInWithRedirect(auth, provider);
+    } else {
+      setError(err.message);
+    }
+  } finally {
+    setLoading(false);
+  }
+};
+
+
+
+
 
     const handleVerifySMS = async () => {
         try {
