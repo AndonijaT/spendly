@@ -16,7 +16,7 @@ import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { LanguageProvider } from './context/LanguageContext';
 import TransactionHistoryPage from './pages/TransactionHistoryPage';
-
+import PrivateRoute from './components/PrivateComponent';
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
@@ -25,23 +25,26 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
         <ToastContainer position="top-right" autoClose={3000} pauseOnHover theme="light" />
         <Routes>
           {/* All pages that should show the global Navbar */}
-          <Route path="/" element={<Layout />}>
-            <Route index element={<App />} /> {/* splash + home */}
-            <Route path="about" element={<About />} />
-            <Route path="features" element={<Features />} />
-            <Route path="contact" element={<Contact />} />
-            <Route path="account" element={<Account />} />
-            <Route path="dashboard" element={<Dashboard />} />
-            <Route path="budget" element={<Budget />} />
-            <Route path="statistics" element={<Statistics />} />
-            <Route path="transaction-history" element={<TransactionHistoryPage />} />
+        <Route path="/" element={<Layout />}>
+  {/* PUBLIC routes */}
+  <Route index element={<App />} />
+  <Route path="about" element={<About />} />
+  <Route path="features" element={<Features />} />
+  <Route path="contact" element={<Contact />} />
 
-          </Route>
+  {/* PROTECTED routes */}
+  <Route path="account" element={<PrivateRoute><Account /></PrivateRoute>} />
+  <Route path="dashboard" element={<PrivateRoute><Dashboard /></PrivateRoute>} />
+  <Route path="budget" element={<PrivateRoute><Budget /></PrivateRoute>} />
+  <Route path="statistics" element={<PrivateRoute><Statistics /></PrivateRoute>} />
+  <Route path="transaction-history" element={<PrivateRoute><TransactionHistoryPage /></PrivateRoute>} />
+</Route>
 
-          {/* Auth routes (separate, without layout if needed) */}
+
+          {}
 
 
-          {/* Catch all */}
+          {}
           <Route path="*" element={<NotFound />} />
         </Routes>
       </Router>
