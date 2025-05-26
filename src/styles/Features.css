@@ -1,0 +1,209 @@
+.features-container {
+  padding: 2rem;
+  max-width: 1200px;
+  margin: 0 auto;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  color: #1a1a1a;
+  position: relative;
+  z-index: 0;
+}
+
+/* Title & Subtitle */
+.features-title {
+  font-size: 2.75rem;
+  font-weight: 800;
+  text-align: center;
+  margin-bottom: 1rem;
+}
+
+.features-subtitle {
+  font-size: 1.2rem;
+  text-align: center;
+  color: #555;
+  margin-bottom: 3rem;
+}
+
+/* Feature Grid */
+.features-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 2rem;
+  margin-bottom: 2rem;
+}
+
+/* Individual Feature Card */
+.feature-card {
+  cursor: pointer;
+  background: #fffdf5;
+  border: 1px solid #ffe58a;
+  border-radius: 16px;
+  padding: 1.5rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  transition: transform 0.3s ease;
+  text-align: center;
+}
+
+.feature-card:hover {
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+}
+
+.feature-icon {
+  font-size: 2rem;
+  margin-bottom: 0.8rem;
+}
+
+.feature-title {
+  font-size: 1.3rem;
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+}
+
+.feature-description {
+  font-size: 1rem;
+  color: #444;
+}
+
+/* Fun Fact Section */
+.features-tip {
+  text-align: center;
+  margin-top: 2rem;
+}
+
+.features-tip button {
+  background: #fff4cc;
+  border: 1px solid #ffce4a;
+  padding: 0.5rem 1rem;
+  border-radius: 10px;
+  cursor: pointer;
+  font-weight: bold;
+  transition: all 0.2s ease-in-out;
+}
+
+.features-tip button:hover {
+  background-color: #ffe382;
+}
+
+/* Modal Overlay */
+.features-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.4);
+  z-index: 1000;
+}
+
+/* Modal Wrapper */
+.features-modal-wrapper {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+}
+
+/* Popup (Standard) */
+.features-popup,
+.features-popup.large {
+  background: #fffdf5;
+  padding: 2.5rem;
+  border-radius: 16px;
+  max-width: 540px;
+  width: 90%;
+  z-index: 1001;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.2);
+  text-align: left;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  position: relative;
+}
+
+
+/* Modal Content */
+.features-popup h3 {
+  font-size: 1.8rem;
+  font-weight: bold;
+  margin-bottom: 1rem;
+  color: #1a1a1a;
+}
+
+.features-popup p {
+  font-size: 1.1rem;
+  color: #444;
+  line-height: 1.6;
+}
+
+/* Modal Close Button */
+.features-close {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  background: #ffd6d6;
+  border: none;
+  border-radius: 6px;
+  font-size: 1.1rem;
+  font-weight: bold;
+  padding: 0.3rem 0.6rem;
+  cursor: pointer;
+  color: #d8000c;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+  transition: background-color 0.2s ease;
+}
+
+.features-close:hover {
+  background-color: #ffb3b3;
+}
+
+/* Modal Animation */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -60%);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, -50%);
+  }
+}
+
+/* CTA */
+.features-cta {
+  text-align: center;
+  margin-top: 3rem;
+}
+
+.features-cta h2 {
+  font-size: 1.8rem;
+  margin-bottom: 1rem;
+  font-weight: bold;
+}
+
+.features-cta a {
+  display: inline-block;
+  background-color: #ffc107;
+  padding: 0.75rem 1.5rem;
+  border-radius: 999px;
+  color: #000;
+  font-weight: bold;
+  text-decoration: none;
+  box-shadow: 0 0 8px #ffc10780;
+  transition: background-color 0.2s ease-in-out;
+}
+
+.features-cta a:hover {
+  background-color: #ffca2c;
+}
+.features-modal-wrapper {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.features-modal-center {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  height: 100%;
+}
