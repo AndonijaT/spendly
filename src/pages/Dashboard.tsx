@@ -196,16 +196,13 @@ export default function Dashboard() {
     <div className="dashboard-container">
       <h1 className="dashboard-title">Your Dashboard</h1>
       <div className="dashboard-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <h1 className="dashboard-title">Your Dashboard</h1>
-        <button
-          className="start-tutorial-btn"
-          onClick={() => {
-            setStepIndex(0);
-            setRunTour(true);
-          }}
-        >
-          🎓 Tutorial
-        </button>
+       <div className="floating-tutorial" onClick={() => {
+  setStepIndex(0);
+  setRunTour(true);
+}}>
+  🎓
+</div>
+
       </div>
 
       <button onClick={() => setShowBudgetModal(true)} className="start-tutorial-btn">

@@ -276,3 +276,50 @@
   font-weight: bold;
   margin-top: 0.3rem;
 }
+.floating-tutorial {
+  position: fixed;
+  top: 5.5rem; /* 👈 was 2rem, now placed just below your navbar */
+  right: 2rem;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background-color: rgba(255, 255, 255, 0.6);
+  backdrop-filter: blur(8px);
+  border: 1px solid #ccc;
+  font-size: 1.5rem;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  transition: background-color 0.2s ease, transform 0.2s ease;
+  z-index: 1001;
+}
+
+.floating-tutorial:hover {
+  background-color: #f4f4f4;
+  transform: scale(1.05);
+}
+
+.floating-tutorial::after {
+  content: "Start Tutorial";
+  position: absolute;
+  top: 100%;
+  right: 0;
+  white-space: nowrap;
+  margin-top: 6px;
+  padding: 4px 8px;
+  background: #333;
+  color: white;
+  font-size: 0.75rem;
+  border-radius: 4px;
+  opacity: 0;
+  transform: translateY(4px);
+  pointer-events: none;
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+.floating-tutorial:hover::after {
+  opacity: 1;
+  transform: translateY(0);
+}
