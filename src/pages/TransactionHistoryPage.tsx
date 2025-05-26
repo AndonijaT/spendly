@@ -28,8 +28,7 @@ export default function TransactionHistoryPage() {
   }, []);
 
   return (
-    <div style={{  maxWidth: '900px',
-  margin: 'auto',
+    <div style={{ 
   fontFamily: 'Segoe UI, sans-serif', padding: '2rem', maxWidth: '900px', margin: 'auto' }}>
       <h2>All Transactions</h2>
      <ul style={{ padding: 0, listStyle: 'none' }}>

@@ -38,17 +38,47 @@ function Contact() {
   };
 
   return (
-    <div className="contact-container">
-      <h2>Contact Us</h2>
-      <form onSubmit={sendEmail} className="contact-form">
-        <input type="text" name="name" placeholder="Name" required value={formData.name} onChange={handleChange} />
-        <input type="email" name="email" placeholder="Email" required value={formData.email} onChange={handleChange} />
-        <textarea name="message" placeholder="Message" required value={formData.message} onChange={handleChange} />
-        <button type="submit">Send Email</button>
-      </form>
-      {success && <p className="contact-success"> Your message has been sent!</p>}
-      {error && <p className="contact-error">Oops!Something went wrong.</p>}
-    </div>
+<div className="contact-container">
+  <h2>Contact Us</h2>
+  <p className="contact-intro">
+    Have a question? A bug to report?<br />
+    We’d love to hear from you. Just leave us a message below!
+  </p>
+
+  <form onSubmit={sendEmail} className="contact-form">
+    <input
+      type="text"
+      name="name"
+      placeholder="Your name"
+      required
+      value={formData.name}
+      onChange={handleChange}
+    />
+    <input
+      type="email"
+      name="email"
+      placeholder="Your email"
+      required
+      value={formData.email}
+      onChange={handleChange}
+    />
+    <textarea
+      name="message"
+      placeholder="What’s on your mind?"
+      required
+      value={formData.message}
+      onChange={handleChange}
+    />
+    <button type="submit"> Send Message</button>
+  </form>
+
+  {success && <p className="contact-success">🎉 Your message has been sent! We’ll get back to you soon.</p>}
+  {error && <p className="contact-error">⚠️ Oops! Something went wrong. Please try again later.</p>}
+
+  <p className="contact-closing">
+    💛 Thanks for taking the time to connect with us. Your feedback helps make Spendly better!
+  </p>
+</div>
   );
 }
 
