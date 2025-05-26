@@ -21,28 +21,28 @@ function RegisterForm({
   const [password, setPassword] = useState('');
   const [name, setName] = useState('');
 
-const handleSignup = async (e: React.FormEvent) => {
-  e.preventDefault();
-  try {
-    const userCred = await createUserWithEmailAndPassword(auth, email, password);
-    await updateProfile(userCred.user, { displayName: name });
-    await sendEmailVerification(userCred.user);
-    toast.success('Verification email sent. Please check your inbox.');
+  const handleSignup = async (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      const userCred = await createUserWithEmailAndPassword(auth, email, password);
+      await updateProfile(userCred.user, { displayName: name });
+      await sendEmailVerification(userCred.user);
+      toast.success('Verification email sent. Please check your inbox.');
 
-    await auth.signOut(); // ✅ Sign them out immediately
-    onSuccess(); // Optional: close modal or redirect
-  } catch (err: any) {
-    if (err.code === 'auth/email-already-in-use') {
-      toast.error('An account with this email already exists.');
-    } else if (err.code === 'auth/invalid-email') {
-      toast.error('Invalid email address.');
-    } else if (err.code === 'auth/weak-password') {
-      toast.error('Password must be at least 6 characters.');
-    } else {
-      toast.error('Something went wrong. Please try again.');
+      await auth.signOut(); // ✅ Sign them out immediately
+      onSuccess(); // Optional: close modal or redirect
+    } catch (err: any) {
+      if (err.code === 'auth/email-already-in-use') {
+        toast.error('An account with this email already exists.');
+      } else if (err.code === 'auth/invalid-email') {
+        toast.error('Invalid email address.');
+      } else if (err.code === 'auth/weak-password') {
+        toast.error('Password must be at least 6 characters.');
+      } else {
+        toast.error('Something went wrong. Please try again.');
+      }
     }
-  }
-}; const handleGoogleSignup = async () => {
+  }; const handleGoogleSignup = async () => {
     try {
       const provider = new GoogleAuthProvider();
       await signInWithPopup(auth, provider);
@@ -61,7 +61,7 @@ const handleSignup = async (e: React.FormEvent) => {
       <button type="submit">Sign Up</button>
 
       <div className="auth-separator">or</div>
- <button className="google-btn" type="button" onClick={handleGoogleSignup}>
+      <button className="google-btn" type="button" onClick={handleGoogleSignup}>
         <img src="/google-icon.png" alt="Google" style={{ width: '20px', marginRight: '8px' }} />
         Continue with Google
       </button>

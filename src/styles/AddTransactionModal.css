@@ -149,6 +149,4 @@ button[type="submit"] {
   overflow-y: auto;
   box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
 }
-body.modal-open .top-bar {
-  display: none !important;
-}
+
