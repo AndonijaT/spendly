@@ -61,11 +61,23 @@
   background-color: rgba(255, 255, 255, 0);
 }
 
+/* Light navbar override */
+.navbar-light {
+  background-color: white;
+}
+
 .navbar-light .navbar-logo a,
 .navbar-light .navbar-links a,
 .navbar-light .account-button {
-  color: #ffffff !important;
+  color: #222 !important;
 }
+
+.navbar-light .navbar-links a:hover,
+.navbar-light .account-button:hover {
+  text-decoration: underline;
+  color: #000 !important;
+}
+
 
 .navbar-light .navbar-links a:hover,
 .navbar-light .account-button:hover {
@@ -88,7 +100,7 @@
     font-size: 2rem;
     background: none;
     border: none;
-    color: white; /* WHITE ICON DEFAULT */
+    color: white; 
     cursor: pointer;
     z-index: 1001;
   }
@@ -155,5 +167,8 @@
   .navbar-links li .account-button:hover {
     background-color: #f0f0f0;
     color: #000;
+  }
+    .navbar-light .hamburger {
+    color: #222; /* black when navbar-light is active */
   }
 }

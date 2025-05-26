@@ -25,15 +25,18 @@ function Navbar() {
     }
   };
 
-  const useDarkText =
-    location.pathname.startsWith('/dashboard') ||
-    location.pathname.startsWith('/account') ||
-    location.pathname.startsWith('/budget') ||
-    location.pathname.startsWith('/statistics');
+ const useDarkText =
+  location.pathname.startsWith('/dashboard') ||
+  location.pathname.startsWith('/account') ||
+  location.pathname.startsWith('/budget') ||
+  location.pathname.startsWith('/statistics') ||
+  location.pathname.startsWith('/about') ||
+  location.pathname.startsWith('/contact');
+
 
   return (
     <>
-     <nav className={`navbar ${useDarkText ? 'navbar-light' : ''} ${menuOpen ? 'open' : ''}`}>
+<nav className={`navbar ${useDarkText ? 'navbar-light' : ''} ${menuOpen ? 'open' : ''}`}>
 
         <div className="navbar-logo">
           <Link to="/">Spendly</Link>
