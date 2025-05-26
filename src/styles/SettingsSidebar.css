@@ -66,3 +66,20 @@
 .setting-group.links a:hover {
   text-decoration: underline;
 }
+.budget-mode-btn {
+  background-color: #fff;
+  border: 2px solid #d2b109;
+  color: #d2b109;
+  padding: 0.6rem 1rem;
+  font-weight: bold;
+  font-size: 1rem;
+  border-radius: 6px;
+  cursor: pointer;
+  width: 100%;
+  transition: all 0.2s ease;
+}
+
+.budget-mode-btn:hover {
+  background-color: #d2b109;
+  color: white;
+}

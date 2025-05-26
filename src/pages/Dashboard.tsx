@@ -11,7 +11,7 @@ import SettingsSidebar from '../components/SettingsSidebar';
 import Joyride from 'react-joyride';
 import type { Step } from 'react-joyride';
 import SetCategoryBudgetModal from '../components/SetCategoryBudgetModal';
-import { query, where } from 'firebase/firestore'; 
+import { query, where } from 'firebase/firestore';
 type Transaction = {
   id: string;
   type: 'income' | 'expense';
@@ -31,6 +31,10 @@ export default function Dashboard() {
   const showAllButton = transactions.length > 10;
   const [showSettings, setShowSettings] = useState(false);
   const [showBudgetModal, setShowBudgetModal] = useState(false);
+  const handleBudgetMode = () => {
+    setShowSettings(false); // Close sidebar
+    setShowBudgetModal(true); // Open budget modal
+  };
 
   const recentTransactions = [...transactions]
     .sort((a, b) => b.timestamp.seconds - a.timestamp.seconds)
@@ -68,7 +72,7 @@ export default function Dashboard() {
       setTimeout(() => {
         setRunTour(true);
         localStorage.setItem('seenSpendlyTutorial', 'true');
-      }, 400); 
+      }, 400);
     }
   }, []);
 
@@ -104,7 +108,7 @@ export default function Dashboard() {
         allData.push({ id: doc.id, ...data } as Transaction);
       });
 
-    
+
       const filtered = allData.filter((tx) => {
         if (!tx.timestamp?.seconds) return false;
         const date = new Date(tx.timestamp.seconds * 1000);
@@ -196,18 +200,16 @@ export default function Dashboard() {
     <div className="dashboard-container">
       <h1 className="dashboard-title">Your Dashboard</h1>
       <div className="dashboard-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-       <div className="floating-tutorial" onClick={() => {
-  setStepIndex(0);
-  setRunTour(true);
-}}>
-  🎓
-</div>
+        <div className="floating-tutorial" onClick={() => {
+          setStepIndex(0);
+          setRunTour(true);
+        }}>
+          🎓
+        </div>
 
       </div>
 
-      <button onClick={() => setShowBudgetModal(true)} className="start-tutorial-btn">
-        Set Category Budget
-      </button>
+    
 
       <Joyride
         steps={steps}
@@ -347,8 +349,12 @@ export default function Dashboard() {
       </div>
 
       {showSettings && (
-        <SettingsSidebar onClose={() => setShowSettings(false)} />
+        <SettingsSidebar
+          onClose={() => setShowSettings(false)}
+          onBudgetModeClick={handleBudgetMode} 
+        />
       )}
+
       {showBudgetModal && (
         <SetCategoryBudgetModal onClose={() => setShowBudgetModal(false)} />
       )}

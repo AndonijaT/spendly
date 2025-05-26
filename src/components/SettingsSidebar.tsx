@@ -5,7 +5,13 @@ import { deleteDoc, collection, getDocs, doc } from 'firebase/firestore';
 import { useLanguage } from '../context/LanguageContext';
 import ConfirmModal from './ConfirmModal';
 
-export default function SettingsSidebar({ onClose }: { onClose: () => void }) {
+export default function SettingsSidebar({
+  onClose,
+  onBudgetModeClick, 
+}: {
+  onClose: () => void;
+  onBudgetModeClick: () => void;
+}) {
   const { language, setLanguage, t } = useLanguage();
   const [currency, setCurrency] = useState<'EUR' | 'USD' | 'MKD'>('EUR');
   const [showConfirm, setShowConfirm] = useState(false);
@@ -59,6 +65,12 @@ export default function SettingsSidebar({ onClose }: { onClose: () => void }) {
             {t('erase')}
           </button>
         </div>
+<div className="setting-group">
+  <label>Budget</label>
+  <button className="budget-mode-btn" onClick={onBudgetModeClick}>
+    💼 Budget Mode
+  </button>
+</div>
 
         <div className="setting-group links">
           <a href="/privacy-policy" target="_blank" rel="noopener noreferrer">
