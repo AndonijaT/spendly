@@ -8,6 +8,7 @@ import { format, parse } from 'date-fns';
 import AddTransactionModal from '../components/AddTransactionModal';
 import { useNavigate } from 'react-router-dom';
 import SettingsSidebar from '../components/SettingsSidebar';
+import Joyride from 'react-joyride';
 
 type Transaction = {
   id: string;
@@ -26,11 +27,42 @@ export default function Dashboard() {
   const [showAddModal, setShowAddModal] = useState(false);
   const navigate = useNavigate();
   const showAllButton = transactions.length > 10;
-const [showSettings, setShowSettings] = useState(false);
+  const [showSettings, setShowSettings] = useState(false);
 
   const recentTransactions = [...transactions]
     .sort((a, b) => b.timestamp.seconds - a.timestamp.seconds)
     .slice(0, 10);
+  const [runTour, setRunTour] = useState(false);
+
+  const steps = [
+    {
+      target: '.dashboard-title',
+      content: '👋 Welcome to your Spendly Dashboard! This is your financial overview.',
+    },
+    {
+      target: '.floating-add',
+      content: '➕ Click here to add a new income or expense.',
+    },
+    {
+      target: '.summary-row',
+      content: '📊 Here’s a quick look at your income, expenses, and current balance.',
+    },
+    {
+      target: '.chart-wrapper',
+      content: '🎯 This chart shows where your money goes by category.',
+    },
+    {
+      target: '.floating-settings',
+      content: '⚙️ Access your language, currency, and app settings here.',
+    }
+  ];
+  useEffect(() => {
+    const seen = localStorage.getItem('seenSpendlyTutorial');
+    if (!seen) {
+      setRunTour(true);
+      localStorage.setItem('seenSpendlyTutorial', 'true');
+    }
+  }, []);
 
   // Load selected month from localStorage on first render
   useEffect(() => {
@@ -104,6 +136,20 @@ const [showSettings, setShowSettings] = useState(false);
   return (
     <div className="dashboard-container">
       <h1 className="dashboard-title">Your Dashboard</h1>
+      <Joyride
+        steps={steps}
+        run={runTour}
+        continuous
+        showProgress
+        showSkipButton
+        styles={{
+          options: {
+            zIndex: 10000,
+            primaryColor: '#d2b109',
+            textColor: '#333',
+          }
+        }}
+      />
 
       <div className="month-picker">
         <label>Select Month: </label>
@@ -150,9 +196,9 @@ const [showSettings, setShowSettings] = useState(false);
             return (
               <li key={tx.id} className={tx.type}>
                 <span className="category">{tx.category}</span>
-               {tx.description && (
-  <span className="description">{tx.description}</span>
-)}
+                {tx.description && (
+                  <span className="description">{tx.description}</span>
+                )}
                 <span className="datetime">{date}</span>
                 <span className="amount">
                   {tx.type === 'income' ? '+' : '-'}
@@ -178,14 +224,14 @@ const [showSettings, setShowSettings] = useState(false);
         <AddTransactionModal onClose={() => setShowAddModal(false)} />
       )}
       <div className="floating-settings" onClick={() => setShowSettings(true)}>
-  ⚙️
-</div>
+        ⚙️
+      </div>
 
-{showSettings && (
-  <SettingsSidebar onClose={() => setShowSettings(false)} />
-)}
+      {showSettings && (
+        <SettingsSidebar onClose={() => setShowSettings(false)} />
+      )}
 
     </div>
-    
+
   );
 }
