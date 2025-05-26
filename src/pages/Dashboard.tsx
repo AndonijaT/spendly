@@ -9,6 +9,7 @@ import AddTransactionModal from '../components/AddTransactionModal';
 import { useNavigate } from 'react-router-dom';
 import SettingsSidebar from '../components/SettingsSidebar';
 import Joyride from 'react-joyride';
+import type { Step } from 'react-joyride';
 
 type Transaction = {
   id: string;
@@ -33,11 +34,14 @@ export default function Dashboard() {
     .sort((a, b) => b.timestamp.seconds - a.timestamp.seconds)
     .slice(0, 10);
   const [runTour, setRunTour] = useState(false);
+  const [stepIndex, setStepIndex] = useState(0);
 
-  const steps = [
+  const steps: Step[] = [
     {
-      target: '.dashboard-title',
+      target: '.dashboard-container',
+      placement: 'center',
       content: '👋 Welcome to your Spendly Dashboard! This is your financial overview.',
+      disableBeacon: true,
     },
     {
       target: '.floating-add',
@@ -56,13 +60,17 @@ export default function Dashboard() {
       content: '⚙️ Access your language, currency, and app settings here.',
     }
   ];
-  useEffect(() => {
-    const seen = localStorage.getItem('seenSpendlyTutorial');
-    if (!seen) {
+useEffect(() => {
+  const seen = localStorage.getItem('seenSpendlyTutorial');
+  if (!seen) {
+    setTimeout(() => {
       setRunTour(true);
       localStorage.setItem('seenSpendlyTutorial', 'true');
-    }
-  }, []);
+    }, 400); // Wait for DOM to fully mount
+  }
+}, []);
+
+
 
   // Load selected month from localStorage on first render
   useEffect(() => {
@@ -136,20 +144,51 @@ export default function Dashboard() {
   return (
     <div className="dashboard-container">
       <h1 className="dashboard-title">Your Dashboard</h1>
+      <div className="dashboard-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <h1 className="dashboard-title">Your Dashboard</h1>
+        <button
+          className="start-tutorial-btn"
+          onClick={() => {
+            setStepIndex(0);
+            setRunTour(true);
+          }}
+        >
+          🎓 Tutorial
+        </button>
+      </div>
+
+
       <Joyride
         steps={steps}
         run={runTour}
+        stepIndex={stepIndex}
         continuous
         showProgress
         showSkipButton
+        disableScrolling
         styles={{
           options: {
-            zIndex: 10000,
+            zIndex: 9999, // or try 11000 if necessary
             primaryColor: '#d2b109',
             textColor: '#333',
-          }
+          },
+          overlay: {
+            zIndex: 9998, // below the Joyride tooltip
+          },
         }}
+      callback={(data) => {
+  const { action, index, status, type } = data;
+
+  if (type === 'step:after' || type === 'error:target_not_found') {
+    setStepIndex(index + 1);
+  } else if (status === 'finished' || status === 'skipped') {
+    setRunTour(false);
+    setStepIndex(0);
+  }
+}}
+
       />
+
 
       <div className="month-picker">
         <label>Select Month: </label>
