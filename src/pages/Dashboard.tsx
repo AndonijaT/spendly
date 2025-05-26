@@ -14,12 +14,15 @@ import SetCategoryBudgetModal from '../components/SetCategoryBudgetModal';
 import { query, where } from 'firebase/firestore';
 type Transaction = {
   id: string;
-  type: 'income' | 'expense';
+  type: 'income' | 'expense' | 'transfer';
+  method?: 'cash' | 'card'; // optional for transfer
+  direction?: 'to_cash' | 'to_card'; // only for transfers
   category: string;
   amount: number;
   description?: string;
   timestamp: { seconds: number };
 };
+
 
 export default function Dashboard() {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
@@ -51,7 +54,7 @@ export default function Dashboard() {
     },
     {
       target: '.floating-add',
-      content: '➕ Click here to add a new income or expense.',
+      content: '➕ Click here to add a new income or expense. Select category and fill in the details.',
     },
     {
       target: '.summary-row',
@@ -63,7 +66,7 @@ export default function Dashboard() {
     },
     {
       target: '.floating-settings',
-      content: '⚙️ Access your language, currency, and app settings here.',
+      content: '⚙️ Access your language, currency, app settings and also add budget for each category, if you want to remove a budget just set the limit to 0.',
     }
   ];
   useEffect(() => {
@@ -195,6 +198,34 @@ export default function Dashboard() {
       },
     ],
   };
+let cash = 0;
+let card = 0;
+
+transactions.forEach((tx) => {
+  const amt = Number(tx.amount);
+
+  if (tx.type === 'income') {
+    if (tx.method === 'cash') cash += amt;
+    if (tx.method === 'card') card += amt;
+  }
+
+  if (tx.type === 'expense') {
+    if (tx.method === 'cash') cash -= amt;
+    if (tx.method === 'card') card -= amt;
+  }
+
+  if (tx.type === 'transfer') {
+    if (tx.direction === 'to_cash') {
+      card -= amt;
+      cash += amt;
+    } else if (tx.direction === 'to_card') {
+      cash -= amt;
+      card += amt;
+    }
+  }
+});
+
+const totalBalance = cash + card;
 
   return (
     <div className="dashboard-container">
@@ -266,6 +297,9 @@ export default function Dashboard() {
         <div className="summary-box expense">Expenses: -{expenseTotal.toFixed(2)} €</div>
         <div className="summary-box balance">Balance: {(incomeTotal - expenseTotal).toFixed(2)} €</div>
       </div>
+<div className="summary-box balance">Balance: {totalBalance.toFixed(2)} €</div>
+<div className="summary-box income">Cash Balance: {cash.toFixed(2)} €</div>
+<div className="summary-box expense">Card Balance: {card.toFixed(2)} €</div>
 
       <div className="chart-section">
         <h3>Expenses by Category</h3>
