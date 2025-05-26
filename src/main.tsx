@@ -17,6 +17,7 @@ import 'react-toastify/dist/ReactToastify.css';
 import { LanguageProvider } from './context/LanguageContext';
 import TransactionHistoryPage from './pages/TransactionHistoryPage';
 import PrivateRoute from './components/PrivateComponent';
+import './emailInit'; 
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
