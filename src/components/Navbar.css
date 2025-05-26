@@ -176,3 +176,14 @@ body.modal-open .top-bar,
 body.modal-open .navbar {
   display: none !important;
 }
+.navbar.scrolled {
+  background-color: white;
+  transition: background-color 0.3s ease;
+}
+
+.navbar.scrolled .navbar-logo a,
+.navbar.scrolled .navbar-links a,
+.navbar.scrolled .account-button,
+.navbar.scrolled .hamburger {
+  color: #222 !important;
+}

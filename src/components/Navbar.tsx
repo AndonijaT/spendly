@@ -6,6 +6,9 @@ import LoginForm from './LoginForm';
 import RegisterForm from './RegisterForm';
 import ForgotPasswordForm from './ForgotPasswordForm';
 import './Navbar.css';
+import { useEffect } from 'react';
+
+
 
 function Navbar() {
   const { user } = useAuth();
@@ -15,7 +18,16 @@ function Navbar() {
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [authMode, setAuthMode] = useState<'login' | 'register' | 'forgot'>('login');
   const [menuOpen, setMenuOpen] = useState(false); // NEW
+const [scrolled, setScrolled] = useState(false);
 
+useEffect(() => {
+  const handleScroll = () => {
+    setScrolled(window.scrollY > 10);
+  };
+
+  window.addEventListener('scroll', handleScroll);
+  return () => window.removeEventListener('scroll', handleScroll);
+}, []);
   const handleAccountClick = () => {
     if (user) {
       navigate('/account');
@@ -36,7 +48,7 @@ function Navbar() {
 
   return (
     <>
-<nav className={`navbar ${useDarkText ? 'navbar-light' : ''} ${menuOpen ? 'open' : ''}`}>
+<nav className={`navbar ${useDarkText ? 'navbar-light' : ''} ${menuOpen ? 'open' : ''} ${scrolled ? 'scrolled' : ''}`}>
 
         <div className="navbar-logo">
           <Link to="/">Spendly</Link>
