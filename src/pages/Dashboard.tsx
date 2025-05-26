@@ -10,7 +10,8 @@ import { useNavigate } from 'react-router-dom';
 import SettingsSidebar from '../components/SettingsSidebar';
 import Joyride from 'react-joyride';
 import type { Step } from 'react-joyride';
-
+import SetCategoryBudgetModal from '../components/SetCategoryBudgetModal';
+import { query, where } from 'firebase/firestore'; 
 type Transaction = {
   id: string;
   type: 'income' | 'expense';
@@ -29,6 +30,7 @@ export default function Dashboard() {
   const navigate = useNavigate();
   const showAllButton = transactions.length > 10;
   const [showSettings, setShowSettings] = useState(false);
+  const [showBudgetModal, setShowBudgetModal] = useState(false);
 
   const recentTransactions = [...transactions]
     .sort((a, b) => b.timestamp.seconds - a.timestamp.seconds)
@@ -60,19 +62,27 @@ export default function Dashboard() {
       content: '⚙️ Access your language, currency, and app settings here.',
     }
   ];
-useEffect(() => {
-  const seen = localStorage.getItem('seenSpendlyTutorial');
-  if (!seen) {
-    setTimeout(() => {
-      setRunTour(true);
-      localStorage.setItem('seenSpendlyTutorial', 'true');
-    }, 400); // Wait for DOM to fully mount
-  }
-}, []);
+  useEffect(() => {
+    const seen = localStorage.getItem('seenSpendlyTutorial');
+    if (!seen) {
+      setTimeout(() => {
+        setRunTour(true);
+        localStorage.setItem('seenSpendlyTutorial', 'true');
+      }, 400); 
+    }
+  }, []);
+
+  type Budget = {
+    id: string;
+    category: string;
+    limit: number;
+    currency: string;
+    type: 'expense' | 'income';
+  };
+
+  const [budgets, setBudgets] = useState<Budget[]>([]);
 
 
-
-  // Load selected month from localStorage on first render
   useEffect(() => {
     const savedMonth = localStorage.getItem('selectedMonth');
     const defaultMonth = format(new Date(), 'yyyy-MM');
@@ -94,7 +104,7 @@ useEffect(() => {
         allData.push({ id: doc.id, ...data } as Transaction);
       });
 
-      // Filter by selected month
+    
       const filtered = allData.filter((tx) => {
         if (!tx.timestamp?.seconds) return false;
         const date = new Date(tx.timestamp.seconds * 1000);
@@ -118,6 +128,29 @@ useEffect(() => {
 
     fetchTransactions();
   }, [selectedMonth]);
+  useEffect(() => {
+    const fetchBudgets = async () => {
+      const user = auth.currentUser;
+      if (!user) return;
+
+      const nowMonth = format(new Date(), 'yyyy-MM');
+      const q = query(
+        collection(db, 'users', user.uid, 'budgets'),
+        where('month', '==', nowMonth)
+      );
+
+      const snapshot = await getDocs(q);
+      const budgetData: Budget[] = [];
+
+      snapshot.forEach((docSnap) => {
+        budgetData.push({ id: docSnap.id, ...docSnap.data() } as Budget);
+      });
+
+      setBudgets(budgetData);
+    };
+
+    fetchBudgets();
+  }, []);
 
   const expenseByCategory = transactions
     .filter((tx) => tx.type === 'expense')
@@ -125,6 +158,24 @@ useEffect(() => {
       acc[tx.category] = (acc[tx.category] || 0) + tx.amount;
       return acc;
     }, {} as Record<string, number>);
+  const budgetProgress = budgets.map((budget) => {
+    const spent = transactions
+      .filter((tx) => tx.type === budget.type && tx.category === budget.category)
+      .reduce((sum, tx) => sum + tx.amount, 0);
+
+    const percent = (spent / budget.limit) * 100;
+
+    let warningLevel: 'none' | 'mid' | 'high' | 'over' = 'none';
+    if (percent >= 100) warningLevel = 'over';
+    else if (percent >= 75) warningLevel = 'high';
+    else if (percent >= 50) warningLevel = 'mid';
+    return {
+      ...budget,
+      spent,
+      percent,
+      warningLevel,
+    };
+  });
 
   const pieData = {
     labels: Object.keys(expenseByCategory),
@@ -157,6 +208,9 @@ useEffect(() => {
         </button>
       </div>
 
+      <button onClick={() => setShowBudgetModal(true)} className="start-tutorial-btn">
+        Set Category Budget
+      </button>
 
       <Joyride
         steps={steps}
@@ -168,24 +222,24 @@ useEffect(() => {
         disableScrolling
         styles={{
           options: {
-            zIndex: 9999, // or try 11000 if necessary
+            zIndex: 9999, // or 11000 if necessary
             primaryColor: '#d2b109',
             textColor: '#333',
           },
           overlay: {
-            zIndex: 9998, // below the Joyride tooltip
+            zIndex: 9998, // below the joyride tooltip
           },
         }}
-      callback={(data) => {
-  const { action, index, status, type } = data;
+        callback={(data) => {
+          const { action, index, status, type } = data;
 
-  if (type === 'step:after' || type === 'error:target_not_found') {
-    setStepIndex(index + 1);
-  } else if (status === 'finished' || status === 'skipped') {
-    setRunTour(false);
-    setStepIndex(0);
-  }
-}}
+          if (type === 'step:after' || type === 'error:target_not_found') {
+            setStepIndex(index + 1);
+          } else if (status === 'finished' || status === 'skipped') {
+            setRunTour(false);
+            setStepIndex(0);
+          }
+        }}
 
       />
 
@@ -219,6 +273,35 @@ useEffect(() => {
         <div className="chart-wrapper">
           <Pie data={pieData} />
         </div>
+      </div>
+      <div className="budget-usage-section">
+        <h3>Budget Usage</h3>
+        {budgetProgress.map((bp) => (
+          <div key={bp.category} className="budget-bar">
+            <div className="label">
+              <strong>{bp.category}</strong>: {bp.spent.toFixed(2)} / {bp.limit.toFixed(2)} {bp.currency} ({Math.min(bp.percent, 100).toFixed(0)}%)
+            </div>
+            <div className="progress-bar-container">
+              <div
+                className="progress"
+                style={{
+                  width: `${Math.min(bp.percent, 100)}%`,
+                  backgroundColor:
+                    bp.warningLevel === 'over'
+                      ? '#c62828'
+                      : bp.warningLevel === 'high'
+                        ? '#ff9800'
+                        : bp.warningLevel === 'mid'
+                          ? '#fbc02d'
+                          : '#d2b109',
+                }}
+              />
+            </div>
+            {bp.warningLevel === 'mid' && <p className="warning-text">⚠️ 50% of your budget used.</p>}
+            {bp.warningLevel === 'high' && <p className="warning-text">⚠️ 75% of your budget used!</p>}
+            {bp.warningLevel === 'over' && <p className="warning-text">🚨 Over budget!</p>}
+          </div>
+        ))}
       </div>
 
       <div className="recent-transactions">
@@ -268,6 +351,9 @@ useEffect(() => {
 
       {showSettings && (
         <SettingsSidebar onClose={() => setShowSettings(false)} />
+      )}
+      {showBudgetModal && (
+        <SetCategoryBudgetModal onClose={() => setShowBudgetModal(false)} />
       )}
 
     </div>
