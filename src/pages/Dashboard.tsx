@@ -14,6 +14,7 @@ type Transaction = {
   type: 'income' | 'expense';
   category: string;
   amount: number;
+  description?: string;
   timestamp: { seconds: number };
 };
 
@@ -149,6 +150,9 @@ const [showSettings, setShowSettings] = useState(false);
             return (
               <li key={tx.id} className={tx.type}>
                 <span className="category">{tx.category}</span>
+               {tx.description && (
+  <span className="description">{tx.description}</span>
+)}
                 <span className="datetime">{date}</span>
                 <span className="amount">
                   {tx.type === 'income' ? '+' : '-'}

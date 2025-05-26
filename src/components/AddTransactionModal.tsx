@@ -18,12 +18,14 @@ export default function AddTransactionModal({ onClose }: { onClose: () => void }
   const [category, setCategory] = useState('');
   const [amount, setAmount] = useState('');
   const { t } = useLanguage();
-useEffect(() => {
-  document.body.classList.add('modal-open');
-  return () => {
-    document.body.classList.remove('modal-open');
-  };
-}, []);
+  const [description, setDescription] = useState('');
+
+  useEffect(() => {
+    document.body.classList.add('modal-open');
+    return () => {
+      document.body.classList.remove('modal-open');
+    };
+  }, []);
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const user = auth.currentUser;
@@ -35,8 +37,10 @@ useEffect(() => {
         method,
         category,
         amount: parseFloat(amount),
+        description: description.trim(),
         timestamp: serverTimestamp(),
       });
+
       toast.success(t('transactionAdded'));
       onClose();
     } catch (err) {
@@ -103,7 +107,14 @@ useEffect(() => {
           <label>{t('amount')}:
             <input type="number" value={amount} onChange={(e) => setAmount(e.target.value)} required />
           </label>
-
+          <label>{t('description')} ({t('optional')}):
+            <textarea
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              placeholder="e.g. Birthday dinner, gym subscription, etc."
+              rows={2}
+            />
+          </label>
           <div className="form-buttons">
             <button type="submit">{t('add')}</button>
             <button type="button" onClick={onClose} className="cancel">{t('cancel')}</button>

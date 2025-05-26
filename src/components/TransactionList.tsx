@@ -11,13 +11,15 @@ interface Transaction {
   method: 'cash' | 'card';
   category: string;
   amount: number;
+  description?: string;
   timestamp?: { seconds: number };
 }
+
 
 export default function TransactionList() {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [balance, setBalance] = useState(0);
-const { t } = useLanguage();
+  const { t } = useLanguage();
 
   const fetchTransactions = async (userId: string) => {
     try {
@@ -73,11 +75,17 @@ const { t } = useLanguage();
       <ul>
         {transactions.map((tx) => (
           <li key={tx.id} className={tx.type}>
-            <span>{tx.category}</span>
+            <div>
+              <strong>{tx.category}</strong>
+              {tx.description && (
+                <div className="tx-description">{tx.description}</div>
+              )}
+            </div>
             <span>{tx.amount.toFixed(2)} €</span>
           </li>
         ))}
       </ul>
+
     </div>
   );
 }

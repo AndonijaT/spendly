@@ -9,8 +9,10 @@ interface Transaction {
   method: 'cash' | 'card';
   category: string;
   amount: number;
+  description?: string;
   timestamp?: { seconds: number };
 }
+
 
 export default function TransactionHistory({ onClose }: { onClose: () => void }) {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
@@ -51,16 +53,16 @@ export default function TransactionHistory({ onClose }: { onClose: () => void })
           {transactions.map((tx) => (
             <li key={tx.id} className={tx.type}>
               <div>
-                <strong>{tx.category}</strong> ({tx.method})<br />
-                <span>{formatDate(tx.timestamp)}</span>
+                <strong>{tx.category}</strong>
+                {tx.description && (
+                  <div className="tx-description">{tx.description}</div>
+                )}
               </div>
-              <div className="amount">
-                {tx.type === 'income' ? '+' : '-'}
-                {tx.amount.toFixed(2)} €
-              </div>
+              <span>{tx.amount.toFixed(2)} €</span>
             </li>
           ))}
         </ul>
+
         <button onClick={onClose}>Close</button>
       </div>
     </div>
