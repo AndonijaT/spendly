@@ -78,3 +78,43 @@ html, body {
 .cta-button:hover {
   background-color: #d2b109;
 }
+@media (max-width: 768px) {
+  /* Hide the video on mobile */
+  .bg-video {
+    display: none;
+  }
+
+  /* Use background image instead */
+  .hero::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image: url('/background.jpg');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    z-index: -1;
+  }
+
+  .hero-text {
+    left: 20px;
+    right: 20px;
+    bottom: 20px;
+    padding: 1.5rem;
+    max-width: unset;
+  }
+
+  .hero-text h1 {
+    font-size: 1.4rem;
+  }
+
+  .hero-text p {
+    font-size: 0.95rem;
+  }
+
+  .cta-button {
+    font-size: 0.95rem;
+    padding: 0.6rem 1.2rem;
+  }
+}
+

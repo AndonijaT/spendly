@@ -14,6 +14,7 @@ function Navbar() {
 
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [authMode, setAuthMode] = useState<'login' | 'register' | 'forgot'>('login');
+  const [menuOpen, setMenuOpen] = useState(false); // NEW
 
   const handleAccountClick = () => {
     if (user) {
@@ -24,7 +25,6 @@ function Navbar() {
     }
   };
 
-  // Detect if route needs dark navbar
   const useDarkText =
     location.pathname.startsWith('/dashboard') ||
     location.pathname.startsWith('/account') ||
@@ -33,18 +33,28 @@ function Navbar() {
 
   return (
     <>
-      <nav className={`navbar ${useDarkText ? 'navbar-light' : ''}`}>
+     <nav className={`navbar ${useDarkText ? 'navbar-light' : ''} ${menuOpen ? 'open' : ''}`}>
+
         <div className="navbar-logo">
           <Link to="/">Spendly</Link>
         </div>
-        <ul className="navbar-links">
-          <li><Link to="/">Home</Link></li>
-          <li><Link to="/about">About Us</Link></li>
-          <li><Link to="/features">Features</Link></li>
-          <li><Link to="/contact">Contact Us</Link></li>
-          {user && <li><Link to="/dashboard">Dashboard</Link></li>}
+
+        <button
+          className="hamburger"
+          onClick={() => setMenuOpen(!menuOpen)}
+          aria-label="Toggle menu"
+        >
+          ☰
+        </button>
+
+        <ul className={`navbar-links ${menuOpen ? 'open' : ''}`}>
+          <li><Link to="/" onClick={() => setMenuOpen(false)}>Home</Link></li>
+          <li><Link to="/about" onClick={() => setMenuOpen(false)}>About Us</Link></li>
+          <li><Link to="/features" onClick={() => setMenuOpen(false)}>Features</Link></li>
+          <li><Link to="/contact" onClick={() => setMenuOpen(false)}>Contact Us</Link></li>
+          {user && <li><Link to="/dashboard" onClick={() => setMenuOpen(false)}>Dashboard</Link></li>}
           <li>
-            <button className="account-button" onClick={handleAccountClick}>Account</button>
+            <button className="account-button" onClick={() => { setMenuOpen(false); handleAccountClick(); }}>Account</button>
           </li>
         </ul>
       </nav>
