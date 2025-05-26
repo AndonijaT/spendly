@@ -4,6 +4,7 @@ import { addDoc, collection, serverTimestamp } from 'firebase/firestore';
 import { toast } from 'react-toastify';
 import '../styles/AddTransactionModal.css';
 import { useLanguage } from '../context/LanguageContext';
+import { useEffect } from 'react';
 
 const categories = [
   "groceries", "home", "eating out", "food delivery", "coffee", "car", "health",
@@ -17,7 +18,12 @@ export default function AddTransactionModal({ onClose }: { onClose: () => void }
   const [category, setCategory] = useState('');
   const [amount, setAmount] = useState('');
   const { t } = useLanguage();
-
+useEffect(() => {
+  document.body.classList.add('modal-open');
+  return () => {
+    document.body.classList.remove('modal-open');
+  };
+}, []);
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const user = auth.currentUser;

@@ -119,3 +119,36 @@ button[type="submit"] {
   background-color: #d2b109;
   color: white;
 }
+@media (max-width: 768px) {
+  .modal-card {
+    max-height: 90vh;
+    overflow-y: auto;
+    padding: 1.5rem;
+  }
+
+  .category-grid {
+    grid-template-columns: repeat(3, 1fr); /* tighter fit on small screens */
+  }
+
+  .form-buttons {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .form-buttons button {
+    width: 100%;
+  }
+}
+.modal-card {
+  background: white;
+  border-radius: 16px;
+  padding: 2rem;
+  width: 90%;
+  max-width: 480px;
+  max-height: 95vh;
+  overflow-y: auto;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+}
+body.modal-open .top-bar {
+  display: none !important;
+}

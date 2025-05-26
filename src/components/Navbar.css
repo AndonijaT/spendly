@@ -172,3 +172,7 @@
     color: #222; /* black when navbar-light is active */
   }
 }
+body.modal-open .top-bar,
+body.modal-open .navbar {
+  display: none !important;
+}
