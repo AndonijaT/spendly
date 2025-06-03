@@ -404,3 +404,101 @@
   font-weight: bold;
   color: #333;
 }
+.recent-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.see-all-link {
+  background: #e6f0f2;
+  color: #000000;
+  font-weight: 600;
+  border: none;
+  padding: 0.3rem 0.8rem;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.9rem;
+}
+
+.recent-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid #eee;
+  background: #fff;
+  border-radius: 6px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.03);
+  margin-bottom: 0.5rem;
+}
+
+.recent-left {
+  display: flex;
+  flex-direction: column;
+}
+
+.recent-category {
+  font-weight: 600;
+  color: #222;
+}
+
+.recent-date {
+  font-size: 0.8rem;
+  color: #777;
+}
+
+.recent-amount {
+  font-weight: bold;
+  font-size: 1rem;
+  color: #333;
+}
+.cash-card-balance-section {
+  background: #ffffff;
+  padding: 2rem 1rem;
+  margin: 2rem auto;
+  max-width: 400px;
+  border-radius: 12px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.05);
+  text-align: center;
+}
+
+.cash-card-balance-section h3 {
+  margin-bottom: 0.8rem;
+  font-size: 1.2rem;
+  color: #444;
+}
+
+.balance-display {
+  font-size: 2.2rem;
+  font-weight: bold;
+  margin-bottom: 1.2rem;
+}
+
+.balance-positive {
+  color: #2e7d32;
+}
+
+.balance-negative {
+  color: #c62828;
+}
+
+.balance-breakdown {
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+}
+
+.balance-line {
+  display: flex;
+  justify-content: space-between;
+  font-size: 1rem;
+  font-weight: 600;
+  color: #333;
+}
+
+.balance-line .label {
+  color: #666;
+  font-weight: normal;
+}

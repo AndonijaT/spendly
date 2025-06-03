@@ -43,7 +43,7 @@ export default function Dashboard() {
 
   const recentTransactions = [...transactions]
     .sort((a, b) => b.timestamp.seconds - a.timestamp.seconds)
-    .slice(0, 10);
+    .slice(0, 3);
   const [runTour, setRunTour] = useState(false);
   const [stepIndex, setStepIndex] = useState(0);
 
@@ -228,19 +228,19 @@ export default function Dashboard() {
   });
 
   const totalBalance = cash + card;
-const cashCardData = {
-  labels: ['Cash', 'Card'],
-  datasets: [
-    {
-      data: [cash, card],
-      backgroundColor: ['#4caf50', '#42a5f5'],
-      borderWidth: 1,
-    },
-  ],
-};
+  const cashCardData = {
+    labels: ['Cash', 'Card'],
+    datasets: [
+      {
+        data: [cash, card],
+        backgroundColor: ['#4caf50', '#42a5f5'],
+        borderWidth: 1,
+      },
+    ],
+  };
   return (
     <div className="dashboard-container">
-     
+
       <div className="dashboard-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <div className="floating-tutorial" onClick={() => {
           setStepIndex(0);
@@ -297,79 +297,71 @@ const cashCardData = {
         />
       </div>
 
-     
 
-     <div className="summary-group">
-  <div className="summary-row">
-    <div className="summary-box income">Income: +{incomeTotal.toFixed(2)} €</div>
-    <div className="summary-box expense">Expenses: -{expenseTotal.toFixed(2)} €</div>
-    <div className="summary-box balance">Balance: {(incomeTotal - expenseTotal).toFixed(2)} €</div>
-  </div>
-  <div className="summary-row">
-   <div className="cash-card-chart-section">
-  <h3>Cash vs Card</h3>
-  <div className="donut-wrapper">
-    <Doughnut data={cashCardData} options={{
-      cutout: '70%', // creates the inner hole
-      plugins: {
-        legend: {
-          display: true,
-          position: 'bottom',
-        },
-      },
-    }} />
-    <div className="donut-center-label">
-  {totalBalance >= 0 ? (
-    <>
-      <strong className="donut-positive">{totalBalance.toFixed(2)} €</strong>
-      <div style={{ fontSize: '0.8rem', color: '#555' }}>Total</div>
-    </>
-  ) : (
-    <>
-      <strong className="donut-negative">Oops!</strong>
-      <div style={{ fontSize: '0.8rem', color: '#c62828' }}>
-        You spent {(Math.abs(totalBalance)).toFixed(2)} € too much
-      </div>
-    </>
-  )}
-</div>
 
-  </div>
-</div>
-</div>
-</div>
-
-     <div className="chart-section">
-  <h3>Expenses by Category</h3>
-  <div className="chart-wrapper">
-    <Pie data={pieData} options={{
-      cutout: '60%',
-      plugins: {
-        legend: {
-          display: false
-        }
-      }
-    }} />
-  </div>
-
-  <div className="category-expense-list">
-    {Object.entries(expenseByCategory).map(([category, amount], i) => {
-      const color = pieData.datasets[0].backgroundColor[i] as string;
-      const percent = ((amount / expenseTotal) * 100).toFixed(1);
-      return (
-        <div key={category} className="category-expense-item">
-          <div className="category-color-box" style={{ backgroundColor: color }}></div>
-          <div className="category-label" style={{ color }}>
-            {category} ({percent}%)
+      <div className="summary-group">
+        
+        <div className="summary-row">
+          <div className="cash-card-balance-section">
+            <h3>Total Balance</h3>
+            <div className="balance-display">
+              {totalBalance >= 0 ? (
+                <span className="balance-positive">{totalBalance.toFixed(2)} €</span>
+              ) : (
+                <span className="balance-negative">- {(Math.abs(totalBalance)).toFixed(2)} €</span>
+              )}
+            </div>
+            <div className="balance-breakdown">
+              <div className="balance-line">
+                <span className="label">Cash</span>
+                <span>{cash.toFixed(2)} €</span>
+              </div>
+              <div className="balance-line">
+                <span className="label">Card</span>
+                <span>{card.toFixed(2)} €</span>
+              </div>
+            </div>
           </div>
-          <div className="category-amount">
-            {amount.toFixed(2)} €
-          </div>
+
         </div>
-      );
-    })}
-  </div>
-</div>
+        <div className="summary-row">
+          <div className="summary-box income">Income: +{incomeTotal.toFixed(2)} €</div>
+          <div className="summary-box expense">Expenses: -{expenseTotal.toFixed(2)} €</div>
+          <div className="summary-box balance">Balance: {(incomeTotal - expenseTotal).toFixed(2)} €</div>
+        </div>
+      </div>
+
+      <div className="chart-section">
+        <h3>Expenses by Category</h3>
+        <div className="chart-wrapper">
+          <Pie data={pieData} options={{
+            cutout: '60%',
+            plugins: {
+              legend: {
+                display: false
+              }
+            }
+          }} />
+        </div>
+
+        <div className="category-expense-list">
+          {Object.entries(expenseByCategory).map(([category, amount], i) => {
+            const color = pieData.datasets[0].backgroundColor[i] as string;
+            const percent = ((amount / expenseTotal) * 100).toFixed(1);
+            return (
+              <div key={category} className="category-expense-item">
+                <div className="category-color-box" style={{ backgroundColor: color }}></div>
+                <div className="category-label" style={{ color }}>
+                  {category} ({percent}%)
+                </div>
+                <div className="category-amount">
+                  {amount.toFixed(2)} €
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
 
       <div className="budget-usage-section">
         <h3>Budget Usage</h3>
@@ -402,38 +394,38 @@ const cashCardData = {
       </div>
 
       <div className="recent-transactions">
-        <h3>Recent Transactions</h3>
+        <div className="recent-header">
+          <h3>Latest transactions</h3>
+          <button className="see-all-link" onClick={() => navigate('/transaction-history')}>
+            See all
+          </button>
+        </div>
         <ul>
           {recentTransactions.map((tx) => {
-            const date = new Date(tx.timestamp.seconds * 1000).toLocaleString('en-GB', {
-              day: '2-digit',
-              month: '2-digit',
-              year: 'numeric',
-              hour: '2-digit',
-              minute: '2-digit',
-            });
+            const date = new Date(tx.timestamp.seconds * 1000);
+            const today = new Date();
+            const formatted =
+              date.toDateString() === today.toDateString()
+                ? 'Today'
+                : date.toDateString() === new Date(today.getTime() - 86400000).toDateString()
+                  ? 'Yesterday'
+                  : date.toLocaleDateString();
+
             return (
-              <li key={tx.id} className={tx.type}>
-                <span className="category">{tx.category}</span>
-                {tx.description && (
-                  <span className="description">{tx.description}</span>
-                )}
-                <span className="datetime">{date}</span>
-                <span className="amount">
-                  {tx.type === 'income' ? '+' : '-'}
-                  {tx.amount.toFixed(2)} €
-                </span>
+              <li key={tx.id} className={`recent-item ${tx.type}`}>
+                <div className="recent-left">
+                  <div className="recent-category">{tx.category}</div>
+                  <div className="recent-date">{formatted}</div>
+                </div>
+                <div className="recent-amount">
+                  {tx.type === 'income' ? '+' : '-'}{tx.amount.toFixed(2)} €
+                </div>
               </li>
             );
           })}
         </ul>
-
-        {showAllButton && (
-          <button className="see-all-btn" onClick={() => navigate('/transaction-history')}>
-            See All Transactions →
-          </button>
-        )}
       </div>
+
 
       <div className="floating-add" onClick={() => setShowAddModal(true)}>
         +

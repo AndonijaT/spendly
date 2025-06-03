@@ -88,13 +88,7 @@ export default function SetCategoryBudgetModal({ onClose }: { onClose: () => voi
                         <option value="MKD">MKD</option>
                     </select>
                 </label>
-                <label>
-                    Type:
-                    <select value={type} onChange={(e) => setType(e.target.value as 'income' | 'expense')}>
-                        <option value="expense">Expense</option>
-                        <option value="income">Income</option>
-                    </select>
-                </label>
+               
 
                 <div className="form-buttons">
                     <button onClick={handleSave}>Save</button>
