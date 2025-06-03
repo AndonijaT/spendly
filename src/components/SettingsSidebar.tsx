@@ -4,10 +4,12 @@ import { auth, db } from '../firebase/firebaseConfig';
 import { deleteDoc, collection, getDocs, doc } from 'firebase/firestore';
 import { useLanguage } from '../context/LanguageContext';
 import ConfirmModal from './ConfirmModal';
+import jsPDF from 'jspdf';
+import autoTable from 'jspdf-autotable';
 
 export default function SettingsSidebar({
   onClose,
-  onBudgetModeClick, 
+  onBudgetModeClick,
 }: {
   onClose: () => void;
   onBudgetModeClick: () => void;
@@ -34,6 +36,59 @@ export default function SettingsSidebar({
     setShowConfirm(false);
     setConfirmSuccess(false);
     window.location.reload();
+  };
+
+  const handleExportCSV = async () => {
+    const user = auth.currentUser;
+    if (!user) return;
+
+    const snapshot = await getDocs(collection(db, 'users', user.uid, 'transactions'));
+    const transactions = snapshot.docs.map((doc) => doc.data());
+
+    const headers = ['Type', 'Category', 'Amount', 'Description', 'Date'];
+    const rows = transactions.map(tx => [
+      tx.type,
+      tx.category,
+      tx.amount,
+      tx.description || '',
+      new Date(tx.timestamp.seconds * 1000).toLocaleString()
+    ]);
+
+    const csvContent = [headers, ...rows].map(e => e.join(',')).join('\n');
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+
+    const link = document.createElement('a');
+    link.href = url;
+    link.setAttribute('download', 'transactions.csv');
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
+  const handleExportPDF = async () => {
+    const user = auth.currentUser;
+    if (!user) return;
+
+    const snapshot = await getDocs(collection(db, 'users', user.uid, 'transactions'));
+    const transactions = snapshot.docs.map((doc) => doc.data());
+
+    const docPDF = new jsPDF();
+    docPDF.text('Transactions Report', 14, 15);
+
+    autoTable(docPDF, {
+      startY: 20,
+      head: [['Type', 'Category', 'Amount', 'Description', 'Date']],
+      body: transactions.map(tx => [
+        tx.type,
+        tx.category,
+        tx.amount,
+        tx.description || '',
+        new Date(tx.timestamp.seconds * 1000).toLocaleString()
+      ]),
+    });
+
+    docPDF.save('transactions.pdf');
   };
 
   return (
@@ -65,12 +120,19 @@ export default function SettingsSidebar({
             {t('erase')}
           </button>
         </div>
-<div className="setting-group">
-  <label>Budget</label>
-  <button className="budget-mode-btn" onClick={onBudgetModeClick}>
-    💼 Budget Mode
-  </button>
-</div>
+
+        <div className="setting-group">
+          <label>Budget</label>
+          <button className="budget-mode-btn" onClick={onBudgetModeClick}>
+            💼 Budget Mode
+          </button>
+        </div>
+
+        <div className="setting-group">
+          <label>Export</label>
+          <button onClick={handleExportCSV}>📁 Export CSV</button>
+          <button onClick={handleExportPDF}>📄 Export PDF</button>
+        </div>
 
         <div className="setting-group links">
           <a href="/privacy-policy" target="_blank" rel="noopener noreferrer">
