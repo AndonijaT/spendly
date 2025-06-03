@@ -1,11 +1,13 @@
 import '../styles/SettingsSidebar.css';
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { auth, db } from '../firebase/firebaseConfig';
-import { deleteDoc, collection, getDocs, doc } from 'firebase/firestore';
+import { deleteDoc, collection, getDocs, doc, addDoc, Timestamp } from 'firebase/firestore';
 import { useLanguage } from '../context/LanguageContext';
 import ConfirmModal from './ConfirmModal';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
+import Papa from 'papaparse';
+import { toast } from 'react-toastify';
 
 export default function SettingsSidebar({
   onClose,
@@ -18,6 +20,7 @@ export default function SettingsSidebar({
   const [currency, setCurrency] = useState<'EUR' | 'USD' | 'MKD'>('EUR');
   const [showConfirm, setShowConfirm] = useState(false);
   const [confirmSuccess, setConfirmSuccess] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const deleteAllConfirmed = async () => {
     const user = auth.currentUser;
@@ -28,8 +31,7 @@ export default function SettingsSidebar({
       deleteDoc(doc(db, 'users', user.uid, 'transactions', docItem.id))
     );
     await Promise.all(deletes);
-
-    setConfirmSuccess(true); // Show success message in modal
+    setConfirmSuccess(true);
   };
 
   const handleCloseSuccess = () => {
@@ -64,6 +66,8 @@ export default function SettingsSidebar({
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
+
+    toast.success('Export completed ✅');
   };
 
   const handleExportPDF = async () => {
@@ -89,6 +93,53 @@ export default function SettingsSidebar({
     });
 
     docPDF.save('transactions.pdf');
+    toast.success('Export completed ✅');
+  };
+
+  const handleImportCSV = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const user = auth.currentUser;
+    if (!user) return;
+
+    Papa.parse(file, {
+      header: true,
+      complete: async (results: Papa.ParseResult<any>) => {
+
+        const currentMonth = new Date().getMonth();
+        const currentYear = new Date().getFullYear();
+
+        const rows = results.data as {
+          Type: string;
+          Category: string;
+          Amount: string;
+          Description?: string;
+          Date: string;
+        }[];
+
+        const currentMonthRows = rows.filter((row) => {
+          const date = new Date(row.Date);
+          return date.getMonth() === currentMonth && date.getFullYear() === currentYear;
+        });
+
+        const adds = currentMonthRows.map((row) =>
+          addDoc(collection(db, 'users', user.uid, 'transactions'), {
+            type: row.Type.toLowerCase(),
+            category: row.Category,
+            amount: parseFloat(row.Amount),
+            description: row.Description || '',
+            method: 'cash', 
+            timestamp: Timestamp.fromDate(new Date(row.Date))
+          })
+        );
+
+
+        await Promise.all(adds);
+        toast.success('Import completed ✅');
+        if (fileInputRef.current) fileInputRef.current.value = '';
+      },
+    });
   };
 
   return (
@@ -132,6 +183,16 @@ export default function SettingsSidebar({
           <label>Export</label>
           <button onClick={handleExportCSV}>📁 Export CSV</button>
           <button onClick={handleExportPDF}>📄 Export PDF</button>
+        </div>
+
+        <div className="setting-group">
+          <label>Import CSV (Current Month)</label>
+          <input
+            type="file"
+            accept=".csv"
+            ref={fileInputRef}
+            onChange={handleImportCSV}
+          />
         </div>
 
         <div className="setting-group links">
