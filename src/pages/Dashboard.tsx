@@ -12,6 +12,8 @@ import Joyride from 'react-joyride';
 import type { Step } from 'react-joyride';
 import SetCategoryBudgetModal from '../components/SetCategoryBudgetModal';
 import { query, where } from 'firebase/firestore';
+import { Doughnut } from 'react-chartjs-2';
+
 type Transaction = {
   id: string;
   type: 'income' | 'expense' | 'transfer';
@@ -198,38 +200,47 @@ export default function Dashboard() {
       },
     ],
   };
-let cash = 0;
-let card = 0;
+  let cash = 0;
+  let card = 0;
 
-transactions.forEach((tx) => {
-  const amt = Number(tx.amount);
+  transactions.forEach((tx) => {
+    const amt = Number(tx.amount);
 
-  if (tx.type === 'income') {
-    if (tx.method === 'cash') cash += amt;
-    if (tx.method === 'card') card += amt;
-  }
-
-  if (tx.type === 'expense') {
-    if (tx.method === 'cash') cash -= amt;
-    if (tx.method === 'card') card -= amt;
-  }
-
-  if (tx.type === 'transfer') {
-    if (tx.direction === 'to_cash') {
-      card -= amt;
-      cash += amt;
-    } else if (tx.direction === 'to_card') {
-      cash -= amt;
-      card += amt;
+    if (tx.type === 'income') {
+      if (tx.method === 'cash') cash += amt;
+      if (tx.method === 'card') card += amt;
     }
-  }
-});
 
-const totalBalance = cash + card;
+    if (tx.type === 'expense') {
+      if (tx.method === 'cash') cash -= amt;
+      if (tx.method === 'card') card -= amt;
+    }
 
+    if (tx.type === 'transfer') {
+      if (tx.direction === 'to_cash') {
+        card -= amt;
+        cash += amt;
+      } else if (tx.direction === 'to_card') {
+        cash -= amt;
+        card += amt;
+      }
+    }
+  });
+
+  const totalBalance = cash + card;
+const cashCardData = {
+  labels: ['Cash', 'Card'],
+  datasets: [
+    {
+      data: [cash, card],
+      backgroundColor: ['#4caf50', '#42a5f5'],
+      borderWidth: 1,
+    },
+  ],
+};
   return (
     <div className="dashboard-container">
-      <h1 className="dashboard-title">Your Dashboard</h1>
+     
       <div className="dashboard-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <div className="floating-tutorial" onClick={() => {
           setStepIndex(0);
@@ -240,7 +251,7 @@ const totalBalance = cash + card;
 
       </div>
 
-    
+
 
       <Joyride
         steps={steps}
@@ -286,27 +297,80 @@ const totalBalance = cash + card;
         />
       </div>
 
-      {selectedMonth && (
-        <h2 className="selected-month-title">
-          Showing data for: {format(parse(selectedMonth, 'yyyy-MM', new Date()), 'MMMM yyyy')}
-        </h2>
-      )}
+     
 
-      <div className="summary-row">
-        <div className="summary-box income">Income: +{incomeTotal.toFixed(2)} €</div>
-        <div className="summary-box expense">Expenses: -{expenseTotal.toFixed(2)} €</div>
-        <div className="summary-box balance">Balance: {(incomeTotal - expenseTotal).toFixed(2)} €</div>
+     <div className="summary-group">
+  <div className="summary-row">
+    <div className="summary-box income">Income: +{incomeTotal.toFixed(2)} €</div>
+    <div className="summary-box expense">Expenses: -{expenseTotal.toFixed(2)} €</div>
+    <div className="summary-box balance">Balance: {(incomeTotal - expenseTotal).toFixed(2)} €</div>
+  </div>
+  <div className="summary-row">
+   <div className="cash-card-chart-section">
+  <h3>Cash vs Card</h3>
+  <div className="donut-wrapper">
+    <Doughnut data={cashCardData} options={{
+      cutout: '70%', // creates the inner hole
+      plugins: {
+        legend: {
+          display: true,
+          position: 'bottom',
+        },
+      },
+    }} />
+    <div className="donut-center-label">
+  {totalBalance >= 0 ? (
+    <>
+      <strong className="donut-positive">{totalBalance.toFixed(2)} €</strong>
+      <div style={{ fontSize: '0.8rem', color: '#555' }}>Total</div>
+    </>
+  ) : (
+    <>
+      <strong className="donut-negative">Oops!</strong>
+      <div style={{ fontSize: '0.8rem', color: '#c62828' }}>
+        You spent {(Math.abs(totalBalance)).toFixed(2)} € too much
       </div>
-<div className="summary-box balance">Balance: {totalBalance.toFixed(2)} €</div>
-<div className="summary-box income">Cash Balance: {cash.toFixed(2)} €</div>
-<div className="summary-box expense">Card Balance: {card.toFixed(2)} €</div>
+    </>
+  )}
+</div>
 
-      <div className="chart-section">
-        <h3>Expenses by Category</h3>
-        <div className="chart-wrapper">
-          <Pie data={pieData} />
+  </div>
+</div>
+</div>
+</div>
+
+     <div className="chart-section">
+  <h3>Expenses by Category</h3>
+  <div className="chart-wrapper">
+    <Pie data={pieData} options={{
+      cutout: '60%',
+      plugins: {
+        legend: {
+          display: false
+        }
+      }
+    }} />
+  </div>
+
+  <div className="category-expense-list">
+    {Object.entries(expenseByCategory).map(([category, amount], i) => {
+      const color = pieData.datasets[0].backgroundColor[i] as string;
+      const percent = ((amount / expenseTotal) * 100).toFixed(1);
+      return (
+        <div key={category} className="category-expense-item">
+          <div className="category-color-box" style={{ backgroundColor: color }}></div>
+          <div className="category-label" style={{ color }}>
+            {category} ({percent}%)
+          </div>
+          <div className="category-amount">
+            {amount.toFixed(2)} €
+          </div>
         </div>
-      </div>
+      );
+    })}
+  </div>
+</div>
+
       <div className="budget-usage-section">
         <h3>Budget Usage</h3>
         {budgetProgress.map((bp) => (
@@ -385,7 +449,7 @@ const totalBalance = cash + card;
       {showSettings && (
         <SettingsSidebar
           onClose={() => setShowSettings(false)}
-          onBudgetModeClick={handleBudgetMode} 
+          onBudgetModeClick={handleBudgetMode}
         />
       )}
 

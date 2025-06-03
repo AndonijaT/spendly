@@ -323,3 +323,84 @@
   opacity: 1;
   transform: translateY(0);
 }
+.summary-group {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+.cash-card-chart-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  margin: 2rem auto;
+  width: 100%;
+  text-align: center;
+}
+
+
+.donut-wrapper {
+  position: relative;
+  width: 300px;
+  height: 300px;
+  margin: 0 auto;
+}
+
+.donut-center-label {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  text-align: center;
+  font-size: 1.2rem;
+  color: #111;
+}
+.donut-center-label strong {
+  font-size: 1.4rem;
+}
+
+.donut-positive {
+  color: #2e7d32; /* green */
+}
+
+.donut-negative {
+  color: #c62828; /* red */
+}
+.category-expense-list {
+  margin-top: 1rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.8rem;
+}
+
+.category-expense-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 90%;
+  max-width: 500px;
+  background: #f9f9f9;
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.category-color-box {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  margin-right: 0.6rem;
+}
+
+.category-label {
+  flex: 1;
+  font-weight: 600;
+  text-align: left;
+}
+
+.category-amount {
+  font-weight: bold;
+  color: #333;
+}
