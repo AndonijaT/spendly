@@ -242,6 +242,9 @@ const monthInputRef = useRef<HTMLInputElement>(null);
       },
     ],
   };
+
+  const expensesRef = useRef<HTMLDivElement>(null);
+
   return (
     <div className="dashboard-container">
 
@@ -329,7 +332,14 @@ const monthInputRef = useRef<HTMLInputElement>(null);
         </div>
       </div>
 
-      <div className="dashboard-section expense-breakdown-section">
+<div className="overview-button-wrapper">
+  <button className="overview-button" onClick={() => expensesRef.current?.scrollIntoView({ behavior: 'smooth' })}>
+    <span className="icon">📊</span> Spending Overview →
+  </button>
+</div>
+
+
+<div ref={expensesRef} className="dashboard-section expense-breakdown-section">
   <h3>Expenses by Category</h3>
   <div className="expense-layout">
     <div className="expense-chart">
