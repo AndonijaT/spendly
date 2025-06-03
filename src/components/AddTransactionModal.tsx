@@ -4,6 +4,7 @@ import { addDoc, collection, serverTimestamp } from 'firebase/firestore';
 import { toast } from 'react-toastify';
 import '../styles/AddTransactionModal.css';
 import { useLanguage } from '../context/LanguageContext';
+import { getDocs } from 'firebase/firestore';
 
 const categories = [
   "groceries", "home", "eating out", "food delivery", "coffee", "car", "health",
@@ -19,6 +20,7 @@ export default function AddTransactionModal({ onClose }: { onClose: () => void }
   const [direction, setDirection] = useState<'to_cash' | 'to_card'>('to_cash');
   const { t } = useLanguage();
   const [description, setDescription] = useState('');
+const [errorMessage, setErrorMessage] = useState('');
 
   useEffect(() => {
     document.body.classList.add('modal-open');
@@ -48,6 +50,17 @@ export default function AddTransactionModal({ onClose }: { onClose: () => void }
       if (type === 'transfer') {
         payload.direction = direction;
       }
+if (type === 'expense') {
+  const amt = parseFloat(amount);
+  if (method === 'cash' && amt > currentCash) {
+    setErrorMessage('🚨 Balance too low! Not enough cash.');
+    return;
+  }
+  if (method === 'card' && amt > currentCard) {
+    setErrorMessage('🚨 Balance too low! Not enough card balance.');
+    return;
+  }
+}
 
       await addDoc(collection(db, 'users', user.uid, 'transactions'), payload);
 
@@ -58,6 +71,44 @@ export default function AddTransactionModal({ onClose }: { onClose: () => void }
       console.error(err);
     }
   };
+const [currentCash, setCurrentCash] = useState(0);
+const [currentCard, setCurrentCard] = useState(0);
+
+useEffect(() => {
+  const fetchBalances = async () => {
+    const user = auth.currentUser;
+    if (!user) return;
+
+    const snapshot = await getDocs(collection(db, 'users', user.uid, 'transactions'));
+    let cash = 0;
+    let card = 0;
+
+    snapshot.forEach((doc) => {
+      const tx = doc.data();
+      const amt = Number(tx.amount);
+      if (tx.type === 'income') {
+        if (tx.method === 'cash') cash += amt;
+        if (tx.method === 'card') card += amt;
+      } else if (tx.type === 'expense') {
+        if (tx.method === 'cash') cash -= amt;
+        if (tx.method === 'card') card -= amt;
+      } else if (tx.type === 'transfer') {
+        if (tx.direction === 'to_cash') {
+          card -= amt;
+          cash += amt;
+        } else if (tx.direction === 'to_card') {
+          cash -= amt;
+          card += amt;
+        }
+      }
+    });
+
+    setCurrentCash(cash);
+    setCurrentCard(card);
+  };
+
+  fetchBalances();
+}, []);
 
   return (
     <div className="modal-backdrop">
@@ -75,6 +126,9 @@ export default function AddTransactionModal({ onClose }: { onClose: () => void }
             🔄 {t('transfer') || 'Transfer'}
           </button>
         </div>
+{errorMessage && (
+  <div className="error-warning">{errorMessage}</div>
+)}
 
         <form onSubmit={handleSubmit}>
           {type !== 'transfer' && (
