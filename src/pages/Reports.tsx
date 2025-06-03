@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { collection, getDocs } from 'firebase/firestore';
 import { auth, db } from '../firebase/firebaseConfig';
+import { onAuthStateChanged } from 'firebase/auth';
 import { format } from 'date-fns';
 import {
   Chart as ChartJS,
@@ -41,24 +42,32 @@ type Transaction = {
 export default function Reports() {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
 
-  useEffect(() => {
-    const fetchTransactions = async () => {
-      const user = auth.currentUser;
-      if (!user) return;
 
-      const snapshot = await getDocs(collection(db, 'users', user.uid, 'transactions'));
-      const allData: Transaction[] = [];
+useEffect(() => {
+  const unsubscribe = onAuthStateChanged(auth, async (user) => {
+    if (!user) {
+      console.log('Not logged in');
+      return;
+    }
 
-      snapshot.forEach((doc) => {
-        const data = doc.data();
-        allData.push({ id: doc.id, ...data } as Transaction);
-      });
+    console.log('Logged in as:', user.uid);
 
-      setTransactions(allData);
-    };
+    const snapshot = await getDocs(collection(db, 'users', user.uid, 'transactions'));
+    const allData: Transaction[] = [];
 
-    fetchTransactions();
-  }, []);
+    snapshot.forEach((doc) => {
+      const data = doc.data();
+      allData.push({ id: doc.id, ...data } as Transaction);
+    });
+
+    console.log('Fetched transactions:', allData);
+    setTransactions(allData);
+  });
+
+  return () => unsubscribe(); // Cleanup listener
+}, []);
+
+
 
   const expenses = transactions.filter((t) => t.type === 'expense');
   const income = transactions.filter((t) => t.type === 'income');
