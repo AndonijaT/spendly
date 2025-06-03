@@ -27,6 +27,25 @@ type Transaction = {
 
 
 export default function Dashboard() {
+  const [showOverviewBtn, setShowOverviewBtn] = useState(true);
+const overviewAnchorRef = useRef<HTMLDivElement>(null);
+
+useEffect(() => {
+  const observer = new IntersectionObserver(
+    ([entry]) => {
+      setShowOverviewBtn(entry.isIntersecting);
+    },
+    { threshold: 0.1 }
+  );
+
+  const currentRef = overviewAnchorRef.current;
+  if (currentRef) observer.observe(currentRef);
+
+  return () => {
+    if (currentRef) observer.unobserve(currentRef);
+  };
+}, []);
+
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [selectedMonth, setSelectedMonth] = useState<string>('');
   const [incomeTotal, setIncomeTotal] = useState(0);
@@ -332,11 +351,17 @@ const monthInputRef = useRef<HTMLInputElement>(null);
         </div>
       </div>
 
-<div className="overview-button-wrapper">
-  <button className="overview-button" onClick={() => expensesRef.current?.scrollIntoView({ behavior: 'smooth' })}>
-    <span className="icon">📊</span> Spending Overview →
-  </button>
+<div ref={overviewAnchorRef} className="overview-button-wrapper">
+  {showOverviewBtn && (
+    <button
+      className="overview-button"
+      onClick={() => expensesRef.current?.scrollIntoView({ behavior: 'smooth' })}
+    >
+      <span className="icon">📊</span> Spending Overview →
+    </button>
+  )}
 </div>
+
 
 
 <div ref={expensesRef} className="dashboard-section expense-breakdown-section">
