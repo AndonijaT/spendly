@@ -683,3 +683,56 @@ html {
   opacity: 1;
   pointer-events: auto;
 }
+.expense-breakdown-section h3 {
+  text-align: center;
+  margin-bottom: 1rem;
+}
+
+.expense-layout {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 2rem;
+  align-items: flex-start;
+}
+
+.expense-chart {
+  flex: 1 1 300px;
+  max-width: 400px;
+  margin: auto;
+}
+
+.category-expense-list {
+  flex: 1 1 300px;
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+}
+
+.category-expense-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: #f9f9f9;
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.category-color-box {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  margin-right: 0.6rem;
+}
+
+.category-label {
+  flex: 1;
+  font-weight: 600;
+  text-align: left;
+}
+
+.category-amount {
+  font-weight: bold;
+  color: #333;
+}

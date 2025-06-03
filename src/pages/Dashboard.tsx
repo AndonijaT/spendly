@@ -295,74 +295,69 @@ const monthInputRef = useRef<HTMLInputElement>(null);
 
       <div className="summary-group">
 
-        <div className="summary-row">
-          <div className='dashboard-section'>
-            <div className="cash-card-balance-section">
-              <h3>Total Balance</h3>
-              <div className="balance-display">
-                {totalBalance >= 0 ? (
-                  <span className="balance-positive">{totalBalance.toFixed(2)} €</span>
-                ) : (
-                  <span className="balance-negative">- {(Math.abs(totalBalance)).toFixed(2)} €</span>
-                )}
-              </div>
-              <div className="balance-breakdown">
-                <div className="balance-line">
-                  <span className="label">Cash</span>
-                  <span>{cash.toFixed(2)} €</span>
-                </div>
-                <div className="balance-line">
-                  <span className="label">Card</span>
-                  <span>{card.toFixed(2)} €</span>
-                </div>
-              </div>
-            </div>
-          </div>
+        <div className="summary-row" style={{ justifyContent: 'center' }}>
+  <div className='dashboard-section'>
+    <div className="cash-card-balance-section">
+      <h3>Total Balance</h3>
+      <div className="balance-display">
+        {totalBalance >= 0 ? (
+          <span className="balance-positive">{totalBalance.toFixed(2)} €</span>
+        ) : (
+          <span className="balance-negative">- {(Math.abs(totalBalance)).toFixed(2)} €</span>
+        )}
+      </div>
+      <div className="balance-breakdown">
+        <div className="balance-line">
+          <span className="label">Cash</span>
+          <span>{cash.toFixed(2)} €</span>
         </div>
+        <div className="balance-line">
+          <span className="label">Card</span>
+          <span>{card.toFixed(2)} €</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
 
         <div className="dashboard-section">
           <div className="summary-row">
             <div className="summary-box income">Income: +{incomeTotal.toFixed(2)} €</div>
             <div className="summary-box expense">Expenses: -{expenseTotal.toFixed(2)} €</div>
-            <div className="summary-box balance">Balance: {(incomeTotal - expenseTotal).toFixed(2)} €</div>
           </div>
         </div>
       </div>
 
-      <div className="dashboard-section">
-        <div className="chart-section">
-          <h3>Expenses by Category</h3>
-          <div className="chart-wrapper">
-            <Pie data={pieData} options={{
-              cutout: '60%',
-              plugins: {
-                legend: {
-                  display: false
-                }
-              }
-            }} />
+      <div className="dashboard-section expense-breakdown-section">
+  <h3>Expenses by Category</h3>
+  <div className="expense-layout">
+    <div className="expense-chart">
+      <Pie data={pieData} options={{
+        cutout: '60%',
+        plugins: { legend: { display: false } }
+      }} />
+    </div>
+    <div className="category-expense-list">
+      {Object.entries(expenseByCategory).map(([category, amount], i) => {
+        const color = pieData.datasets[0].backgroundColor[i] as string;
+        const percent = ((amount / expenseTotal) * 100).toFixed(1);
+        return (
+          <div key={category} className="category-expense-item">
+            <div className="category-color-box" style={{ backgroundColor: color }}></div>
+            <div className="category-label" style={{ color }}>
+              {category} ({percent}%)
+            </div>
+            <div className="category-amount">
+              {amount.toFixed(2)} €
+            </div>
           </div>
-        </div>
-        <div className="dashboard-section">
-          <div className="category-expense-list">
-            {Object.entries(expenseByCategory).map(([category, amount], i) => {
-              const color = pieData.datasets[0].backgroundColor[i] as string;
-              const percent = ((amount / expenseTotal) * 100).toFixed(1);
-              return (
-                <div key={category} className="category-expense-item">
-                  <div className="category-color-box" style={{ backgroundColor: color }}></div>
-                  <div className="category-label" style={{ color }}>
-                    {category} ({percent}%)
-                  </div>
-                  <div className="category-amount">
-                    {amount.toFixed(2)} €
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        </div>
-      </div>
+        );
+      })}
+    </div>
+  </div>
+</div>
+
 
       <div className="dashboard-section">
       <div className="budget-usage-section">
@@ -431,10 +426,7 @@ const monthInputRef = useRef<HTMLInputElement>(null);
       </div>
       </div>
 
-{/* Floating FAB main button */}
-<div className="floating-fab" onClick={() => setFabOpen(prev => !prev)}>
-  {fabOpen ? '×' : '☰'}
-</div>
+
 
 {/* Expandable floating menu */}
 <div className="fab-container">
