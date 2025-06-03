@@ -57,21 +57,21 @@ const features: Feature[] = [
 function Features() {
   const [showTip, setShowTip] = useState(false);
   const [selectedFeature, setSelectedFeature] = useState<Feature | null>(null);
-const [isGuest, setIsGuest] = useState(true);
-const [showAuthModal, setShowAuthModal] = useState(false);
-const [authMode, setAuthMode] = useState<'login' | 'register' | 'forgot'>('register');
+  const [isGuest, setIsGuest] = useState(true);
+  const [showAuthModal, setShowAuthModal] = useState(false);
+  const [authMode, setAuthMode] = useState<'login' | 'register' | 'forgot'>('register');
 
-useEffect(() => {
-  const unsubscribe = onAuthStateChanged(auth, (user) => {
-    setIsGuest(!user);
-  });
-  return () => unsubscribe();
-}, []);
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      setIsGuest(!user);
+    });
+    return () => unsubscribe();
+  }, []);
 
-const openRegisterModal = () => {
-  setAuthMode('register');
-  setShowAuthModal(true);
-};
+  const openRegisterModal = () => {
+    setAuthMode('register');
+    setShowAuthModal(true);
+  };
 
   return (
     <div className="features-container">
@@ -112,50 +112,50 @@ const openRegisterModal = () => {
       </div>
 
       <div className="features-tip">
-  <button onClick={() => setShowTip(true)}>💡 Fun Fact</button>
+        <button onClick={() => setShowTip(true)}>💡 Fun Fact</button>
 
-  {showTip && (
-    <div className="features-modal-wrapper">
-      <div className="features-modal-center">
-        <div className="features-overlay" onClick={() => setShowTip(false)} />
+        {showTip && (
+          <div className="features-modal-wrapper">
+            <div className="features-modal-center">
+              <div className="features-overlay" onClick={() => setShowTip(false)} />
 
-        <div className="features-popup">
-          <p>
-            <strong>Did you know?</strong> People who track expenses save up to <u>20%</u> more each month!
-          </p>
-          <button onClick={() => setShowTip(false)}>Close</button>
-        </div>
+              <div className="features-popup">
+                <p>
+                  <strong>Did you know?</strong> People who track expenses save up to <u>20%</u> more each month!
+                </p>
+                <button onClick={() => setShowTip(false)}>Close</button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
-    </div>
-  )}
-</div>
 
 
-     <AnimatePresence>
-  {selectedFeature && (
-    <div className="features-modal-wrapper">
-      <motion.div
-        className="features-overlay"
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        exit={{ opacity: 0 }}
-        onClick={() => setSelectedFeature(null)}
-      />
-      <div className="features-modal-center"> {/* NEW WRAPPER */}
-        <motion.div
-          className="features-popup large"
-          initial={{ opacity: 0, scale: 0.95 }}
-          animate={{ opacity: 1, scale: 1 }}
-          exit={{ opacity: 0, scale: 0.95 }}
-        >
-          <button className="features-close" onClick={() => setSelectedFeature(null)}>❌</button>
-          <h3>{selectedFeature.icon} {selectedFeature.title}</h3>
-          <p>{selectedFeature.details}</p>
-        </motion.div>
-      </div>
-    </div>
-  )}
-</AnimatePresence>
+      <AnimatePresence>
+        {selectedFeature && (
+          <div className="features-modal-wrapper">
+            <motion.div
+              className="features-overlay"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setSelectedFeature(null)}
+            />
+            <div className="features-modal-center"> {/* NEW WRAPPER */}
+              <motion.div
+                className="features-popup large"
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.95 }}
+              >
+                <button className="features-close" onClick={() => setSelectedFeature(null)}>❌</button>
+                <h3>{selectedFeature.icon} {selectedFeature.title}</h3>
+                <p>{selectedFeature.details}</p>
+              </motion.div>
+            </div>
+          </div>
+        )}
+      </AnimatePresence>
 
 
 
@@ -166,30 +166,30 @@ const openRegisterModal = () => {
         transition={{ delay: 0.5 }}
       >
         <h2>Ready to save smarter?</h2>
-{isGuest && (
-  <button className="cta-button" onClick={openRegisterModal}>
-    Create an Account
-  </button>
-)}{showAuthModal && (
-  <Modal onClose={() => setShowAuthModal(false)}>
-    {authMode === 'register' && (
-      <RegisterForm
-        onSuccess={() => setShowAuthModal(false)}
-        switchToLogin={() => setAuthMode('login')}
-      />
-    )}
-    {authMode === 'login' && (
-      <LoginForm
-        onSuccess={() => setShowAuthModal(false)}
-        switchToRegister={() => setAuthMode('register')}
-        switchToForgot={() => setAuthMode('forgot')}
-      />
-    )}
-    {authMode === 'forgot' && (
-      <ForgotPasswordForm onBack={() => setAuthMode('login')} />
-    )}
-  </Modal>
-)}
+        {isGuest && (
+          <button className="cta-button" onClick={openRegisterModal}>
+            Create an Account
+          </button>
+        )}{showAuthModal && (
+          <Modal onClose={() => setShowAuthModal(false)}>
+            {authMode === 'register' && (
+              <RegisterForm
+                onSuccess={() => setShowAuthModal(false)}
+                switchToLogin={() => setAuthMode('login')}
+              />
+            )}
+            {authMode === 'login' && (
+              <LoginForm
+                onSuccess={() => setShowAuthModal(false)}
+                switchToRegister={() => setAuthMode('register')}
+                switchToForgot={() => setAuthMode('forgot')}
+              />
+            )}
+            {authMode === 'forgot' && (
+              <ForgotPasswordForm onBack={() => setAuthMode('login')} />
+            )}
+          </Modal>
+        )}
 
       </motion.div>
     </div>

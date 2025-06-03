@@ -28,7 +28,7 @@ export default function SetCategoryBudgetModal({ onClose }: { onClose: () => voi
                 limit: Number(limit),
                 currency,
                 type,
-                month: format(new Date(), 'yyyy-MM') // ⬅️ Ensure this is included in updates too
+                month: format(new Date(), 'yyyy-MM') 
 
             });
             toast.success(`Updated budget for ${category}`);
@@ -38,7 +38,7 @@ export default function SetCategoryBudgetModal({ onClose }: { onClose: () => voi
                 limit: Number(limit),
                 currency,
                 type,
-                month: format(new Date(), 'yyyy-MM'), // e.g. "2025-05"
+                month: format(new Date(), 'yyyy-MM'), 
             });
             toast.success(`Created new budget for ${category}`);
         }
