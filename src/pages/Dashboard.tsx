@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { collection, getDocs } from 'firebase/firestore';
 import { auth, db } from '../firebase/firebaseConfig';
 import { Pie } from 'react-chartjs-2';
@@ -46,6 +46,8 @@ export default function Dashboard() {
     .slice(0, 3);
   const [runTour, setRunTour] = useState(false);
   const [stepIndex, setStepIndex] = useState(0);
+const [fabOpen, setFabOpen] = useState(false);
+const monthInputRef = useRef<HTMLInputElement>(null);
 
   const steps: Step[] = [
     {
@@ -71,6 +73,8 @@ export default function Dashboard() {
       content: '⚙️ Access your language, currency, app settings and also add budget for each category, if you want to remove a budget just set the limit to 0.',
     }
   ];
+
+
   useEffect(() => {
     const seen = localStorage.getItem('seenSpendlyTutorial');
     if (!seen) {
@@ -285,84 +289,82 @@ export default function Dashboard() {
       />
 
 
-      <div className="month-picker">
-        <label>Select Month: </label>
-        <input
-          type="month"
-          value={selectedMonth}
-          onChange={(e) => {
-            setSelectedMonth(e.target.value);
-            localStorage.setItem('selectedMonth', e.target.value);
-          }}
-        />
-      </div>
+    
 
 
 
       <div className="summary-group">
-        
+
         <div className="summary-row">
-          <div className="cash-card-balance-section">
-            <h3>Total Balance</h3>
-            <div className="balance-display">
-              {totalBalance >= 0 ? (
-                <span className="balance-positive">{totalBalance.toFixed(2)} €</span>
-              ) : (
-                <span className="balance-negative">- {(Math.abs(totalBalance)).toFixed(2)} €</span>
-              )}
-            </div>
-            <div className="balance-breakdown">
-              <div className="balance-line">
-                <span className="label">Cash</span>
-                <span>{cash.toFixed(2)} €</span>
+          <div className='dashboard-section'>
+            <div className="cash-card-balance-section">
+              <h3>Total Balance</h3>
+              <div className="balance-display">
+                {totalBalance >= 0 ? (
+                  <span className="balance-positive">{totalBalance.toFixed(2)} €</span>
+                ) : (
+                  <span className="balance-negative">- {(Math.abs(totalBalance)).toFixed(2)} €</span>
+                )}
               </div>
-              <div className="balance-line">
-                <span className="label">Card</span>
-                <span>{card.toFixed(2)} €</span>
+              <div className="balance-breakdown">
+                <div className="balance-line">
+                  <span className="label">Cash</span>
+                  <span>{cash.toFixed(2)} €</span>
+                </div>
+                <div className="balance-line">
+                  <span className="label">Card</span>
+                  <span>{card.toFixed(2)} €</span>
+                </div>
               </div>
             </div>
           </div>
-
         </div>
-        <div className="summary-row">
-          <div className="summary-box income">Income: +{incomeTotal.toFixed(2)} €</div>
-          <div className="summary-box expense">Expenses: -{expenseTotal.toFixed(2)} €</div>
-          <div className="summary-box balance">Balance: {(incomeTotal - expenseTotal).toFixed(2)} €</div>
+
+        <div className="dashboard-section">
+          <div className="summary-row">
+            <div className="summary-box income">Income: +{incomeTotal.toFixed(2)} €</div>
+            <div className="summary-box expense">Expenses: -{expenseTotal.toFixed(2)} €</div>
+            <div className="summary-box balance">Balance: {(incomeTotal - expenseTotal).toFixed(2)} €</div>
+          </div>
         </div>
       </div>
 
-      <div className="chart-section">
-        <h3>Expenses by Category</h3>
-        <div className="chart-wrapper">
-          <Pie data={pieData} options={{
-            cutout: '60%',
-            plugins: {
-              legend: {
-                display: false
+      <div className="dashboard-section">
+        <div className="chart-section">
+          <h3>Expenses by Category</h3>
+          <div className="chart-wrapper">
+            <Pie data={pieData} options={{
+              cutout: '60%',
+              plugins: {
+                legend: {
+                  display: false
+                }
               }
-            }
-          }} />
+            }} />
+          </div>
         </div>
-
-        <div className="category-expense-list">
-          {Object.entries(expenseByCategory).map(([category, amount], i) => {
-            const color = pieData.datasets[0].backgroundColor[i] as string;
-            const percent = ((amount / expenseTotal) * 100).toFixed(1);
-            return (
-              <div key={category} className="category-expense-item">
-                <div className="category-color-box" style={{ backgroundColor: color }}></div>
-                <div className="category-label" style={{ color }}>
-                  {category} ({percent}%)
+        <div className="dashboard-section">
+          <div className="category-expense-list">
+            {Object.entries(expenseByCategory).map(([category, amount], i) => {
+              const color = pieData.datasets[0].backgroundColor[i] as string;
+              const percent = ((amount / expenseTotal) * 100).toFixed(1);
+              return (
+                <div key={category} className="category-expense-item">
+                  <div className="category-color-box" style={{ backgroundColor: color }}></div>
+                  <div className="category-label" style={{ color }}>
+                    {category} ({percent}%)
+                  </div>
+                  <div className="category-amount">
+                    {amount.toFixed(2)} €
+                  </div>
                 </div>
-                <div className="category-amount">
-                  {amount.toFixed(2)} €
-                </div>
-              </div>
-            );
-          })}
+              );
+            })}
+          </div>
         </div>
       </div>
 
+      <div className="dashboard-section">
       <div className="budget-usage-section">
         <h3>Budget Usage</h3>
         {budgetProgress.map((bp) => (
@@ -392,7 +394,9 @@ export default function Dashboard() {
           </div>
         ))}
       </div>
+</div>
 
+<div className="dashboard-section">
       <div className="recent-transactions">
         <div className="recent-header">
           <h3>Latest transactions</h3>
@@ -425,19 +429,41 @@ export default function Dashboard() {
           })}
         </ul>
       </div>
-
-
-      <div className="floating-add" onClick={() => setShowAddModal(true)}>
-        +
       </div>
 
+{/* Floating FAB main button */}
+<div className="floating-fab" onClick={() => setFabOpen(prev => !prev)}>
+  {fabOpen ? '×' : '☰'}
+</div>
+
+{/* Expandable floating menu */}
+<div className="fab-container">
+  <div className={`fab-button calendar ${fabOpen ? 'show' : ''}`} onClick={() => monthInputRef.current?.showPicker()}>
+    📅
+    <input
+      type="month"
+      ref={monthInputRef}
+      className="hidden-month-input"
+      value={selectedMonth}
+      onChange={(e) => {
+        setSelectedMonth(e.target.value);
+        localStorage.setItem('selectedMonth', e.target.value);
+      }}
+    />
+  </div>
+  <div className={`fab-button add ${fabOpen ? 'show' : ''}`} onClick={() => setShowAddModal(true)}>+</div>
+  <div className={`fab-button settings ${fabOpen ? 'show' : ''}`} onClick={() => setShowSettings(true)}>⚙️</div>
+  <div className="floating-fab" onClick={() => setFabOpen(!fabOpen)}>
+    {fabOpen ? '×' : '☰'}
+  </div>
+</div>
+
+
+     
       {showAddModal && (
         <AddTransactionModal onClose={() => setShowAddModal(false)} />
       )}
-      <div className="floating-settings" onClick={() => setShowSettings(true)}>
-        ⚙️
-      </div>
-
+   
       {showSettings && (
         <SettingsSidebar
           onClose={() => setShowSettings(false)}
@@ -450,6 +476,7 @@ export default function Dashboard() {
       )}
 
     </div>
+    
 
   );
 }

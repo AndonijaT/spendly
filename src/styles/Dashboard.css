@@ -1,17 +1,65 @@
+
+body,
+html {
+  background-color: #f4f6f8 !important;
+  margin: 0;
+  padding: 0;
+}
 .dashboard-container {
   padding: 2rem;
-  padding-top: 6rem; /* ⬅️ makes sure content starts below navbar */
+  padding-top: 6rem;
   max-width: 1000px;
   margin: auto;
+  background-color: #f4f6f8; 
+  min-height: 100vh;
+}
+.dashboard-section {
+  background: #ffffff;
+  padding: 1.5rem 1.5rem;
+  margin-bottom: 2rem;
+  border-radius: 12px;
+  box-shadow: 0 1px 8px rgba(0, 0, 0, 0.05);
 }
 
 .month-picker {
   display: flex;
   align-items: center;
-  gap: 1rem;
-  margin-bottom: 2rem;
-  font-size: 1rem;
+  gap: 0.6rem;
+  margin-bottom: 1rem;
+  margin-left: 0.5rem;
 }
+.floating-calendar {
+  position: fixed;
+  bottom: 6.0rem; 
+  left: 2rem;
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background-color: #d2b109;
+  color: white;
+  font-size: 1.7rem;
+  font-weight: bold;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+  z-index: 1000;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+
+.floating-calendar:hover {
+  transform: scale(1.1);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.3);
+}
+
+.hidden-month-input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
 
 .month-picker label {
   font-weight: bold;
@@ -61,7 +109,7 @@
   margin-top: 2rem;
 }
 .chart-wrapper {
-  max-width: 400px;  /* Adjust this as needed */
+  max-width: 400px;  
   max-height: 400px;
   margin: 0 auto;
 }
@@ -278,7 +326,7 @@
 }
 .floating-tutorial {
   position: fixed;
-  top: 5.5rem; /* 👈 was 2rem, now placed just below your navbar */
+  top: 5.5rem; 
   right: 2rem;
   width: 48px;
   height: 48px;
@@ -361,11 +409,11 @@
 }
 
 .donut-positive {
-  color: #2e7d32; /* green */
+  color: #2e7d32; 
 }
 
 .donut-negative {
-  color: #c62828; /* red */
+  color: #c62828;
 }
 .category-expense-list {
   margin-top: 1rem;
@@ -501,4 +549,137 @@
 .balance-line .label {
   color: #666;
   font-weight: normal;
+}
+.floating-fab {
+  position: fixed;
+  bottom: 2rem;
+  right: 2rem;
+  width: 60px;
+  height: 60px;
+  background-color: #d2b109;
+  border-radius: 50%;
+  color: white;
+  font-size: 2rem;
+  font-weight: bold;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+  z-index: 1000;
+  transition: transform 0.2s ease;
+}
+
+.floating-fab:hover {
+  transform: scale(1.1);
+}
+
+.fab-menu {
+  position: fixed;
+  bottom: 7rem;
+  right: 2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+  z-index: 999;
+}
+
+.fab-menu button {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background-color: #d2b109;
+  color: white;
+  font-size: 1.6rem;
+  border: none;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  transition: transform 0.2s ease;
+}
+
+.fab-menu button:hover {
+  transform: scale(1.1);
+}
+
+.hidden-month-input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+.fab-container {
+  position: fixed;
+  bottom: 2rem;
+  right: 2rem;
+  z-index: 1000;
+}
+
+.floating-fab {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background-color: #d2b109;
+  color: white;
+  font-size: 2rem;
+  font-weight: bold;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+  transition: transform 0.3s ease;
+}
+
+.fab-button {
+  position: absolute;
+  width: 60px;               
+  height: 60px;
+  border-radius: 50%;
+  background-color: #d2b109;
+  color: white;
+  font-size: 1.8rem;         
+  font-weight: bold;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  opacity: 0;
+  pointer-events: none;
+  transition: transform 0.3s ease, opacity 0.3s ease;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+}
+
+
+.fab-button.add {
+  bottom: 0;
+  right: 0;
+  transform: translateY(0);
+}
+
+.fab-button.settings {
+  bottom: 0;
+  right: 0;
+  transform: translateX(0);
+}
+
+.fab-button.calendar {
+  bottom: 0;
+  right: 0;
+  transform: translate(-50%, -50%);
+}
+
+.fab-button.show.add {
+  transform: translateY(-90px);  
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.fab-button.show.settings {
+  transform: translateX(-90px);  
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.fab-button.show.calendar {
+  transform: translate(-70px, -70px); 
+  opacity: 1;
+  pointer-events: auto;
 }
