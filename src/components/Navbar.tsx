@@ -44,7 +44,7 @@ useEffect(() => {
   location.pathname.startsWith('/statistics') ||
   location.pathname.startsWith('/about') ||
     location.pathname.startsWith('/features') ||
-  location.pathname.startsWith('/contact');
+      location.pathname.startsWith('/contact');
 
 
   return (

@@ -7,7 +7,7 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  background: transparent; /* if it's a hero video */
+  background: transparent;
   padding: 1rem 2rem;
 }
 
@@ -61,11 +61,6 @@
   background-color: rgba(255, 255, 255, 0);
 }
 
-/* Light navbar override */
-.navbar-light {
-  background-color: rgba(255, 255, 255, 0);
-}
-
 .navbar-light .navbar-logo a,
 .navbar-light .navbar-links a,
 .navbar-light .account-button {
@@ -76,12 +71,6 @@
 .navbar-light .account-button:hover {
   text-decoration: underline;
   color: #000 !important;
-}
-
-
-.navbar-light .navbar-links a:hover,
-.navbar-light .account-button:hover {
-  text-decoration: underline;
 }
 
 /* Hamburger icon */
@@ -100,22 +89,23 @@
     font-size: 2rem;
     background: none;
     border: none;
-    color: white; 
+    color: white;
     cursor: pointer;
     z-index: 1001;
   }
-.navbar.open .hamburger {
-  color: #222; /* turns black when menu is open */
-}
+
+  .navbar.open .hamburger {
+    color: #222;
+  }
 
   .navbar {
     flex-wrap: wrap;
     padding: 1rem 1.5rem;
-    background-color: transparent; /* TRANSPARENT NAVBAR */
+    background-color: transparent;
   }
 
   .navbar.open {
-    background-color: white; /* WHITE WHEN MENU OPEN */
+    background-color: white;
   }
 
   .navbar-logo a {
@@ -168,14 +158,17 @@
     background-color: #f0f0f0;
     color: #000;
   }
-    .navbar-light .hamburger {
-    color: #222; /* black when navbar-light is active */
+
+  .navbar-light .hamburger {
+    color: #222;
   }
 }
+
 body.modal-open .top-bar,
 body.modal-open .navbar {
   display: none !important;
 }
+
 .navbar.scrolled {
   background-color: white;
   transition: background-color 0.3s ease;

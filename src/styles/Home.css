@@ -2,53 +2,70 @@ html, body {
   margin: 0;
   padding: 0;
   height: 100%;
+  overflow: hidden;
+}
+
+#root {
+  height: 100%;
 }
 
 .home {
   height: 100vh;
   width: 100vw;
   font-family: 'Segoe UI', sans-serif;
-  margin: 0;
-  padding: 0;
-  overflow: hidden;
   position: relative;
+  overflow: hidden;
 }
+
+.video-background {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: -1;
+  overflow: hidden;
+}
+
+.video-background video {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 100vw;
+  height: 100vh;
+  object-fit: cover;
+  background-color: black;
+}
+
+
 
 .hero {
   position: relative;
-  width: 100%;
-  height: 100%;
-  overflow: hidden;
-  color: white;
+  height: 100vh;
+  display: flex;
+  align-items: flex-end;
+  padding: 60px 40px;
+  box-sizing: border-box;
 }
+
 .hero::before {
   content: '';
   position: absolute;
   inset: 0;
   background: rgba(0, 0, 0, 0.3);
   z-index: -1;
-}
-
-.bg-video {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  z-index: -1;
+  pointer-events: none;
 }
 
 .hero-text {
-  position: absolute;
-  bottom: 40px;
-  left: 40px;
   background: rgba(255, 255, 255, 0.85);
   padding: 2rem;
   border-radius: 1rem;
   color: #222;
   max-width: 400px;
-  box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+  z-index: 1;
 }
 
 .hero-text h1 {
@@ -75,30 +92,35 @@ html, body {
 }
 
 .cta-button:hover {
-  background-color: #d2b109;
+  background-color: #bfa107;
 }
+
+/* mobile styles */
 @media (max-width: 768px) {
-  .bg-video {
+  .video-background {
     display: none;
   }
 
   .hero::before {
-    content: '';
-    position: absolute;
-    inset: 0;
     background-image: url('/background.jpg');
     background-size: cover;
     background-position: center;
     background-repeat: no-repeat;
-    z-index: -1;
+    background-color: #000;
+  }
+
+  .hero {
+    padding: 40px 20px;
+    align-items: flex-end;
   }
 
   .hero-text {
-    left: 20px;
-    right: 20px;
-    bottom: 20px;
+    width: 100%;
     padding: 1.5rem;
-    max-width: unset;
+    border-radius: 1rem;
+    left: 0;
+    right: 0;
+    max-width: none;
   }
 
   .hero-text h1 {
@@ -114,4 +136,3 @@ html, body {
     padding: 0.6rem 1.2rem;
   }
 }
-
