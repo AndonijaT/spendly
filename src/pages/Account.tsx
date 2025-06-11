@@ -14,6 +14,7 @@ import { auth, storage } from '../firebase/firebaseConfig';
 import { toast } from 'react-toastify';
 import '../styles/AccountPage.css';
 import { signOut } from 'firebase/auth';
+import { inviteUserToSharedAccount } from '../firebase/firebaseUtils';
 
 declare global {
     interface Window {
@@ -33,6 +34,8 @@ function Account() {
     const [code, setCode] = useState('');
     const [verificationId, setVerificationId] = useState('');
     const [mfaEnabled, setMfaEnabled] = useState(false);
+    const [inviteEmail, setInviteEmail] = useState('');
+    const [inviteStatus, setInviteStatus] = useState('');
 
     useEffect(() => {
         const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
@@ -74,6 +77,21 @@ function Account() {
             toast.error('Error saving changes.');
         }
     };
+
+    const handleInvite = async () => {
+    try {
+        console.log("Trying to invite:", inviteEmail);
+        const uid = await inviteUserToSharedAccount(inviteEmail);
+        console.log("Invite successful, added UID:", uid);
+        setInviteStatus(`Successfully shared account with ${inviteEmail}`);
+        setInviteEmail('');
+    } catch (err: any) {
+        console.error("Invite failed:", err);
+        setInviteStatus(` ${err.message}`);
+    }
+};
+
+
     const handleSignOut = async () => {
         try {
             await signOut(auth);
@@ -226,12 +244,27 @@ function Account() {
                     </>
                 )}
             </div>
-            {}
+            { }
             <div className="account-section">
                 <button className="signout-btn" onClick={handleSignOut}>
                     Sign Out
                 </button>
             </div>
+
+            <div className="account-section">
+                <h3>Collaborate with a Partner</h3>
+                <p>Invite someone you trust to co-manage this account. Shared users can add expenses and view reports.</p>
+                <input
+                    type="email"
+                    placeholder="Enter their email address"
+                    value={inviteEmail}
+                    onChange={(e) => setInviteEmail(e.target.value)}
+                    style={{ padding: '0.5rem', width: '100%', maxWidth: '300px', marginBottom: '0.5rem' }}
+                />
+                <button onClick={handleInvite}>Send Invite</button>
+                <p>{inviteStatus}</p>
+            </div>
+
         </div>
 
     );

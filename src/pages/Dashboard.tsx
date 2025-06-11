@@ -121,68 +121,127 @@ const monthInputRef = useRef<HTMLInputElement>(null);
     setSelectedMonth(savedMonth || defaultMonth);
   }, []);
 
-  useEffect(() => {
-    if (!selectedMonth) return;
+useEffect(() => {
+  if (!selectedMonth) return;
 
-    const fetchTransactions = async () => {
-      const user = auth.currentUser;
-      if (!user) return;
+  const fetchTransactions = async () => {
+    const user = auth.currentUser;
+    if (!user) return;
 
-      const snapshot = await getDocs(collection(db, 'users', user.uid, 'transactions'));
-      const allData: Transaction[] = [];
+    console.log(" your Current user is :", user.uid);
+
+    const allUIDs = [user.uid];
+
+    try {
+      const q = query(collection(db, 'users'));
+      const snapshot = await getDocs(q);
 
       snapshot.forEach((doc) => {
-        const data = doc.data();
-        allData.push({ id: doc.id, ...data } as Transaction);
+        const sharedWith = doc.data().sharedWith || [];
+        console.log(`hmm Checking if ${user.uid} is in sharedWith of ${doc.id}`, sharedWith);
+
+        if (sharedWith.includes(user.uid) && !allUIDs.includes(doc.id)) {
+          console.log(`successfully Added shared access from ${doc.id}`);
+          allUIDs.push(doc.id);
+        }
       });
+    } catch (err) {
+      console.error("❌ Error while finding shared accounts:", err);
+    }
+
+    console.log("Looking for Will fetch transactions from UIDs:", allUIDs);
+
+    const allData: Transaction[] = [];
+
+    for (const uid of allUIDs) {
+      try {
+        const txSnapshot = await getDocs(collection(db, 'users', uid, 'transactions'));
+        txSnapshot.forEach((doc) => {
+          const data = doc.data();
+          allData.push({ id: doc.id, ...data } as Transaction);
+        });
+        console.log(`Fetched ${txSnapshot.size} transactions from ${uid}`);
+      } catch (err) {
+        console.error(`❌ Error fetching transactions for ${uid}:`, err);
+      }
+    }
+
+    const filtered = allData.filter((tx) => {
+      if (!tx.timestamp?.seconds) return false;
+      const date = new Date(tx.timestamp.seconds * 1000);
+      return format(date, 'yyyy-MM') === selectedMonth;
+    });
+
+    console.log(`✅ Filtered ${filtered.length} transactions for selected month: ${selectedMonth}`);
+
+    setTransactions(filtered);
+
+    let income = 0;
+    let expenses = 0;
+
+    filtered.forEach((tx) => {
+      const amt = Number(tx.amount);
+      if (tx.type === 'income') income += amt;
+      else if (tx.type === 'expense') expenses += amt;
+    });
+
+    setIncomeTotal(income);
+    setExpenseTotal(expenses);
+  };
+
+  fetchTransactions();
+}, [selectedMonth]);
 
 
-      const filtered = allData.filter((tx) => {
-        if (!tx.timestamp?.seconds) return false;
-        const date = new Date(tx.timestamp.seconds * 1000);
-        return format(date, 'yyyy-MM') === selectedMonth;
-      });
 
-      setTransactions(filtered);
-
-      let income = 0;
-      let expenses = 0;
-
-      filtered.forEach((tx) => {
-        const amt = Number(tx.amount);
-        if (tx.type === 'income') income += amt;
-        else expenses += amt;
-      });
-
-      setIncomeTotal(income);
-      setExpenseTotal(expenses);
-    };
-
-    fetchTransactions();
-  }, [selectedMonth]);
   useEffect(() => {
-    const fetchBudgets = async () => {
-      const user = auth.currentUser;
-      if (!user) return;
+  const fetchBudgets = async () => {
+    const user = auth.currentUser;
+    if (!user) return;
 
-      const nowMonth = format(new Date(), 'yyyy-MM');
+    const allUIDs = [user.uid];
+
+    try {
+      const sharedWithMeQuery = query(
+        collection(db, 'users'),
+        where('sharedWith', 'array-contains', user.uid)
+      );
+      const sharedDocs = await getDocs(sharedWithMeQuery);
+
+      sharedDocs.forEach((doc) => {
+        if (!allUIDs.includes(doc.id)) {
+          allUIDs.push(doc.id);
+        }
+      });
+    } catch (err) {
+      console.error("Error loading shared accounts for budgets:", err);
+    }
+
+    const nowMonth = format(new Date(), 'yyyy-MM');
+    const budgetData: Budget[] = [];
+
+    for (const uid of allUIDs) {
       const q = query(
-        collection(db, 'users', user.uid, 'budgets'),
+        collection(db, 'users', uid, 'budgets'),
         where('month', '==', nowMonth)
       );
 
-      const snapshot = await getDocs(q);
-      const budgetData: Budget[] = [];
+      try {
+        const snapshot = await getDocs(q);
+        snapshot.forEach((docSnap) => {
+          budgetData.push({ id: docSnap.id, ...docSnap.data() } as Budget);
+        });
+      } catch (err) {
+        console.error("Error fetching budgets for UID:", uid, err);
+      }
+    }
 
-      snapshot.forEach((docSnap) => {
-        budgetData.push({ id: docSnap.id, ...docSnap.data() } as Budget);
-      });
+    setBudgets(budgetData);
+  };
 
-      setBudgets(budgetData);
-    };
+  fetchBudgets();
+}, []);
 
-    fetchBudgets();
-  }, []);
 
   const expenseByCategory = transactions
     .filter((tx) => tx.type === 'expense')
