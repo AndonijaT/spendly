@@ -17,34 +17,36 @@ import { Doughnut } from 'react-chartjs-2';
 type Transaction = {
   id: string;
   type: 'income' | 'expense' | 'transfer';
-  method?: 'cash' | 'card'; // optional for transfer
-  direction?: 'to_cash' | 'to_card'; // only for transfers
+  method?: 'cash' | 'card';
+  direction?: 'to_cash' | 'to_card';
   category: string;
   amount: number;
   description?: string;
   timestamp: { seconds: number };
+  ownerUid: string; 
 };
+
 
 
 export default function Dashboard() {
   const [showOverviewBtn, setShowOverviewBtn] = useState(true);
-const overviewAnchorRef = useRef<HTMLDivElement>(null);
+  const overviewAnchorRef = useRef<HTMLDivElement>(null);
 
-useEffect(() => {
-  const observer = new IntersectionObserver(
-    ([entry]) => {
-      setShowOverviewBtn(entry.isIntersecting);
-    },
-    { threshold: 0.1 }
-  );
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        setShowOverviewBtn(entry.isIntersecting);
+      },
+      { threshold: 0.1 }
+    );
 
-  const currentRef = overviewAnchorRef.current;
-  if (currentRef) observer.observe(currentRef);
+    const currentRef = overviewAnchorRef.current;
+    if (currentRef) observer.observe(currentRef);
 
-  return () => {
-    if (currentRef) observer.unobserve(currentRef);
-  };
-}, []);
+    return () => {
+      if (currentRef) observer.unobserve(currentRef);
+    };
+  }, []);
 
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [selectedMonth, setSelectedMonth] = useState<string>('');
@@ -65,8 +67,8 @@ useEffect(() => {
     .slice(0, 3);
   const [runTour, setRunTour] = useState(false);
   const [stepIndex, setStepIndex] = useState(0);
-const [fabOpen, setFabOpen] = useState(false);
-const monthInputRef = useRef<HTMLInputElement>(null);
+  const [fabOpen, setFabOpen] = useState(false);
+  const monthInputRef = useRef<HTMLInputElement>(null);
 
   const steps: Step[] = [
     {
@@ -120,127 +122,179 @@ const monthInputRef = useRef<HTMLInputElement>(null);
     const defaultMonth = format(new Date(), 'yyyy-MM');
     setSelectedMonth(savedMonth || defaultMonth);
   }, []);
-
-useEffect(() => {
-  if (!selectedMonth) return;
-
-  const fetchTransactions = async () => {
-    const user = auth.currentUser;
-    if (!user) return;
-
-    console.log(" your Current user is :", user.uid);
-
-    const allUIDs = [user.uid];
-
-    try {
-      const q = query(collection(db, 'users'));
-      const snapshot = await getDocs(q);
-
-      snapshot.forEach((doc) => {
-        const sharedWith = doc.data().sharedWith || [];
-        console.log(`hmm Checking if ${user.uid} is in sharedWith of ${doc.id}`, sharedWith);
-
-        if (sharedWith.includes(user.uid) && !allUIDs.includes(doc.id)) {
-          console.log(`successfully Added shared access from ${doc.id}`);
-          allUIDs.push(doc.id);
-        }
+  const [uidToEmail, setUidToEmail] = useState<Record<string, string>>({});
+  useEffect(() => {
+    const fetchUserEmails = async () => {
+      const snap = await getDocs(collection(db, 'users'));
+      const map: Record<string, string> = {};
+      snap.forEach(doc => {
+        const email = doc.data().email;
+        if (email) map[doc.id] = email;
       });
-    } catch (err) {
-      console.error("❌ Error while finding shared accounts:", err);
-    }
+      setUidToEmail(map);
+    };
+    fetchUserEmails();
+  }, []);
 
-    console.log("Looking for Will fetch transactions from UIDs:", allUIDs);
+  useEffect(() => {
+    if (!selectedMonth) return;
 
-    const allData: Transaction[] = [];
+    const fetchTransactions = async () => {
+      const user = auth.currentUser;
+      if (!user) return;
 
-    for (const uid of allUIDs) {
+      console.log(" your Current user is :", user.uid);
+
+      const allUIDs = [user.uid];
+
       try {
-        const txSnapshot = await getDocs(collection(db, 'users', uid, 'transactions'));
-        txSnapshot.forEach((doc) => {
-          const data = doc.data();
-          allData.push({ id: doc.id, ...data } as Transaction);
+        const q = await getDocs(collection(db, 'users'));
+        q.forEach((doc) => {
+          const sharedWith = doc.data().sharedWith || [];
+          const docUid = doc.id;
+
+          // They shared with me
+          if (sharedWith.includes(user.uid) && !allUIDs.includes(docUid)) {
+            allUIDs.push(docUid);
+          }
+
+          //  I shared with them
+          if (user.uid === docUid && Array.isArray(sharedWith)) {
+            sharedWith.forEach((uid: string) => {
+              if (!allUIDs.includes(uid)) {
+                allUIDs.push(uid);
+              }
+            });
+          }
         });
-        console.log(`Fetched ${txSnapshot.size} transactions from ${uid}`);
       } catch (err) {
-        console.error(`❌ Error fetching transactions for ${uid}:`, err);
+        console.error("❌ Error while finding shared accounts:", err);
       }
-    }
 
-    const filtered = allData.filter((tx) => {
-      if (!tx.timestamp?.seconds) return false;
-      const date = new Date(tx.timestamp.seconds * 1000);
-      return format(date, 'yyyy-MM') === selectedMonth;
-    });
 
-    console.log(`✅ Filtered ${filtered.length} transactions for selected month: ${selectedMonth}`);
+      console.log("Looking for Will fetch transactions from UIDs:", allUIDs);
 
-    setTransactions(filtered);
+      const allData: Transaction[] = [];
 
-    let income = 0;
-    let expenses = 0;
+      for (const uid of allUIDs) {
+        try {
+          const snapshot = await getDocs(collection(db, 'users', uid, 'transactions'));
+          snapshot.forEach((docSnap) => {
+            const data = docSnap.data();
 
-    filtered.forEach((tx) => {
-      const amt = Number(tx.amount);
-      if (tx.type === 'income') income += amt;
-      else if (tx.type === 'expense') expenses += amt;
-    });
+            if (
+              data.type &&
+              data.category &&
+              data.amount !== undefined &&
+              data.timestamp?.seconds
+            ) {
+              const tx: Transaction = {
+                id: docSnap.id,
+                type: data.type,
+                category: data.category,
+                amount: data.amount,
+                timestamp: data.timestamp,
+                method: data.method,
+                direction: data.direction,
+                description: data.description,
+                ownerUid: uid,
+              };
 
-    setIncomeTotal(income);
-    setExpenseTotal(expenses);
-  };
+              allData.push(tx);
+            } else {
+              console.warn(` Skipping incomplete transaction from ${uid}:`, data);
+            }
+          });
 
-  fetchTransactions();
-}, [selectedMonth]);
+          console.log(`Fetched ${snapshot.size} transactions from ${uid}`);
+        } catch (err) {
+          console.error(` Error fetching transactions for ${uid}:`, err);
+        }
+      }
+
+
+      const filtered = allData.filter((tx) => {
+        if (!tx.timestamp?.seconds) return false;
+        const date = new Date(tx.timestamp.seconds * 1000);
+        return format(date, 'yyyy-MM') === selectedMonth;
+      });
+
+      console.log(` Filtered ${filtered.length} transactions for selected month: ${selectedMonth}`);
+
+      setTransactions(filtered);
+
+      let income = 0;
+      let expenses = 0;
+
+      filtered.forEach((tx) => {
+        const amt = Number(tx.amount);
+        if (tx.type === 'income') income += amt;
+        else if (tx.type === 'expense') expenses += amt;
+      });
+
+      setIncomeTotal(income);
+      setExpenseTotal(expenses);
+    };
+
+    fetchTransactions();
+  }, [selectedMonth]);
 
 
 
   useEffect(() => {
-  const fetchBudgets = async () => {
-    const user = auth.currentUser;
-    if (!user) return;
+    const fetchBudgets = async () => {
+      const user = auth.currentUser;
+      if (!user) return;
 
-    const allUIDs = [user.uid];
-
-    try {
-      const sharedWithMeQuery = query(
-        collection(db, 'users'),
-        where('sharedWith', 'array-contains', user.uid)
-      );
-      const sharedDocs = await getDocs(sharedWithMeQuery);
-
-      sharedDocs.forEach((doc) => {
-        if (!allUIDs.includes(doc.id)) {
-          allUIDs.push(doc.id);
-        }
-      });
-    } catch (err) {
-      console.error("Error loading shared accounts for budgets:", err);
-    }
-
-    const nowMonth = format(new Date(), 'yyyy-MM');
-    const budgetData: Budget[] = [];
-
-    for (const uid of allUIDs) {
-      const q = query(
-        collection(db, 'users', uid, 'budgets'),
-        where('month', '==', nowMonth)
-      );
+      const allUIDs = [user.uid];
 
       try {
-        const snapshot = await getDocs(q);
-        snapshot.forEach((docSnap) => {
-          budgetData.push({ id: docSnap.id, ...docSnap.data() } as Budget);
+        const q = await getDocs(collection(db, 'users'));
+        q.forEach((doc) => {
+          const sharedWith = doc.data().sharedWith || [];
+          const docUid = doc.id;
+
+          if (sharedWith.includes(user.uid) && !allUIDs.includes(docUid)) {
+            allUIDs.push(docUid);
+          }
+
+          if (user.uid === docUid && Array.isArray(sharedWith)) {
+            sharedWith.forEach((uid: string) => {
+              if (!allUIDs.includes(uid)) {
+                allUIDs.push(uid);
+              }
+            });
+          }
         });
       } catch (err) {
-        console.error("Error fetching budgets for UID:", uid, err);
+        console.error(" Error finding shared budgets:", err);
       }
-    }
 
-    setBudgets(budgetData);
-  };
 
-  fetchBudgets();
-}, []);
+      const nowMonth = format(new Date(), 'yyyy-MM');
+      const budgetData: Budget[] = [];
+
+      for (const uid of allUIDs) {
+        const q = query(
+          collection(db, 'users', uid, 'budgets'),
+          where('month', '==', nowMonth)
+        );
+
+        try {
+          const snapshot = await getDocs(q);
+          snapshot.forEach((docSnap) => {
+            budgetData.push({ id: docSnap.id, ...docSnap.data() } as Budget);
+          });
+        } catch (err) {
+          console.error("Error fetching budgets for UID:", uid, err);
+        }
+      }
+
+      setBudgets(budgetData);
+    };
+
+    fetchBudgets();
+  }, []);
 
 
   const expenseByCategory = transactions
@@ -370,36 +424,36 @@ useEffect(() => {
       />
 
 
-    
+
 
 
 
       <div className="summary-group">
 
         <div className="summary-row" style={{ justifyContent: 'center' }}>
-  <div className='dashboard-section'>
-    <div className="cash-card-balance-section">
-      <h3>Total Balance</h3>
-      <div className="balance-display">
-        {totalBalance >= 0 ? (
-          <span className="balance-positive">{totalBalance.toFixed(2)} €</span>
-        ) : (
-          <span className="balance-negative">- {(Math.abs(totalBalance)).toFixed(2)} €</span>
-        )}
-      </div>
-      <div className="balance-breakdown">
-        <div className="balance-line">
-          <span className="label">Cash</span>
-          <span>{cash.toFixed(2)} €</span>
+          <div className='dashboard-section'>
+            <div className="cash-card-balance-section">
+              <h3>Total Balance</h3>
+              <div className="balance-display">
+                {totalBalance >= 0 ? (
+                  <span className="balance-positive">{totalBalance.toFixed(2)} €</span>
+                ) : (
+                  <span className="balance-negative">- {(Math.abs(totalBalance)).toFixed(2)} €</span>
+                )}
+              </div>
+              <div className="balance-breakdown">
+                <div className="balance-line">
+                  <span className="label">Cash</span>
+                  <span>{cash.toFixed(2)} €</span>
+                </div>
+                <div className="balance-line">
+                  <span className="label">Card</span>
+                  <span>{card.toFixed(2)} €</span>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
-        <div className="balance-line">
-          <span className="label">Card</span>
-          <span>{card.toFixed(2)} €</span>
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
 
 
         <div className="dashboard-section">
@@ -410,146 +464,155 @@ useEffect(() => {
         </div>
       </div>
 
-<div ref={overviewAnchorRef} className="overview-button-wrapper">
-  {showOverviewBtn && (
-    <button
-      className="overview-button"
-      onClick={() => expensesRef.current?.scrollIntoView({ behavior: 'smooth' })}
-    >
-      <span className="icon">📊</span> Spending Overview →
-    </button>
-  )}
-</div>
+      <div ref={overviewAnchorRef} className="overview-button-wrapper">
+        {showOverviewBtn && (
+          <button
+            className="overview-button"
+            onClick={() => expensesRef.current?.scrollIntoView({ behavior: 'smooth' })}
+          >
+            <span className="icon">📊</span> Spending Overview →
+          </button>
+        )}
+      </div>
 
 
 
-<div ref={expensesRef} className="dashboard-section expense-breakdown-section">
-  <h3>Expenses by Category</h3>
-  <div className="expense-layout">
-    <div className="expense-chart">
-      <Pie data={pieData} options={{
-        cutout: '60%',
-        plugins: { legend: { display: false } }
-      }} />
-    </div>
-    <div className="category-expense-list">
-      {Object.entries(expenseByCategory).map(([category, amount], i) => {
-        const color = pieData.datasets[0].backgroundColor[i] as string;
-        const percent = ((amount / expenseTotal) * 100).toFixed(1);
-        return (
-          <div key={category} className="category-expense-item">
-            <div className="category-color-box" style={{ backgroundColor: color }}></div>
-            <div className="category-label" style={{ color }}>
-              {category} ({percent}%)
-            </div>
-            <div className="category-amount">
-              {amount.toFixed(2)} €
-            </div>
+      <div ref={expensesRef} className="dashboard-section expense-breakdown-section">
+        <h3>Expenses by Category</h3>
+        <div className="expense-layout">
+          <div className="expense-chart">
+            <Pie data={pieData} options={{
+              cutout: '60%',
+              plugins: { legend: { display: false } }
+            }} />
           </div>
-        );
-      })}
-    </div>
-  </div>
-</div>
+          <div className="category-expense-list">
+            {Object.entries(expenseByCategory).map(([category, amount], i) => {
+              const color = pieData.datasets[0].backgroundColor[i] as string;
+              const percent = ((amount / expenseTotal) * 100).toFixed(1);
+              return (
+                <div key={category} className="category-expense-item">
+                  <div className="category-color-box" style={{ backgroundColor: color }}></div>
+                  <div className="category-label" style={{ color }}>
+                    {category} ({percent}%)
+                  </div>
+                  <div className="category-amount">
+                    {amount.toFixed(2)} €
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      </div>
 
 
       <div className="dashboard-section">
-      <div className="budget-usage-section">
-        <h3>Budget Usage</h3>
-        {budgetProgress.map((bp) => (
-          <div key={bp.category} className="budget-bar">
-            <div className="label">
-              <strong>{bp.category}</strong>: {bp.spent.toFixed(2)} / {bp.limit.toFixed(2)} {bp.currency} ({Math.min(bp.percent, 100).toFixed(0)}%)
+        <div className="budget-usage-section">
+          <h3>Budget Usage</h3>
+          {budgetProgress.map((bp) => (
+            <div key={bp.category} className="budget-bar">
+              <div className="label">
+                <strong>{bp.category}</strong>: {bp.spent.toFixed(2)} / {bp.limit.toFixed(2)} {bp.currency} ({Math.min(bp.percent, 100).toFixed(0)}%)
+              </div>
+              <div className="progress-bar-container">
+                <div
+                  className="progress"
+                  style={{
+                    width: `${Math.min(bp.percent, 100)}%`,
+                    backgroundColor:
+                      bp.warningLevel === 'over'
+                        ? '#c62828'
+                        : bp.warningLevel === 'high'
+                          ? '#ff9800'
+                          : bp.warningLevel === 'mid'
+                            ? '#fbc02d'
+                            : '#d2b109',
+                  }}
+                />
+              </div>
+              {bp.warningLevel === 'mid' && <p className="warning-text">⚠️ 50% of your budget used.</p>}
+              {bp.warningLevel === 'high' && <p className="warning-text">⚠️ 75% of your budget used!</p>}
+              {bp.warningLevel === 'over' && <p className="warning-text">🚨 Over budget!</p>}
             </div>
-            <div className="progress-bar-container">
-              <div
-                className="progress"
-                style={{
-                  width: `${Math.min(bp.percent, 100)}%`,
-                  backgroundColor:
-                    bp.warningLevel === 'over'
-                      ? '#c62828'
-                      : bp.warningLevel === 'high'
-                        ? '#ff9800'
-                        : bp.warningLevel === 'mid'
-                          ? '#fbc02d'
-                          : '#d2b109',
-                }}
-              />
-            </div>
-            {bp.warningLevel === 'mid' && <p className="warning-text">⚠️ 50% of your budget used.</p>}
-            {bp.warningLevel === 'high' && <p className="warning-text">⚠️ 75% of your budget used!</p>}
-            {bp.warningLevel === 'over' && <p className="warning-text">🚨 Over budget!</p>}
-          </div>
-        ))}
-      </div>
-</div>
-
-<div className="dashboard-section">
-      <div className="recent-transactions">
-        <div className="recent-header">
-          <h3>Latest transactions</h3>
-          <button className="see-all-link" onClick={() => navigate('/transaction-history')}>
-            See all
-          </button>
+          ))}
         </div>
-        <ul>
-          {recentTransactions.map((tx) => {
-            const date = new Date(tx.timestamp.seconds * 1000);
-            const today = new Date();
-            const formatted =
-              date.toDateString() === today.toDateString()
-                ? 'Today'
-                : date.toDateString() === new Date(today.getTime() - 86400000).toDateString()
-                  ? 'Yesterday'
-                  : date.toLocaleDateString();
-
-            return (
-              <li key={tx.id} className={`recent-item ${tx.type}`}>
-                <div className="recent-left">
-                  <div className="recent-category">{tx.category}</div>
-                  <div className="recent-date">{formatted}</div>
-                </div>
-                <div className="recent-amount">
-                  {tx.type === 'income' ? '+' : '-'}{tx.amount.toFixed(2)} €
-                </div>
-              </li>
-            );
-          })}
-        </ul>
-      </div>
       </div>
 
+      <div className="dashboard-section">
+        <div className="recent-transactions">
+          <div className="recent-header">
+            <h3>Latest transactions</h3>
+            <button className="see-all-link" onClick={() => navigate('/transaction-history')}>
+              See all
+            </button>
+          </div>
+          <ul>
+            {recentTransactions.map((tx) => {
+              const date = new Date(tx.timestamp.seconds * 1000);
+              const today = new Date();
+              const formatted =
+                date.toDateString() === today.toDateString()
+                  ? 'Today'
+                  : date.toDateString() === new Date(today.getTime() - 86400000).toDateString()
+                    ? 'Yesterday'
+                    : date.toLocaleDateString();
+
+              return (
+                <li key={tx.id} className={`recent-item ${tx.type}`}>
+                  <div className="recent-left">
+                    <div className="recent-category">{tx.category}</div>
+                    <div className="recent-date">
+                      {formatted}
+                      {tx.ownerUid && (
+                        <div className="transaction-owner">
+                          {uidToEmail[tx.ownerUid] || 'Shared User'}
+                        </div>
+                      )}
+                    </div>
 
 
-{/* Expandable floating menu */}
-<div className="fab-container">
-  <div className={`fab-button calendar ${fabOpen ? 'show' : ''}`} onClick={() => monthInputRef.current?.showPicker()}>
-    📅
-    <input
-      type="month"
-      ref={monthInputRef}
-      className="hidden-month-input"
-      value={selectedMonth}
-      onChange={(e) => {
-        setSelectedMonth(e.target.value);
-        localStorage.setItem('selectedMonth', e.target.value);
-      }}
-    />
-  </div>
-  <div className={`fab-button add ${fabOpen ? 'show' : ''}`} onClick={() => setShowAddModal(true)}>+</div>
-  <div className={`fab-button settings ${fabOpen ? 'show' : ''}`} onClick={() => setShowSettings(true)}>⚙️</div>
-  <div className="floating-fab" onClick={() => setFabOpen(!fabOpen)}>
-    {fabOpen ? '×' : '☰'}
-  </div>
-</div>
+                  </div>
+                  <div className="recent-amount">
+                    {tx.type === 'income' ? '+' : '-'}{tx.amount.toFixed(2)} €
+                  </div>
+                </li>
+              );
+            })}
+          </ul>
+        </div>
+      </div>
 
 
-     
+
+      {/* Expandable floating menu */}
+      <div className="fab-container">
+        <div className={`fab-button calendar ${fabOpen ? 'show' : ''}`} onClick={() => monthInputRef.current?.showPicker()}>
+          📅
+          <input
+            type="month"
+            ref={monthInputRef}
+            className="hidden-month-input"
+            value={selectedMonth}
+            onChange={(e) => {
+              setSelectedMonth(e.target.value);
+              localStorage.setItem('selectedMonth', e.target.value);
+            }}
+          />
+        </div>
+        <div className={`fab-button add ${fabOpen ? 'show' : ''}`} onClick={() => setShowAddModal(true)}>+</div>
+        <div className={`fab-button settings ${fabOpen ? 'show' : ''}`} onClick={() => setShowSettings(true)}>⚙️</div>
+        <div className="floating-fab" onClick={() => setFabOpen(!fabOpen)}>
+          {fabOpen ? '×' : '☰'}
+        </div>
+      </div>
+
+
+
       {showAddModal && (
         <AddTransactionModal onClose={() => setShowAddModal(false)} />
       )}
-   
+
       {showSettings && (
         <SettingsSidebar
           onClose={() => setShowSettings(false)}
@@ -562,7 +625,7 @@ useEffect(() => {
       )}
 
     </div>
-    
+
 
   );
 }

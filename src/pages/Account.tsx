@@ -25,6 +25,7 @@ import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { auth, db, storage } from '../firebase/firebaseConfig';
 import { toast } from 'react-toastify';
 import '../styles/AccountPage.css';
+import { saveNotificationToHistory } from './../utils/saveNotification';
 
 declare global {
     interface Window {
@@ -59,21 +60,8 @@ export default function Account() {
         });
         return () => unsubscribe();
     }, []);
-useEffect(() => {
-    if (!user) return;
 
-    const checkNotifications = async () => {
-        const snap = await getDocs(collection(db, `users/${user.uid}/notifications`));
-        snap.forEach(doc => {
-            const data = doc.data();
-            if (data.type === 'invite_response') {
-                toast.info(`📬 ${data.fromEmail} ${data.status} your invite.`);
-            }
-        });
-    };
 
-    checkNotifications();
-}, [user]);
 
    const checkForPendingInvites = async (uid: string) => {
     const invites = await getDocs(collection(db, `users/${uid}/incomingInvites`));
@@ -83,35 +71,55 @@ useEffect(() => {
     const inviteData = pending.data();
     const inviteRef = doc(db, `users/${uid}/incomingInvites/${pending.id}`);
 const notifyInviter = async (status: 'accepted' | 'declined') => {
-    const authUser = auth.currentUser;
+  const authUser = auth.currentUser;
 
-    if (!inviteData.fromUid) {
-        console.error('Missing fromUid, cannot send notification');
-        return;
-    }
+  if (!inviteData.fromUid) {
+    console.error('Missing fromUid, cannot send notification');
+    return;
+  }
 
-    const fromEmail = authUser?.email ?? email ?? 'unknown@user.com';
+  const fromEmail = authUser?.email ?? email ?? 'unknown@user.com';
+  const localTimestamp = new Date();
 
-    await addDoc(collection(db, `users/${inviteData.fromUid}/notifications`), {
-        type: 'invite_response',
-        status,
-        fromEmail,
-        timestamp: serverTimestamp(),
-    });
+  //save to Firestore
+  await addDoc(collection(db, `users/${inviteData.fromUid}/notifications`), {
+    type: 'invite_response',
+    status,
+    fromEmail,
+    timestamp: localTimestamp, // keep consistent with local history
+  });
+
+  // save to local history
+await saveNotificationToHistory({
+  message: `${fromEmail} ${status} your invite.`,
+  type: 'invite_response',
+  toastType: 'info',
+});
+
 };
+
 
 
 
 
    const handleAccept = async () => {
     await updateDoc(inviteRef, { status: 'accepted' });
+
+    // add the inviter to current users sharedWith
     await updateDoc(doc(db, `users/${uid}`), {
         sharedWith: arrayUnion(inviteData.fromUid),
     });
+
+    // add current user to inviter's sharedWith (2 -directional shari)
+    await updateDoc(doc(db, `users/${inviteData.fromUid}`), {
+        sharedWith: arrayUnion(uid),
+    });
+
     await notifyInviter('accepted');
     toast.dismiss();
     toast.success(`Now sharing with ${inviteData.fromEmail}`);
 };
+
 
    const handleDecline = async () => {
     await updateDoc(inviteRef, { status: 'declined' });
@@ -134,22 +142,33 @@ const notifyInviter = async (status: 'accepted' | 'declined') => {
 };
 
 
-    const handleImageUpload = async (file: File) => {
-        if (!user) return;
-        setUploading(true);
-        const imageRef = ref(storage, `profile-images/${user.uid}`);
-        try {
-            await uploadBytes(imageRef, file);
-            const url = await getDownloadURL(imageRef);
-            await updateProfile(user, { photoURL: url });
-            setPhotoURL(url);
-            toast.success('Profile photo updated!');
-        } catch {
-            toast.error('Failed to upload photo.');
-        } finally {
-            setUploading(false);
-        }
-    };
+const handleImageUpload = async (file: File) => {
+  if (!user) return;
+  setUploading(true);
+
+  try {
+    const imageRef = ref(storage, `profile-images/${user.uid}`);
+    await uploadBytes(imageRef, file);
+    const url = await getDownloadURL(imageRef);
+
+    await updateProfile(user, { photoURL: url });
+    await auth.currentUser?.reload(); // reload to reflect changes
+    const refreshedUser = auth.currentUser;
+
+    setPhotoURL(refreshedUser?.photoURL || url); // refresh ui
+    toast.success('Profile photo updated!');
+  } catch (error: any) {
+    console.error('Upload error:', error.message || error);
+    toast.error('Upload failed: ' + (error.message || 'Unknown error'));
+  } finally {
+    setUploading(false);
+  }
+};
+
+
+
+
+
 
     const handleSave = async () => {
         if (!auth.currentUser) return;
@@ -322,18 +341,25 @@ const notifyInviter = async (status: 'accepted' | 'declined') => {
                 <button className="signout-btn" onClick={handleSignOut}>Sign Out</button>
             </div>
 
-            <div className="account-section">
-                <h3>Collaborate</h3>
-                <p>Invite someone to co-manage your account.</p>
-                <input
-                    type="email"
-                    placeholder="Enter email"
-                    value={inviteEmail}
-                    onChange={(e) => setInviteEmail(e.target.value)}
-                />
-                <button onClick={handleInvite}>Send Invite</button>
-                <p>{inviteStatus}</p>
-            </div>
+            <div className="account-section collaborate-section">
+  <h3> Collaborate</h3>
+  <p className="collab-description">
+    Want to track finances with a partner, friend, or family member? Enter their email address below to invite them.
+    Once they accept, you'll both see the same budget and transactions — in real-time.
+  </p>
+  <div className="collab-input-group">
+    <input
+      type="email"
+      className="collab-input"
+      placeholder="e.g. partner@email.com"
+      value={inviteEmail}
+      onChange={(e) => setInviteEmail(e.target.value)}
+    />
+    <button className="collab-button" onClick={handleInvite}>Send Invite</button>
+  </div>
+  {inviteStatus && <p className="invite-status">{inviteStatus}</p>}
+</div>
+
         </div>
     );
 }

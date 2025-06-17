@@ -1,15 +1,6 @@
-import { useState } from 'react';
-import SplashScreen from './components/SplashScreen';
+// src/App.tsx
 import Home from './pages/Home';
 
-function App() {
-  const [showSplash, setShowSplash] = useState(true);
-
-  return showSplash ? (
-    <SplashScreen onFinish={() => setShowSplash(false)} />
-  ) : (
-    <Home />
-  );
+export default function App() {
+  return <Home />;
 }
-
-export default App;

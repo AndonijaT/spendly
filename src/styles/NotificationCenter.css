@@ -1,0 +1,48 @@
+.notification-center {
+  position: fixed;
+  top: 0;
+  right: 0;
+  width: 300px;
+  max-height: 100vh;
+  background: white;
+  border-left: 1px solid #ccc;
+  box-shadow: -2px 0 8px rgba(0, 0, 0, 0.1);
+  padding: 1rem;
+  overflow-y: auto;
+  z-index: 9999;
+}
+.notification-center .header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.notification-center ul {
+  list-style: none;
+  padding: 0;
+}
+.notification-center .notif {
+  margin-bottom: 1rem;
+  padding: 0.5rem;
+  border-radius: 6px;
+  background: #f9f9f9;
+}
+.notification-center .notif.success {
+  border-left: 4px solid #4caf50;
+}
+.notification-center .notif.error {
+  border-left: 4px solid #f44336;
+}
+.notification-center .notif.info {
+  border-left: 4px solid #2196f3;
+}
+.timestamp {
+  font-size: 0.8rem;
+  color: #777;
+}
+.floating-bell {
+  position: fixed;
+  bottom: 6rem;
+  right: 2rem;
+  font-size: 1.8rem;
+  cursor: pointer;
+}

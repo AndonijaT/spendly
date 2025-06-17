@@ -110,3 +110,59 @@
 .signout-btn:hover {
   background-color: #c0392b;
 }
+.collaborate-section {
+  background-color: #f9fafb;
+  border: 1px solid #e0e0e0;
+  border-radius: 12px;
+  padding: 2rem;
+  margin-top: 2rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.collaborate-section h3 {
+  font-size: 1.4rem;
+  margin-bottom: 0.5rem;
+}
+
+.collab-description {
+  font-size: 1rem;
+  color: #555;
+  margin-bottom: 1rem;
+}
+
+.collab-input-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.collab-input {
+  flex: 1;
+  padding: 0.6rem 1rem;
+  font-size: 1rem;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  min-width: 240px;
+}
+
+.collab-button {
+  background-color: #d2b109;
+  color: white;
+  padding: 0.6rem 1.2rem;
+  font-size: 1rem;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background-color 0.2s ease-in-out;
+}
+
+.collab-button:hover {
+  background-color: #b99c08;
+}
+
+.invite-status {
+  margin-top: 0.5rem;
+  font-size: 0.95rem;
+  color: #333;
+}
