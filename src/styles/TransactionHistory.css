@@ -52,3 +52,16 @@
   color: #666;
   margin-top: 4px;
 }
+.tx-description {
+  font-size: 0.9rem;
+  color: #666;
+}
+.tx-date {
+  font-size: 0.85rem;
+  color: #999;
+}
+.tx-shared {
+  font-size: 0.85rem;
+  color: #d2b109;
+  margin-top: 2px;
+}
