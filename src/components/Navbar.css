@@ -180,3 +180,14 @@ body.modal-open .navbar {
 .navbar.scrolled .hamburger {
   color: #222 !important;
 }
+.notification-button {
+  background: none;
+  border: none;
+  font-size: 1.3rem;
+  cursor: pointer;
+  color: inherit;
+}
+
+.notification-button:hover {
+  opacity: 0.8;
+}

@@ -10,7 +10,7 @@ import { useEffect } from 'react';
 
 
 
-function Navbar() {
+function Navbar({ toggleNotifications }: { toggleNotifications: () => void }) {
   const { user } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
@@ -72,6 +72,19 @@ useEffect(() => {
           <li>
             <button className="account-button" onClick={() => { setMenuOpen(false); handleAccountClick(); }}>Account</button>
           </li>
+          <li>
+  <button
+    className="account-button"
+    onClick={() => {
+      toggleNotifications();
+      setMenuOpen(false);
+    }}
+    aria-label="Notifications"
+  >
+    Notifications
+  </button>
+</li>
+
         </ul>
       </nav>
 
