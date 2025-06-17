@@ -14,7 +14,6 @@ import Account from './pages/Account';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { LanguageProvider } from './context/LanguageContext';
-import TransactionHistory from './pages/TransactionHistory';
 import PrivateRoute from './components/PrivateComponent';
 import './emailInit';
 import PrivacyPolicy from './pages/PrivacyPolicy';
@@ -46,7 +45,6 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
               <Route path="dashboard" element={<PrivateRoute><Dashboard /></PrivateRoute>} />
               <Route path="budget" element={<PrivateRoute><Budget /></PrivateRoute>} />
               <Route path="statistics" element={<PrivateRoute><Statistics /></PrivateRoute>} />
-              <Route path="transaction-history" element={<PrivateRoute><TransactionHistory /></PrivateRoute>} />
             </Route>
 
 

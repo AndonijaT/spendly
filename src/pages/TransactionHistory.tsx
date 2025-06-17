@@ -14,7 +14,7 @@ interface Transaction {
   ownerUid?: string;
 }
 
-export default function TransactionHistory({ onClose }: { onClose: () => void }) {
+export default function TransactionHistory({ onClose }: { onClose?: () => void }) {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [uidToEmail, setUidToEmail] = useState<Record<string, string>>({});
 
@@ -25,20 +25,16 @@ export default function TransactionHistory({ onClose }: { onClose: () => void })
 
       const allUIDs = [user.uid];
 
-      // fetermine all shared accounts
       try {
         const userDocs = await getDocs(collection(db, 'users'));
-
         userDocs.forEach((doc) => {
           const sharedWith = doc.data().sharedWith || [];
           const docUid = doc.id;
 
-          // they shared with me
           if (sharedWith.includes(user.uid) && !allUIDs.includes(docUid)) {
             allUIDs.push(docUid);
           }
 
-          // i shared with them
           if (docUid === user.uid && Array.isArray(sharedWith)) {
             sharedWith.forEach((uid: string) => {
               if (!allUIDs.includes(uid)) allUIDs.push(uid);
@@ -46,7 +42,6 @@ export default function TransactionHistory({ onClose }: { onClose: () => void })
           }
         });
 
-        // build UID-to-email map
         const emailMap: Record<string, string> = {};
         userDocs.forEach((doc) => {
           const email = doc.data().email;
@@ -57,7 +52,6 @@ export default function TransactionHistory({ onClose }: { onClose: () => void })
         console.error("Error fetching shared users:", err);
       }
 
-      // fetch transactions from all UIDs
       const allData: Transaction[] = [];
 
       for (const uid of allUIDs) {
@@ -87,7 +81,6 @@ export default function TransactionHistory({ onClose }: { onClose: () => void })
         }
       }
 
-      // sort and save
       allData.sort((a, b) => (b.timestamp?.seconds ?? 0) - (a.timestamp?.seconds ?? 0));
       setTransactions(allData);
     };
@@ -102,29 +95,39 @@ export default function TransactionHistory({ onClose }: { onClose: () => void })
   };
 
   return (
-    <div className="history-backdrop">
+    <div className={onClose ? 'modal-backdrop fade-in' : 'history-page'}>
       <div className="history-panel">
         <h2>Transaction History</h2>
-        <ul>
+        <ul className="transaction-list">
           {transactions.map((tx) => (
-            <li key={tx.id} className={tx.type}>
-              <div>
-                <strong>{tx.category}</strong>
+            <li key={tx.id} className={`transaction-item ${tx.type}`}>
+              <div className="transaction-left">
+                <div className="transaction-category">
+                  <strong>{tx.category}</strong>
+                </div>
                 {tx.description && (
-                  <div className="tx-description">{tx.description}</div>
+                  <div className="transaction-description">{tx.description}</div>
                 )}
-                <div className="tx-date">{formatDate(tx.timestamp)}</div>
-                {tx.ownerUid !== auth.currentUser?.uid && (
-                  <div className="tx-shared">
-                    Shared by: {uidToEmail[tx.ownerUid!] || 'Another user'}
-                  </div>
-                )}
+                <div className="transaction-meta">
+                  <span className="transaction-date">{formatDate(tx.timestamp)}</span>
+                  {tx.ownerUid !== auth.currentUser?.uid && (
+                    <span className="transaction-shared">
+                      Shared by: {uidToEmail[tx.ownerUid!] || 'Another user'}
+                    </span>
+                  )}
+                </div>
               </div>
-              <span>{tx.amount.toFixed(2)} €</span>
+              <div className={`transaction-amount ${tx.type}`}>
+                {tx.type === 'income' ? '+' : '-'}{tx.amount.toFixed(2)} €
+              </div>
             </li>
           ))}
         </ul>
-        <button onClick={onClose}>Close</button>
+        {onClose && (
+          <button className="close-modal" onClick={onClose}>
+            × Close
+          </button>
+        )}
       </div>
     </div>
   );

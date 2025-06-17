@@ -13,6 +13,7 @@ import type { Step } from 'react-joyride';
 import SetCategoryBudgetModal from '../components/SetCategoryBudgetModal';
 import { query, where } from 'firebase/firestore';
 import { Doughnut } from 'react-chartjs-2';
+import TransactionHistory from '../pages/TransactionHistory';
 
 type Transaction = {
   id: string;
@@ -23,7 +24,7 @@ type Transaction = {
   amount: number;
   description?: string;
   timestamp: { seconds: number };
-  ownerUid: string; 
+  ownerUid: string;
 };
 
 
@@ -31,6 +32,7 @@ type Transaction = {
 export default function Dashboard() {
   const [showOverviewBtn, setShowOverviewBtn] = useState(true);
   const overviewAnchorRef = useRef<HTMLDivElement>(null);
+  const [showHistoryModal, setShowHistoryModal] = useState(false);
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -240,6 +242,17 @@ export default function Dashboard() {
   }, [selectedMonth]);
 
 
+useEffect(() => {
+  if (showHistoryModal) {
+    document.body.style.overflow = 'hidden';
+  } else {
+    document.body.style.overflow = '';
+  }
+
+  return () => {
+    document.body.style.overflow = '';
+  };
+}, [showHistoryModal]);
 
   useEffect(() => {
     const fetchBudgets = async () => {
@@ -543,9 +556,10 @@ export default function Dashboard() {
         <div className="recent-transactions">
           <div className="recent-header">
             <h3>Latest transactions</h3>
-            <button className="see-all-link" onClick={() => navigate('/transaction-history')}>
+            <button className="see-all-link" onClick={() => setShowHistoryModal(true)}>
               See all
             </button>
+
           </div>
           <ul>
             {recentTransactions.map((tx) => {
@@ -622,6 +636,9 @@ export default function Dashboard() {
 
       {showBudgetModal && (
         <SetCategoryBudgetModal onClose={() => setShowBudgetModal(false)} />
+      )}
+      {auth.currentUser && showHistoryModal && (
+        <TransactionHistory onClose={() => setShowHistoryModal(false)} />
       )}
 
     </div>

@@ -1,45 +1,119 @@
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  overflow-y: auto;
+  z-index: 9999;
+}
+
+.fade-in {
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.history-panel {
+  background: white;
+  padding: 2rem;
+  border-radius: 12px;
+  max-width: 700px;
+  width: 95%;
+  max-height: 90vh;
+  overflow-y: auto;
+  position: relative;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+}
+
 .transaction-list {
-  max-width: 500px;
-  width: 100%;
-  margin: 2rem auto;
-}
-
-.transaction-list h2 {
-  text-align: center;
-  margin-bottom: 1rem;
-}
-
-.transaction-list ul {
   list-style: none;
   padding: 0;
+  margin-top: 1rem;
 }
 
-.transaction-list li {
+.transaction-item {
   display: flex;
   justify-content: space-between;
-  padding: 0.75rem 1rem;
-  border-bottom: 1px solid #ddd;
+  align-items: flex-start;
+  gap: 1rem;
+  padding: 1rem;
+  margin-bottom: 0.75rem;
+  border-radius: 10px;
+  background-color: #f7f7f7;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05);
 }
 
-.transaction-list li.income {
-  background-color: #e6ffe6;
+.transaction-item.income {
+  background-color: #e8fce8;
 }
 
-.transaction-list li.expense {
-  background-color: #ffe6e6;
+.transaction-item.expense {
+  background-color: #fdeaea;
 }
-.refresh-btn {
+
+.transaction-left {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+
+.transaction-category {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #333;
+}
+
+.transaction-description {
+  font-size: 0.95rem;
+  color: #555;
+  margin-top: 4px;
+}
+
+.transaction-meta {
+  font-size: 0.85rem;
+  color: #888;
+  margin-top: 6px;
+  display: flex;
+  flex-direction: column;
+}
+
+.transaction-shared {
+  color: #b88b00;
+  margin-top: 2px;
+}
+
+.transaction-date {
+  font-style: italic;
+}
+
+.transaction-amount {
+  font-size: 1.1rem;
+  font-weight: bold;
+  min-width: 90px;
+  text-align: right;
+  padding-top: 0.3rem;
+}
+
+.transaction-amount.income {
+  color: #2e7d32;
+}
+
+.transaction-amount.expense {
+  color: #c62828;
+}
+
+.close-modal {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  font-size: 1.3rem;
   background: none;
   border: none;
   cursor: pointer;
-  font-size: 1.2rem;
-  transition: transform 0.2s ease;
-}
-
-.refresh-btn:hover {
-  transform: rotate(90deg);}
-  .tx-description {
-  font-size: 0.9rem;
-  color: #666;
-  margin-top: 4px;
+  color: #333;
 }
