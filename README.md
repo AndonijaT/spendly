@@ -37,19 +37,26 @@ Spendly is a progressive web app (PWA) for manually tracking income and expenses
 
 ---
 
+
+
 ## 🔧 Setup Instructions
 
-```bash
 git clone https://github.com/yourusername/spendly.git
 cd spendly
 npm install
 npm run dev
 
-## 👨‍💻 Author
+---
 
+## 👨‍💻 Author
+--- bash
 **Andonija Todorova**  
 Frontend & UX Developer | Firebase Enthusiast | AI Explorer  
 📍 Slovenia  
 🔗 [GitHub](https://github.com/andonijaaa)  
-📧 andonija.todorova@gmail.com
+📧 andonija.todorova@gmail.com 
+
+---
+
+## 
 
