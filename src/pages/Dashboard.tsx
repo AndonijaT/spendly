@@ -96,6 +96,7 @@ export default function Dashboard() {
       content: '⚙️ Access your language, currency, app settings and also add budget for each category, if you want to remove a budget just set the limit to 0.',
     }
   ];
+const [viewMode, setViewMode] = useState<'personal' | 'shared'>('shared');
 
 
   useEffect(() => {
@@ -139,16 +140,17 @@ export default function Dashboard() {
   }, []);
 
   useEffect(() => {
-    if (!selectedMonth) return;
+  if (!selectedMonth) return;
 
-    const fetchTransactions = async () => {
-      const user = auth.currentUser;
-      if (!user) return;
+  const fetchTransactions = async () => {
+    const user = auth.currentUser;
+    if (!user) return;
 
-      console.log(" your Current user is :", user.uid);
+    console.log("Your current user is:", user.uid);
 
-      const allUIDs = [user.uid];
+    const allUIDs = [user.uid];
 
+    if (viewMode === 'shared') {
       try {
         const q = await getDocs(collection(db, 'users'));
         q.forEach((doc) => {
@@ -160,7 +162,7 @@ export default function Dashboard() {
             allUIDs.push(docUid);
           }
 
-          //  I shared with them
+          // I shared with them
           if (user.uid === docUid && Array.isArray(sharedWith)) {
             sharedWith.forEach((uid: string) => {
               if (!allUIDs.includes(uid)) {
@@ -172,75 +174,73 @@ export default function Dashboard() {
       } catch (err) {
         console.error("❌ Error while finding shared accounts:", err);
       }
+    }
 
+    console.log("Will fetch transactions from UIDs:", allUIDs);
 
-      console.log("Looking for Will fetch transactions from UIDs:", allUIDs);
+    const allData: Transaction[] = [];
 
-      const allData: Transaction[] = [];
+    for (const uid of allUIDs) {
+      try {
+        const snapshot = await getDocs(collection(db, 'users', uid, 'transactions'));
+        snapshot.forEach((docSnap) => {
+          const data = docSnap.data();
 
-      for (const uid of allUIDs) {
-        try {
-          const snapshot = await getDocs(collection(db, 'users', uid, 'transactions'));
-          snapshot.forEach((docSnap) => {
-            const data = docSnap.data();
+          if (
+            data.type &&
+            data.category &&
+            data.amount !== undefined &&
+            data.timestamp?.seconds
+          ) {
+            const tx: Transaction = {
+              id: docSnap.id,
+              type: data.type,
+              category: data.category,
+              amount: data.amount,
+              timestamp: data.timestamp,
+              method: data.method,
+              direction: data.direction,
+              description: data.description,
+              ownerUid: uid,
+            };
 
-            if (
-              data.type &&
-              data.category &&
-              data.amount !== undefined &&
-              data.timestamp?.seconds
-            ) {
-              const tx: Transaction = {
-                id: docSnap.id,
-                type: data.type,
-                category: data.category,
-                amount: data.amount,
-                timestamp: data.timestamp,
-                method: data.method,
-                direction: data.direction,
-                description: data.description,
-                ownerUid: uid,
-              };
+            allData.push(tx);
+          } else {
+            console.warn(`Skipping incomplete transaction from ${uid}:`, data);
+          }
+        });
 
-              allData.push(tx);
-            } else {
-              console.warn(` Skipping incomplete transaction from ${uid}:`, data);
-            }
-          });
-
-          console.log(`Fetched ${snapshot.size} transactions from ${uid}`);
-        } catch (err) {
-          console.error(` Error fetching transactions for ${uid}:`, err);
-        }
+        console.log(`Fetched ${snapshot.size} transactions from ${uid}`);
+      } catch (err) {
+        console.error(`Error fetching transactions for ${uid}:`, err);
       }
+    }
 
+    const filtered = allData.filter((tx) => {
+      if (!tx.timestamp?.seconds) return false;
+      const date = new Date(tx.timestamp.seconds * 1000);
+      return format(date, 'yyyy-MM') === selectedMonth;
+    });
 
-      const filtered = allData.filter((tx) => {
-        if (!tx.timestamp?.seconds) return false;
-        const date = new Date(tx.timestamp.seconds * 1000);
-        return format(date, 'yyyy-MM') === selectedMonth;
-      });
+    console.log(`Filtered ${filtered.length} transactions for selected month: ${selectedMonth}`);
 
-      console.log(` Filtered ${filtered.length} transactions for selected month: ${selectedMonth}`);
+    setTransactions(filtered);
 
-      setTransactions(filtered);
+    let income = 0;
+    let expenses = 0;
 
-      let income = 0;
-      let expenses = 0;
+    filtered.forEach((tx) => {
+      const amt = Number(tx.amount);
+      if (tx.type === 'income') income += amt;
+      else if (tx.type === 'expense') expenses += amt;
+    });
 
-      filtered.forEach((tx) => {
-        const amt = Number(tx.amount);
-        if (tx.type === 'income') income += amt;
-        else if (tx.type === 'expense') expenses += amt;
-      });
+    setIncomeTotal(income);
+    setExpenseTotal(expenses);
+  };
 
-      setIncomeTotal(income);
-      setExpenseTotal(expenses);
-    };
-
-    fetchTransactions();
-  }, [selectedMonth]);
-
+  fetchTransactions();
+}, [selectedMonth, viewMode]);
 
 useEffect(() => {
   if (showHistoryModal) {
@@ -254,23 +254,26 @@ useEffect(() => {
   };
 }, [showHistoryModal]);
 
-  useEffect(() => {
-    const fetchBudgets = async () => {
-      const user = auth.currentUser;
-      if (!user) return;
+ useEffect(() => {
+  const fetchBudgets = async () => {
+    const user = auth.currentUser;
+    if (!user) return;
 
-      const allUIDs = [user.uid];
+    const allUIDs = [user.uid];
 
+    if (viewMode === 'shared') {
       try {
         const q = await getDocs(collection(db, 'users'));
         q.forEach((doc) => {
           const sharedWith = doc.data().sharedWith || [];
           const docUid = doc.id;
 
+          // They shared with me
           if (sharedWith.includes(user.uid) && !allUIDs.includes(docUid)) {
             allUIDs.push(docUid);
           }
 
+          // I shared with them
           if (user.uid === docUid && Array.isArray(sharedWith)) {
             sharedWith.forEach((uid: string) => {
               if (!allUIDs.includes(uid)) {
@@ -280,34 +283,34 @@ useEffect(() => {
           }
         });
       } catch (err) {
-        console.error(" Error finding shared budgets:", err);
+        console.error("❌ Error finding shared budgets:", err);
       }
+    }
 
+    const nowMonth = format(new Date(), 'yyyy-MM');
+    const budgetData: Budget[] = [];
 
-      const nowMonth = format(new Date(), 'yyyy-MM');
-      const budgetData: Budget[] = [];
+    for (const uid of allUIDs) {
+      const q = query(
+        collection(db, 'users', uid, 'budgets'),
+        where('month', '==', nowMonth)
+      );
 
-      for (const uid of allUIDs) {
-        const q = query(
-          collection(db, 'users', uid, 'budgets'),
-          where('month', '==', nowMonth)
-        );
-
-        try {
-          const snapshot = await getDocs(q);
-          snapshot.forEach((docSnap) => {
-            budgetData.push({ id: docSnap.id, ...docSnap.data() } as Budget);
-          });
-        } catch (err) {
-          console.error("Error fetching budgets for UID:", uid, err);
-        }
+      try {
+        const snapshot = await getDocs(q);
+        snapshot.forEach((docSnap) => {
+          budgetData.push({ id: docSnap.id, ...docSnap.data() } as Budget);
+        });
+      } catch (err) {
+        console.error("❌ Error fetching budgets for UID:", uid, err);
       }
+    }
 
-      setBudgets(budgetData);
-    };
+    setBudgets(budgetData);
+  };
 
-    fetchBudgets();
-  }, []);
+  fetchBudgets();
+}, [viewMode]);
 
 
   const expenseByCategory = transactions
@@ -402,6 +405,20 @@ useEffect(() => {
         </div>
 
       </div>
+<div className="account-toggle">
+  <button
+    className={viewMode === 'shared' ? 'active' : ''}
+    onClick={() => setViewMode('shared')}
+  >
+    Shared View
+  </button>
+  <button
+    className={viewMode === 'personal' ? 'active' : ''}
+    onClick={() => setViewMode('personal')}
+  >
+    My View
+  </button>
+</div>
 
 
 
