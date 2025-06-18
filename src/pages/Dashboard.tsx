@@ -551,6 +551,25 @@ useEffect(() => {
           ))}
         </div>
       </div>
+<div className="dashboard-section" style={{ textAlign: 'center', padding: '1rem' }}>
+  <button
+    className="go-to-reports-btn"
+    onClick={() => navigate('/reports')}
+    style={{
+      padding: '0.75rem 1.2rem',
+      backgroundColor: '#1565c0',
+      color: 'white',
+      border: 'none',
+      borderRadius: '8px',
+      fontSize: '1rem',
+      fontWeight: 600,
+      cursor: 'pointer',
+      boxShadow: '0 2px 6px rgba(0,0,0,0.1)',
+    }}
+  >
+    📈 View Full Spending Report
+  </button>
+</div>
 
       <div className="dashboard-section">
         <div className="recent-transactions">
