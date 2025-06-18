@@ -1,54 +1,55 @@
-# React + TypeScript + Vite
+# 💸 Spendly — Personal Finance Manager
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Spendly is a progressive web app (PWA) for manually tracking income and expenses, creating monthly budgets per category, sharing accounts across users, and getting smart insights powered by AI. It’s built with **React**, **Firebase**, and modern web technologies for a smooth, secure, and cross-platform experience.
 
-Currently, two official plugins are available:
+---
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## 🛠️ Tech Stack
 
-## Expanding the ESLint configuration
+| Frontend | Backend | AI | Styling & UI | Other Tools |
+|----------|---------|----|--------------|-------------|
+| ![React](https://img.shields.io/badge/React-20232A?logo=react&logoColor=61DAFB) | ![Firebase](https://img.shields.io/badge/Firebase-FFCA28?logo=firebase&logoColor=white) | ![OpenAI](https://img.shields.io/badge/OpenAI-412991?logo=openai&logoColor=white) | ![Tailwind CSS](https://img.shields.io/badge/Tailwind-38B2AC?logo=tailwindcss&logoColor=white) | ![Vite](https://img.shields.io/badge/Vite-646CFF?logo=vite&logoColor=white) |
+| ![TypeScript](https://img.shields.io/badge/TypeScript-007ACC?logo=typescript&logoColor=white) | Firestore (NoSQL) | Custom GPT Integration | React Joyride (Onboarding) | Chart.js, React-Chartjs-2 |
+| React Router | Firebase Auth (2FA SMS) | Advice on budget control | Toastify (Alerts) | GitHub Projects (Kanban) |
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+---
 
-```js
-export default tseslint.config({
-  extends: [
-    // Remove ...tseslint.configs.recommended and replace with this
-    ...tseslint.configs.recommendedTypeChecked,
-    // Alternatively, use this for stricter rules
-    ...tseslint.configs.strictTypeChecked,
-    // Optionally, add this for stylistic rules
-    ...tseslint.configs.stylisticTypeChecked,
-  ],
-  languageOptions: {
-    // other options...
-    parserOptions: {
-      project: ['./tsconfig.node.json', './tsconfig.app.json'],
-      tsconfigRootDir: import.meta.dirname,
-    },
-  },
-})
-```
+## ✨ Features
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+- ✅ Manual income and expense input
+- 📆 Monthly budget “envelopes” by category
+- 📊 Visual charts (Pie, Bar)
+- 🚨 Budget overrun detection
+- 🔐 Firebase Auth with 2FA
+- 🔄 Account sharing and joint tracking
+- 🧠 AI-powered advice via OpenAI
+- 📁 Export/import data (PDF, CSV)
+- 📱 PWA support with responsive design
+- 🧭 Onboarding tutorial (React Joyride)
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+---
 
-export default tseslint.config({
-  plugins: {
-    // Add the react-x and react-dom plugins
-    'react-x': reactX,
-    'react-dom': reactDom,
-  },
-  rules: {
-    // other rules...
-    // Enable its recommended typescript rules
-    ...reactX.configs['recommended-typescript'].rules,
-    ...reactDom.configs.recommended.rules,
-  },
-})
-```
+## 👥 Typical Users
+
+- **Maja**, 27, freelancer, wants a lightweight app for daily tracking
+- **Luka & Sara**, young couple managing shared rent and groceries
+- **Petra**, a mom tracking household expenses and kids’ activities
+
+---
+
+## 🔧 Setup Instructions
+
+```bash
+git clone https://github.com/yourusername/spendly.git
+cd spendly
+npm install
+npm run dev
+
+## 👨‍💻 Author
+
+**Andonija Todorova**  
+Frontend & UX Developer | Firebase Enthusiast | AI Explorer  
+📍 Slovenia  
+🔗 [GitHub](https://github.com/andonijaaa)  
+📧 andonija.todorova@gmail.com
+
