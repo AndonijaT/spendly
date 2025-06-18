@@ -18,6 +18,8 @@ import {
 } from 'chart.js';
 import { Bar, Line, Pie, Doughnut } from 'react-chartjs-2';
 import '../styles/Reports.css';
+import html2canvas from 'html2canvas';
+import jsPDF from 'jspdf';
 
 ChartJS.register(
   CategoryScale,
@@ -122,14 +124,68 @@ export default function Reports() {
     runningTotal += tx.type === 'income' ? tx.amount : -tx.amount;
     cumulativeBalance.push({ x: date, y: runningTotal });
   });
+const handleExportPDF = async () => {
+  const reportSection = document.querySelector('.reports-container') as HTMLElement;
+  if (!reportSection) return;
+
+  const canvas = await html2canvas(reportSection, {
+    scale: 2,
+    useCORS: true,
+    backgroundColor: '#fff',
+  });
+
+  const imgData = canvas.toDataURL('image/png');
+  const pdf = new jsPDF({
+    orientation: 'p',
+    unit: 'mm',
+    format: 'a4',
+  });
+
+  const pageWidth = pdf.internal.pageSize.getWidth();
+  const pageHeight = pdf.internal.pageSize.getHeight();
+
+  const imgProps = pdf.getImageProperties(imgData);
+  const imgWidth = pageWidth;
+  const imgHeight = (imgProps.height * imgWidth) / imgProps.width;
+
+  let position = 0;
+
+  // If image is taller than one page, split into multiple pages
+  if (imgHeight < pageHeight) {
+    pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+  } else {
+    let heightLeft = imgHeight;
+
+    while (heightLeft > 0) {
+      pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+      heightLeft -= pageHeight;
+      position -= pageHeight;
+
+      if (heightLeft > 0) pdf.addPage();
+    }
+  }
+
+  pdf.save('Spendly_Report.pdf');
+};
+
 
   return (
     <div className="reports-container">
       <h1>📊 Financial Reports</h1>
 
-      {/* Filter controls */}
-<div style={{ marginBottom: '2rem', textAlign: 'center' }}>
-  <label>Filter by:</label>
+     {/* Filter controls + Export */}
+<div
+  style={{
+    marginBottom: '2rem',
+    display: 'flex',
+    flexWrap: 'wrap',
+    gap: '1rem',
+    justifyContent: 'center',
+    alignItems: 'center',
+    textAlign: 'center',
+  }}
+>
+  <label style={{ fontWeight: '600' }}>Filter by:</label>
   <select value={filterType} onChange={(e) => setFilterType(e.target.value as any)}>
     <option value="all">All time</option>
     <option value="day">Day</option>
@@ -144,7 +200,6 @@ export default function Reports() {
       type="date"
       value={selectedDate}
       onChange={(e) => setSelectedDate(e.target.value)}
-      style={{ marginLeft: '1rem' }}
     />
   )}
 
@@ -153,7 +208,6 @@ export default function Reports() {
       type="date"
       value={selectedDate}
       onChange={(e) => setSelectedDate(e.target.value)}
-      style={{ marginLeft: '1rem' }}
     />
   )}
 
@@ -162,7 +216,6 @@ export default function Reports() {
       type="month"
       value={selectedDate}
       onChange={(e) => setSelectedDate(e.target.value)}
-      style={{ marginLeft: '1rem' }}
     />
   )}
 
@@ -170,12 +223,12 @@ export default function Reports() {
     <select
       value={selectedDate}
       onChange={(e) => setSelectedDate(e.target.value)}
-      style={{ marginLeft: '1rem', padding: '0.5rem 0.75rem', borderRadius: '8px' }}
+      style={{ padding: '0.5rem 0.75rem', borderRadius: '8px' }}
     >
       <option value="">Select Year</option>
-      {Array.from(new Set(transactions.map(t =>
-        new Date(t.timestamp.seconds * 1000).getFullYear()
-      )))
+      {Array.from(
+        new Set(transactions.map((t) => new Date(t.timestamp.seconds * 1000).getFullYear()))
+      )
         .sort((a, b) => b - a)
         .map((year) => (
           <option key={year} value={year.toString()}>
@@ -186,7 +239,7 @@ export default function Reports() {
   )}
 
   {filterType === 'range' && (
-    <div style={{ display: 'flex', justifyContent: 'center', gap: '1rem', marginTop: '0.5rem' }}>
+    <div style={{ display: 'flex', gap: '1rem' }}>
       <input
         type="date"
         value={customRange.start}
@@ -199,57 +252,173 @@ export default function Reports() {
       />
     </div>
   )}
+
+  <button
+    onClick={handleExportPDF}
+    style={{
+      padding: '0.6rem 1rem',
+      backgroundColor: '#d2b109',
+      color: '#fff',
+      border: 'none',
+      borderRadius: '8px',
+      cursor: 'pointer',
+      fontWeight: '600',
+    }}
+  >
+    📄 Export to PDF
+  </button>
 </div>
-      {/* Charts */}
+
+      
+
+
+
+
+
+
       <div className="chart-card">
         <Line
-          data={{
-            labels: Object.keys(dailyExpenses),
-            datasets: [
-              {
-                label: 'Expenses €',
-                data: Object.values(dailyExpenses),
-                borderColor: '#c62828',
-                backgroundColor: 'rgba(198, 40, 40, 0.2)',
-                fill: true,
-              },
-            ],
-          }}
-          options={{
-            responsive: true,
-            plugins: {
-              title: { display: true, text: 'Daily Expenses Over Time' },
-              legend: { position: 'bottom' },
-            },
-          }}
-        />
+  data={{
+    labels: Object.keys(dailyExpenses),
+    datasets: [
+      {
+        label: 'Daily Expenses (€)',
+        data: Object.values(dailyExpenses),
+        borderColor: '#e53935',
+        backgroundColor: 'rgba(229, 57, 53, 0.15)',
+        fill: true,
+        pointRadius: 5,
+        pointHoverRadius: 7,
+        borderWidth: 3,
+      },
+    ],
+  }}
+  options={{
+    responsive: true,
+    plugins: {
+      title: {
+        display: true,
+        text: 'Daily Spending Trends (€)',
+        font: {
+          size: 18,
+          weight: 'bold'
+        },
+        color: '#333'
+      },
+      legend: {
+        display: false
+      },
+      tooltip: {
+        callbacks: {
+          label: (context) => `€ ${context.parsed.y.toFixed(2)} spent`
+        }
+      }
+    },
+    scales: {
+      x: {
+        title: {
+          display: true,
+          text: 'Date',
+          font: {
+            size: 14
+          }
+        },
+        ticks: {
+          maxRotation: 45,
+          minRotation: 20
+        }
+      },
+      y: {
+        title: {
+          display: true,
+          text: 'Amount (€)',
+          font: {
+            size: 14
+          }
+        },
+        beginAtZero: true
+      }
+    }
+  }}
+/>
+
       </div>
 
       <div className="chart-card">
-        <Bar
-          data={{
-            labels: Object.keys(monthlyTotals),
-            datasets: [
-              {
-                label: 'Income',
-                data: Object.values(monthlyTotals).map((m) => m.income),
-                backgroundColor: '#4caf50',
-              },
-              {
-                label: 'Expenses',
-                data: Object.values(monthlyTotals).map((m) => m.expense),
-                backgroundColor: '#f44336',
-              },
-            ],
-          }}
-          options={{
-            responsive: true,
-            plugins: {
-              title: { display: true, text: 'Income vs Expenses by Month' },
-              legend: { position: 'bottom' },
-            },
-          }}
-        />
+      <Bar
+  data={{
+    labels: Object.keys(monthlyTotals),
+    datasets: [
+      {
+        label: 'Income',
+        data: Object.values(monthlyTotals).map((m) => m.income),
+        backgroundColor: '#43a047',
+        borderRadius: 6,
+        barThickness: 40,
+      },
+      {
+        label: 'Expenses',
+        data: Object.values(monthlyTotals).map((m) => m.expense),
+        backgroundColor: '#e53935',
+        borderRadius: 6,
+        barThickness: 40,
+      },
+    ],
+  }}
+  options={{
+    responsive: true,
+    plugins: {
+      title: {
+        display: true,
+        text: 'Monthly Incomes vs Expenses (€)',
+        font: {
+          size: 18,
+          weight: 'bold'
+        },
+        color: '#333'
+      },
+      legend: {
+        position: 'bottom',
+        labels: {
+          usePointStyle: true,
+        },
+      },
+      tooltip: {
+        callbacks: {
+          label: (ctx) => `${ctx.dataset.label}: €${ctx.parsed.y.toFixed(2)}`
+        }
+      }
+    },
+    scales: {
+      x: {
+        title: {
+          display: true,
+          text: 'Month',
+          font: {
+            size: 14
+          }
+        },
+        ticks: {
+          maxRotation: 45,
+          minRotation: 0,
+        },
+        stacked: false,
+      },
+      y: {
+        title: {
+          display: true,
+          text: 'Amount (€)',
+          font: {
+            size: 14
+          }
+        },
+        beginAtZero: true,
+        stacked: false,
+      }
+    }
+  }}
+/>
+
       </div>
 
       <div className="chart-grid">
@@ -318,27 +487,76 @@ export default function Reports() {
       </div>
 
       <div className="chart-card">
-        <Line
-          data={{
-            labels: cumulativeBalance.map((p) => p.x),
-            datasets: [
-              {
-                label: 'Balance €',
-                data: cumulativeBalance.map((p) => p.y),
-                borderColor: '#1565c0',
-                backgroundColor: 'rgba(21, 101, 192, 0.2)',
-                fill: true,
-              },
-            ],
-          }}
-          options={{
-            responsive: true,
-            plugins: {
-              title: { display: true, text: 'Cumulative Balance Over Time' },
-              legend: { position: 'bottom' },
-            },
-          }}
-        />
+       <Line
+  data={{
+    labels: cumulativeBalance.map((p) => p.x),
+    datasets: [
+      {
+        label: 'Balance (€)',
+        data: cumulativeBalance.map((p) => p.y),
+        borderColor: '#1565c0',
+        backgroundColor: 'rgba(21, 101, 192, 0.1)',
+        fill: true,
+        pointRadius: 4,
+        pointHoverRadius: 6,
+        borderWidth: 3,
+        tension: 0.3,
+      },
+    ],
+  }}
+  options={{
+    responsive: true,
+    plugins: {
+      title: {
+        display: true,
+        text: 'Your Account Balance Over Time',
+        font: {
+          size: 18,
+          weight: 'bold',
+        },
+        color: '#333',
+      },
+      legend: {
+        position: 'bottom',
+        labels: {
+          usePointStyle: true,
+        },
+      },
+      tooltip: {
+        callbacks: {
+          title: (ctx) => `Date: ${ctx[0].label}`,
+          label: (ctx) => `Balance: €${ctx.parsed.y.toFixed(2)}`
+        }
+      }
+    },
+    scales: {
+      x: {
+        title: {
+          display: true,
+          text: 'Date',
+          font: {
+            size: 14,
+          },
+        },
+        ticks: {
+          maxRotation: 45,
+          minRotation: 20,
+        },
+      },
+      y: {
+        title: {
+          display: true,
+          text: 'Balance (€)',
+          font: {
+            size: 14,
+          },
+        },
+        beginAtZero: false,
+      },
+    },
+  }}
+/>
+
       </div>
     </div>
   );
