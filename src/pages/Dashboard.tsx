@@ -141,10 +141,7 @@ const [overrunMessage, setOverrunMessage] = useState<string | null>(null);
     fetchUserEmails();
   }, []);
 
-  useEffect(() => {
-  if (!selectedMonth) return;
-
-  const fetchTransactions = async () => {
+   const fetchTransactions = async () => {
     const user = auth.currentUser;
     if (!user) return;
 
@@ -241,8 +238,12 @@ const [overrunMessage, setOverrunMessage] = useState<string | null>(null);
     setExpenseTotal(expenses);
   };
 
+
+  useEffect(() => {
+  if (!selectedMonth) return;
   fetchTransactions();
 }, [selectedMonth, viewMode]);
+
 
 useEffect(() => {
   if (showHistoryModal) {
@@ -638,13 +639,23 @@ useEffect(() => {
 
       <div className="dashboard-section">
         <div className="recent-transactions">
-          <div className="recent-header">
-            <h3>Latest transactions</h3>
-            <button className="see-all-link" onClick={() => setShowHistoryModal(true)}>
-              See all
-            </button>
+         <div className="recent-header">
+  <h3>Latest transactions</h3>
+  <div className="recent-actions">
+    <button className="see-all-link" onClick={() => setShowHistoryModal(true)}>
+      See all
+    </button>
+   <button
+  className="refresh-button"
+  title="Refresh transactions"
+  onClick={fetchTransactions}
+>
+  🔄
+</button>
 
-          </div>
+  </div>
+</div>
+
           <ul>
             {recentTransactions.map((tx) => {
               const date = new Date(tx.timestamp.seconds * 1000);

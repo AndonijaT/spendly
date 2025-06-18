@@ -892,3 +892,22 @@ html {
   color: #fff;
   opacity: 0.9;
 }
+.recent-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.refresh-button {
+  background: transparent;
+  border: none;
+  font-size: 1.2rem;
+  cursor: pointer;
+  color: #555;
+  transition: transform 0.2s ease;
+}
+
+.refresh-button:hover {
+  transform: rotate(90deg);
+  color: #000;
+}
