@@ -27,6 +27,9 @@ export default function useGlobalNotifications() {
 
             // Skip if already dismissed
             if (data.dismissed) return;
+            
+            // skip toast display for budget alerts (in central UI instead)
+            if (data.type === 'budget_alert') return;
 
             let toastFn = toast.info;
             let message = data.message || '';

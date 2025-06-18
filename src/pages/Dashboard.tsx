@@ -14,6 +14,7 @@ import SetCategoryBudgetModal from '../components/SetCategoryBudgetModal';
 import { query, where } from 'firebase/firestore';
 import { Doughnut } from 'react-chartjs-2';
 import TransactionHistory from '../pages/TransactionHistory';
+import { addDoc, serverTimestamp } from 'firebase/firestore';
 
 type Transaction = {
   id: string;
@@ -98,6 +99,7 @@ export default function Dashboard() {
   ];
 const [viewMode, setViewMode] = useState<'personal' | 'shared'>('shared');
 
+const [overrunMessage, setOverrunMessage] = useState<string | null>(null);
 
   useEffect(() => {
     const seen = localStorage.getItem('seenSpendlyTutorial');
@@ -320,7 +322,7 @@ useEffect(() => {
       return acc;
     }, {} as Record<string, number>);
   const budgetProgress = budgets.map((budget) => {
-    const spent = transactions
+       const spent = transactions
       .filter((tx) => tx.type === budget.type && tx.category === budget.category)
       .reduce((sum, tx) => sum + tx.amount, 0);
 
@@ -337,6 +339,35 @@ useEffect(() => {
       warningLevel,
     };
   });
+useEffect(() => {
+  const user = auth.currentUser;
+  if (!user) return;
+
+  const currentMonth = format(new Date(), 'yyyy-MM');
+
+  budgetProgress.forEach(async (bp) => {
+    if (bp.warningLevel === 'over') {
+      const localKey = `dismissed_${bp.category}_${currentMonth}`;
+      const wasDismissed = localStorage.getItem(localKey);
+      if (wasDismissed) return; // do not show if dismissed already
+
+      const message = `${bp.category} over by ${(bp.spent - bp.limit).toFixed(2)} ${bp.currency}`;
+      setOverrunMessage(message);
+
+      const notif = {
+        type: 'budget_alert',
+        message: `🚨 You've exceeded your budget for "${bp.category}"!`,
+        toastType: 'error',
+        dismissed: false,
+        timestamp: serverTimestamp(),
+      };
+
+      const ref = collection(db, 'users', user.uid, 'notifications');
+      await addDoc(ref, notif);
+    }
+  });
+}, [budgetProgress]);
+
 
   const pieData = {
     labels: Object.keys(expenseByCategory),
@@ -453,6 +484,23 @@ useEffect(() => {
 
       />
 
+
+
+{overrunMessage && (
+  <div
+    className="budget-alert"
+    onClick={() => {
+      const currentMonth = format(new Date(), 'yyyy-MM');
+      const category = overrunMessage.split(' ')[0]; // crude but works
+      localStorage.setItem(`dismissed_${category}_${currentMonth}`, 'true');
+      setOverrunMessage(null);
+    }}
+  >
+    <div>🚨 <strong>Budget Overrun:</strong></div>
+    <div style={{ marginTop: '0.5rem' }}>{overrunMessage}</div>
+    <div className="budget-dismiss-note">Click anywhere to dismiss</div>
+  </div>
+)}
 
 
 
