@@ -73,30 +73,31 @@ export default function Dashboard() {
   const [fabOpen, setFabOpen] = useState(false);
   const monthInputRef = useRef<HTMLInputElement>(null);
 
-  const steps: Step[] = [
-    {
-      target: '.dashboard-container',
-      placement: 'center',
-      content: '👋 Welcome to your Spendly Dashboard! This is your financial overview.',
-      disableBeacon: true,
-    },
-    {
-      target: '.floating-add',
-      content: '➕ Click here to add a new income or expense. Select category and fill in the details.',
-    },
-    {
-      target: '.summary-row',
-      content: '📊 Here’s a quick look at your income, expenses, and current balance.',
-    },
-    {
-      target: '.chart-wrapper',
-      content: '🎯 This chart shows where your money goes by category.',
-    },
-    {
-      target: '.floating-settings',
-      content: '⚙️ Access your language, currency, app settings and also add budget for each category, if you want to remove a budget just set the limit to 0.',
-    }
-  ];
+ const steps: Step[] = [
+  {
+    target: '.account-toggle',
+    placement: 'bottom',
+    content: '👥 Switch between "My View" (just your data) and "Shared View" (includes transactions from users you’ve connected with).',
+    disableBeacon: true,
+  },
+  {
+    target: '.cash-card-balance-section',
+    placement: 'bottom',
+    content: '💰 This is your total available balance, split between Cash and Card.',
+  },
+
+  {
+    target: '.floating-advice-button',
+    placement: 'left',
+    content: '🤖 Need help saving money? Ask our smart assistant for personalized advice!',
+  },
+  {
+    target: '.floating-fab',
+    placement: 'left',
+    content: '☰ Tap here to access settings (⚙️), choose a month (📅), or quickly add a new transaction (+).',
+  }
+];
+
 const [viewMode, setViewMode] = useState<'personal' | 'shared'>('shared');
 
 const [overrunMessage, setOverrunMessage] = useState<string | null>(null);

@@ -1,14 +1,11 @@
 import { Link, useNavigate, useLocation } from 'react-router-dom';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useAuth } from '../firebase/firebaseConfig';
 import Modal from './Modal';
 import LoginForm from './LoginForm';
 import RegisterForm from './RegisterForm';
 import ForgotPasswordForm from './ForgotPasswordForm';
 import './Navbar.css';
-import { useEffect } from 'react';
-
-
 
 function Navbar({ toggleNotifications }: { toggleNotifications: () => void }) {
   const { user } = useAuth();
@@ -17,17 +14,15 @@ function Navbar({ toggleNotifications }: { toggleNotifications: () => void }) {
 
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [authMode, setAuthMode] = useState<'login' | 'register' | 'forgot'>('login');
-  const [menuOpen, setMenuOpen] = useState(false); // NEW
-const [scrolled, setScrolled] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
 
-useEffect(() => {
-  const handleScroll = () => {
-    setScrolled(window.scrollY > 10);
-  };
+  useEffect(() => {
+    const handleScroll = () => setScrolled(window.scrollY > 10);
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
-  window.addEventListener('scroll', handleScroll);
-  return () => window.removeEventListener('scroll', handleScroll);
-}, []);
   const handleAccountClick = () => {
     if (user) {
       navigate('/account');
@@ -37,21 +32,24 @@ useEffect(() => {
     }
   };
 
- const useDarkText =
-  location.pathname.startsWith('/dashboard') ||
-  location.pathname.startsWith('/account') ||
-  location.pathname.startsWith('/budget') ||
-  location.pathname.startsWith('/statistics') ||
-  location.pathname.startsWith('/about') ||
-  location.pathname.startsWith('/features') ||
-  location.pathname.startsWith('/reports') ||
-  location.pathname.startsWith('/contact');
-
+  const useDarkText =
+    location.pathname.startsWith('/dashboard') ||
+    location.pathname.startsWith('/account') ||
+    location.pathname.startsWith('/budget') ||
+    location.pathname.startsWith('/statistics') ||
+    location.pathname.startsWith('/about') ||
+    location.pathname.startsWith('/features') ||
+    location.pathname.startsWith('/reports') ||
+    location.pathname.startsWith('/contact');
+const isAboutPage = location.pathname === '/about';
 
   return (
     <>
-<nav className={`navbar ${useDarkText ? 'navbar-light' : ''} ${menuOpen ? 'open' : ''} ${scrolled ? 'scrolled' : ''}`}>
-
+<nav className={`navbar 
+  ${useDarkText ? 'navbar-light' : ''} 
+  ${menuOpen ? 'open' : ''} 
+  ${scrolled ? 'scrolled' : ''} 
+  ${isAboutPage ? 'navbar-about' : ''}`}>
         <div className="navbar-logo">
           <Link to="/">Spendly</Link>
         </div>
@@ -71,21 +69,19 @@ useEffect(() => {
           <li><Link to="/contact" onClick={() => setMenuOpen(false)}>Contact Us</Link></li>
           {user && <li><Link to="/dashboard" onClick={() => setMenuOpen(false)}>Dashboard</Link></li>}
           <li>
-            <button className="account-button" onClick={() => { setMenuOpen(false); handleAccountClick(); }}>Account</button>
+            <button className="account-button" onClick={() => { setMenuOpen(false); handleAccountClick(); }}>
+              Account
+            </button>
           </li>
           <li>
-  <button
-    className="account-button"
-    onClick={() => {
-      toggleNotifications();
-      setMenuOpen(false);
-    }}
-    aria-label="Notifications"
-  >
-    Notifications
-  </button>
-</li>
-
+            <button
+              className="account-button"
+              onClick={() => { toggleNotifications(); setMenuOpen(false); }}
+              aria-label="Notifications"
+            >
+              Notifications
+            </button>
+          </li>
         </ul>
       </nav>
 
@@ -97,7 +93,7 @@ useEffect(() => {
               switchToLogin={() => setAuthMode('login')}
             />
           )}
-          {authMode === 'login' && (
+          {authMode == 'login' && (
             <LoginForm
               onSuccess={() => setShowAuthModal(false)}
               switchToRegister={() => setAuthMode('register')}

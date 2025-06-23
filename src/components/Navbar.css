@@ -7,15 +7,18 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  background: transparent;
   padding: 1rem 2rem;
+  background: transparent;
+  transition: background-color 0.3s ease, backdrop-filter 0.3s ease;
 }
 
 .navbar-logo a {
-  font-size: 1.5rem;
-  font-weight: bold;
+  font-size: 1.6rem;
+  font-weight: 700;
   color: white;
   text-decoration: none;
+  letter-spacing: 1px;
+  transition: color 0.3s ease;
 }
 
 .navbar-links {
@@ -24,56 +27,51 @@
   gap: 2rem;
   margin: 0;
   padding: 0;
-  transition: all 0.3s ease-in-out;
+}
+
+.navbar-links li {
+  position: relative;
 }
 
 .navbar-links a,
 .account-button {
-  color: white;
-  background: none;
-  border: none;
+  font-family: inherit;
   font-size: 1rem;
   font-weight: 500;
+  background: none;
+  border: none;
+  color: white;
   cursor: pointer;
+  padding: 0.5rem 0.75rem;
   text-decoration: none;
+  transition: all 0.3s ease;
+  border-radius: 8px;
+  display: inline-block;
+}
+
+.navbar-links a::before,
+.account-button::before {
+  content: '';
+  position: absolute;
+  bottom: 4px;
+  left: 0;
+  height: 2px;
+  width: 0;
+  background-color: currentColor;
+  transition: width 0.3s ease;
+}
+
+.navbar-links a:hover::before,
+.account-button:hover::before {
+  width: 100%;
 }
 
 .navbar-links a:hover,
 .account-button:hover {
-  text-decoration: underline;
+  background-color: rgba(255, 255, 255, 0.1);
+  transform: translateX(5px);
 }
 
-.account-button {
-  font-family: inherit;
-  background: none;
-  border: none;
-  color: white;
-  font-size: 1rem;
-  padding: 0;
-  margin: 0;
-  cursor: pointer;
-  text-decoration: none;
-  vertical-align: baseline;
-}
-
-/* Light navbar override */
-.navbar-light {
-  background-color: rgba(255, 255, 255, 0);
-}
-
-.navbar-light .navbar-logo a,
-.navbar-light .navbar-links a,
-.navbar-light .account-button {
-  color: #222 !important;
-}
-
-.navbar-light .navbar-links a:hover,
-.navbar-light .account-button:hover {
-  text-decoration: underline;
-  color: #000 !important;
-}
-
-/* Hamburger icon */
 .hamburger {
   display: none;
   font-size: 2rem;
@@ -83,111 +81,85 @@
   cursor: pointer;
 }
 
+.navbar-light {
+  background-color: rgba(255, 255, 255, 0.85);
+}
+
+.navbar-light .navbar-logo a,
+.navbar-light .navbar-links a,
+.navbar-light .account-button {
+  color: #222;
+}
+
+.navbar.scrolled {
+  background-color: rgba(255, 255, 255, 0.9);
+  backdrop-filter: blur(10px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.navbar.scrolled .navbar-logo a,
+.navbar.scrolled .navbar-links a,
+.navbar.scrolled .account-button {
+  color: #222;
+}
+
+/* Mobile */
 @media (max-width: 768px) {
   .hamburger {
     display: block;
-    font-size: 2rem;
-    background: none;
-    border: none;
-    color: white;
-    cursor: pointer;
     z-index: 1001;
   }
 
-  .navbar.open .hamburger {
-    color: #222;
-  }
-
-  .navbar {
-    flex-wrap: wrap;
-    padding: 1rem 1.5rem;
-    background-color: transparent;
-  }
-
-  .navbar.open {
-    background-color: white;
-  }
-
-  .navbar-logo a {
-    color: white;
-    font-size: 1.3rem;
-  }
-
-  .navbar.open .navbar-logo a {
-    color: #222;
-  }
-
   .navbar-links {
+    display: none;
+    flex-direction: column;
     position: absolute;
     top: 100%;
     left: 0;
-    right: 0;
     width: 100%;
-    background-color: white;
-    flex-direction: column;
-    align-items: stretch;
-    padding: 0;
-    display: none;
-    z-index: 1000;
+    background: white;
+    padding: 1rem 0;
   }
 
   .navbar-links.open {
     display: flex;
   }
 
-  .navbar-links li {
-    width: 100%;
-    list-style: none;
-  }
-
   .navbar-links li a,
   .navbar-links li .account-button {
-    display: block;
-    width: 100%;
-    padding: 1rem 1.5rem;
-    font-size: 1.2rem;
     color: #222;
+    font-size: 1.2rem;
+    padding: 1rem 2rem;
     text-align: left;
-    text-decoration: none;
-    background-color: transparent;
-    border: none;
   }
 
   .navbar-links li a:hover,
   .navbar-links li .account-button:hover {
-    background-color: #f0f0f0;
-    color: #000;
+    background-color: #f5f5f5;
   }
 
-  .navbar-light .hamburger {
+  .navbar.open .navbar-logo a,
+  .navbar.open .hamburger {
     color: #222;
   }
 }
 
-body.modal-open .top-bar,
 body.modal-open .navbar {
   display: none !important;
 }
-
-.navbar.scrolled {
-  background-color: white;
-  transition: background-color 0.3s ease;
+.navbar-about {
+  background: linear-gradient(to right, #ecdeb0, #fdf6e3);
+  border-bottom: 1px solid #e0d9b5;
 }
 
-.navbar.scrolled .navbar-logo a,
-.navbar.scrolled .navbar-links a,
-.navbar.scrolled .account-button,
-.navbar.scrolled .hamburger {
+.navbar-about .navbar-logo a,
+.navbar-about .navbar-links a,
+.navbar-about .account-button {
   color: #222 !important;
 }
-.notification-button {
-  background: none;
-  border: none;
-  font-size: 1.3rem;
-  cursor: pointer;
-  color: inherit;
-}
 
-.notification-button:hover {
-  opacity: 0.8;
+.navbar-about .navbar-links a:hover,
+.navbar-about .account-button:hover {
+  background-color: rgba(0, 0, 0, 0.05);
+  color: #000 !important;
 }
