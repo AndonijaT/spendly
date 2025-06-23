@@ -4,7 +4,7 @@ import { auth, db } from '../firebase/firebaseConfig';
 import { Pie } from 'react-chartjs-2';
 import 'chart.js/auto';
 import '../styles/Dashboard.css';
-import { format, parse } from 'date-fns';
+import { format } from 'date-fns';
 import AddTransactionModal from '../components/AddTransactionModal';
 import { useNavigate } from 'react-router-dom';
 import SettingsSidebar from '../components/SettingsSidebar';
@@ -57,7 +57,7 @@ export default function Dashboard() {
   const [expenseTotal, setExpenseTotal] = useState(0);
   const [showAddModal, setShowAddModal] = useState(false);
   const navigate = useNavigate();
-  const showAllButton = transactions.length > 10;
+  // const showAllButton = transactions.length > 10;
   const [showSettings, setShowSettings] = useState(false);
   const [showBudgetModal, setShowBudgetModal] = useState(false);
   const handleBudgetMode = () => {
@@ -412,16 +412,16 @@ useEffect(() => {
   });
 
   const totalBalance = cash + card;
-  const cashCardData = {
-    labels: ['Cash', 'Card'],
-    datasets: [
-      {
-        data: [cash, card],
-        backgroundColor: ['#4caf50', '#42a5f5'],
-        borderWidth: 1,
-      },
-    ],
-  };
+  // const cashCardData = {
+  //   labels: ['Cash', 'Card'],
+  //   datasets: [
+  //     {
+  //       data: [cash, card],
+  //       backgroundColor: ['#4caf50', '#42a5f5'],
+  //       borderWidth: 1,
+  //     },
+  //   ],
+  // };
 
   const expensesRef = useRef<HTMLDivElement>(null);
 const [showAdviceModal, setShowAdviceModal] = useState(false);
@@ -475,7 +475,7 @@ const [hideAdviceTrigger, setHideAdviceTrigger] = useState(false);
           },
         }}
         callback={(data) => {
-          const { action, index, status, type } = data;
+          const { index, status, type } = data;
 
           if (type === 'step:after' || type === 'error:target_not_found') {
             setStepIndex(index + 1);

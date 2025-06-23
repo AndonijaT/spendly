@@ -91,7 +91,6 @@ export default function Reports() {
   });
 
   const expenses = filtered.filter((t) => t.type === 'expense');
-  const income = filtered.filter((t) => t.type === 'income');
 
   const dailyExpenses = expenses.reduce((acc, tx) => {
     const date = format(new Date(tx.timestamp.seconds * 1000), 'yyyy-MM-dd');

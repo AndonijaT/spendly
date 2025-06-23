@@ -100,12 +100,19 @@
   background-color: #e74c3c;
   color: white;
   border: none;
-  padding: 10px 16px;
-  font-size: 16px;
+  font-size: 15px;
   border-radius: 6px;
   cursor: pointer;
-  margin-top: 20px;
+  font-weight: 600;
+  transition: background-color 0.3s ease;
+  height: 44px;
+  padding: 0 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
 }
+
 
 .signout-btn:hover {
   background-color: #c0392b;
@@ -165,4 +172,64 @@
   margin-top: 0.5rem;
   font-size: 0.95rem;
   color: #333;
+}
+.account-buttons {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 1.5rem;
+  gap: 1rem;
+}
+
+
+.delete-icon {
+  font-size: 16px;
+  display: flex;
+  align-items: center;
+}
+
+.delete-account-outlined-btn {
+  background-color: transparent;
+  color: #e53935;
+  border: 1.5px solid #e53935;
+  padding: 10px 16px;
+  font-size: 14px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.3s ease;
+  height: 44px; /* match sign-out button height */
+  box-sizing: border-box;
+}
+
+.delete-account-outlined-btn:hover {
+  background-color: #e53935;
+  color: white;
+}
+.signout-btn,
+.delete-account-outlined-btn {
+  height: 44px;
+  box-sizing: border-box;
+}
+.signout-btn,
+.delete-account-outlined-btn {
+  height: 44px;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  font-size: 15px;
+}
+.delete-account-outlined-btn {
+  background-color: transparent;
+  color: #e53935;
+  border: 1.5px solid #e53935;
+  border-radius: 6px;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  gap: 6px;
 }

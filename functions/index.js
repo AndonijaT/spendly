@@ -66,3 +66,74 @@ exports.createUserDocument = functions
     });
     console.log(` Created user doc for ${email}`);
   });
+const { getFirestore } = require('firebase-admin/firestore');
+
+/**
+ * rrecursively deletes a firestore subcollection
+ */
+async function deleteSubcollection(docRef, subcollectionName) {
+  const subcollectionRef = docRef.collection(subcollectionName);
+  const snap = await subcollectionRef.get();
+
+  const batch = db.batch();
+  snap.docs.forEach((doc) => batch.delete(doc.ref));
+
+  if (!snap.empty) {
+    await batch.commit();
+    console.log(` Deleted ${snap.size} docs from ${docRef.path}/${subcollectionName}`);
+  }
+}
+
+exports.cleanupUserData = functions
+  .runWith({ runtime: 'nodejs18' })
+  .auth.user()
+  .onDelete(async (userRecord) => {
+    const deletedUid = userRecord.uid;
+    try {
+      const deletedUserRef = db.collection('users').doc(deletedUid);
+
+      // delete main user document
+      await deletedUserRef.delete();
+      console.log(` Deleted Firestore document for UID: ${deletedUid}`);
+
+      // delete their subcollections
+      await Promise.all([
+        deleteSubcollection(deletedUserRef, 'incomingInvites'),
+        deleteSubcollection(deletedUserRef, 'notifications'),
+      ]);
+
+      // remove this UID from others' sharedWith and incomingInvites
+      const usersSnap = await db.collection('users').get();
+      const batch = db.batch();
+
+      for (const docSnap of usersSnap.docs) {
+        const data = docSnap.data();
+        const updates = {};
+        let hasChanges = false;
+
+        // remove from sharedWith
+        if (Array.isArray(data.sharedWith) && data.sharedWith.includes(deletedUid)) {
+          updates.sharedWith = data.sharedWith.filter((uid) => uid !== deletedUid);
+          hasChanges = true;
+        }
+
+        // remove invites sent *to* this deleted user
+        const invitesSnap = await docSnap.ref.collection('incomingInvites').get();
+        invitesSnap.forEach((invite) => {
+          if (invite.data().fromUid === deletedUid) {
+            batch.delete(invite.ref);
+            console.log(`Deleted invite from ${deletedUid} in ${docSnap.id}`);
+          }
+        });
+
+        if (hasChanges) {
+          batch.update(docSnap.ref, updates);
+        }
+      }
+
+      await batch.commit();
+      console.log(` Fully cleaned up UID: ${deletedUid}`);
+    } catch (err) {
+      console.error(" Error during cleanupUserData:", err);
+    }
+  });

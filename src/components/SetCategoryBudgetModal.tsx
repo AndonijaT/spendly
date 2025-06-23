@@ -9,7 +9,7 @@ export default function SetCategoryBudgetModal({ onClose }: { onClose: () => voi
     const [category, setCategory] = useState('');
     const [limit, setLimit] = useState('');
     const [currency, setCurrency] = useState('EUR');
-    const [type, setType] = useState<'income' | 'expense'>('expense');
+    const [type] = useState<'income' | 'expense'>('expense');
 
     const handleSave = async () => {
         const user = auth.currentUser;

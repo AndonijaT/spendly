@@ -31,7 +31,6 @@ function LoginForm({
     const [mfaVisible, setMfaVisible] = useState(false);
     const [smsCode, setSmsCode] = useState('');
     const [loading, setLoading] = useState(false);
-    const [isLoading, setIsLoading] = useState(false);
 
    useEffect(() => {
     if (!window.recaptchaVerifier && typeof window !== 'undefined') {

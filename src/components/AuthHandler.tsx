@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { getRedirectResult, GoogleAuthProvider } from 'firebase/auth';
+import { getRedirectResult } from 'firebase/auth';
 import { auth } from '../firebase/firebaseConfig';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';

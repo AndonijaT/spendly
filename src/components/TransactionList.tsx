@@ -3,7 +3,6 @@ import { collection, getDocs, query, orderBy } from 'firebase/firestore';
 import { auth, db } from '../firebase/firebaseConfig';
 import { onAuthStateChanged } from 'firebase/auth';
 import '../styles/TransactionList.css';
-import { useLanguage } from '../context/LanguageContext';
 
 interface Transaction {
   id: string;
@@ -19,7 +18,7 @@ interface Transaction {
 export default function TransactionList() {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [balance, setBalance] = useState(0);
-  const { t } = useLanguage();
+  // const { t } = useLanguage();
 
   const fetchTransactions = async (userId: string) => {
     try {
