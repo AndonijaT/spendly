@@ -911,3 +911,97 @@ html {
   transform: rotate(90deg);
   color: #000;
 }
+.floating-advice-trigger {
+  position: fixed;
+  bottom: 8.5rem;
+  right: 2rem;
+  background-color: #fffbe6;
+  padding: 1rem 1.2rem;
+  border-radius: 10px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  z-index: 1100;
+  font-weight: 500;
+  font-size: 1rem;
+  max-width: 260px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.floating-advice-trigger span {
+  flex: 1;
+}
+
+.close-trigger-btn {
+  background: transparent;
+  border: none;
+  font-size: 1.1rem;
+  color: #555;
+  cursor: pointer;
+  padding: 0;
+  line-height: 1;
+  z-index: 1101;
+  align-self: flex-start;
+  margin-top: -4px;
+}
+
+.close-trigger-btn:hover {
+  color: #000;
+}
+.advice-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.4);
+  z-index: 1200;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.advice-modal-content {
+  position: relative;
+  background: white;
+  padding: 2rem;
+  border-radius: 10px;
+  max-width: 480px;
+  width: 90%;
+  z-index: 1201;
+}
+
+.close-advice-modal {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.75rem;
+  background: transparent;
+  border: none;
+  font-size: 1.3rem;
+  color: #555;
+  cursor: pointer;
+}
+.floating-advice-button {
+  position: fixed;
+  bottom: 80px;
+  left: 20px;
+  z-index: 2000;
+  background-color: #d2b109;
+  color: white;
+  border: none;
+  padding: 0.5rem 0.8rem;
+  border-radius: 25px;
+  font-size: 0.85rem;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+  cursor: pointer;
+  transition: opacity 0.3s ease;
+}
+
+.floating-advice-button .close-advice {
+  margin-left: 8px;
+  font-weight: bold;
+  background: none;
+  border: none;
+  color: white;
+  font-size: 0.9rem;
+  cursor: pointer;
+}

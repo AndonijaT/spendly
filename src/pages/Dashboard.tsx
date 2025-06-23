@@ -12,9 +12,9 @@ import Joyride from 'react-joyride';
 import type { Step } from 'react-joyride';
 import SetCategoryBudgetModal from '../components/SetCategoryBudgetModal';
 import { query, where } from 'firebase/firestore';
-import { Doughnut } from 'react-chartjs-2';
 import TransactionHistory from '../pages/TransactionHistory';
 import { addDoc, serverTimestamp } from 'firebase/firestore';
+import AIAdviceModal from '../components/AIAdviceModal'; 
 
 type Transaction = {
   id: string;
@@ -424,6 +424,8 @@ useEffect(() => {
   };
 
   const expensesRef = useRef<HTMLDivElement>(null);
+const [showAdviceModal, setShowAdviceModal] = useState(false);
+const [hideAdviceTrigger, setHideAdviceTrigger] = useState(false);
 
   return (
     <div className="dashboard-container">
@@ -735,6 +737,39 @@ useEffect(() => {
       {auth.currentUser && showHistoryModal && (
         <TransactionHistory onClose={() => setShowHistoryModal(false)} />
       )}
+{showAdviceModal && (
+  <div
+    className="advice-modal-overlay"
+    onClick={() => setShowAdviceModal(false)}
+  >
+    <div
+      className="advice-modal-content"
+      onClick={(e) => e.stopPropagation()}
+    >
+      <button
+        className="close-advice-modal"
+        onClick={() => setShowAdviceModal(false)}
+        aria-label="Close"
+      >
+        ×
+      </button>
+
+      <AIAdviceModal
+        budgets={budgets}
+        transactions={transactions}
+        onClose={() => setShowAdviceModal(false)}
+      />
+    </div>
+  </div>
+)}
+{!hideAdviceTrigger && (
+  <div className="floating-advice-button">
+    <span onClick={() => setShowAdviceModal(true)}>💬Hey! I am here to help</span>
+    <button className="close-advice" onClick={() => setHideAdviceTrigger(true)}>×</button>
+  </div>
+)}
+
+
 
     </div>
 
