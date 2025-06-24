@@ -73,15 +73,18 @@ const isAboutPage = location.pathname === '/about';
               Account
             </button>
           </li>
-          <li>
-            <button
-              className="account-button"
-              onClick={() => { toggleNotifications(); setMenuOpen(false); }}
-              aria-label="Notifications"
-            >
-              Notifications
-            </button>
-          </li>
+          {user && (
+  <li>
+    <button
+      className="account-button"
+      onClick={() => { toggleNotifications(); setMenuOpen(false); }}
+      aria-label="Notifications"
+    >
+      Notifications
+    </button>
+  </li>
+)}
+
         </ul>
       </nav>
 

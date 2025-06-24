@@ -765,7 +765,7 @@ const [hideAdviceTrigger, setHideAdviceTrigger] = useState(false);
 )}
 {!hideAdviceTrigger && (
   <div className="floating-advice-button">
-    <span onClick={() => setShowAdviceModal(true)}>💬Hey! I am here to help</span>
+    <span onClick={() => setShowAdviceModal(true)}>💬Hey! I am here to help!</span>
     <button className="close-advice" onClick={() => setHideAdviceTrigger(true)}>×</button>
   </div>
 )}
