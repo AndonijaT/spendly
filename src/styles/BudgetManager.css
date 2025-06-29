@@ -1,0 +1,232 @@
+.budget-manager-section {
+  margin-top: 2rem;
+  padding: 1.5rem;
+  background: #fafafa;
+  border-radius: 16px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.06);
+  transition: all 0.3s ease;
+}
+
+.budget-manager-section h3 {
+  font-size: 1.5rem;
+  margin-bottom: 1rem;
+  color: #333;
+}
+
+.budget-bar {
+  padding: 1rem 0;
+  border-bottom: 1px dashed #ddd;
+  margin: 0;
+  margin-bottom: 1rem;
+}
+
+.budget-bar .label {
+  font-size: 1.1rem;
+  margin-bottom: 0.3rem;
+  font-weight: bold;
+  color: #444;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.budget-actions button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 1.2rem;
+  margin-left: 0.5rem;
+  transition: transform 0.2s ease;
+}
+
+.budget-actions button:hover {
+  transform: scale(1.2);
+}
+
+.progress-bar-container {
+  height: 12px;
+  background-color: #eee;
+  border-radius: 6px;
+  overflow: hidden;
+  margin-top: 0.2rem;
+}
+
+.progress {
+  height: 100%;
+  transition: width 0.4s ease-in-out;
+}
+
+.warning-text {
+  font-size: 0.9rem;
+  font-weight: bold;
+  color: #d32f2f;
+  margin-top: 0.4rem;
+}
+
+.add-budget-toggle {
+  margin-top: 1rem;
+  padding: 0.75rem 1.5rem;
+  background: linear-gradient(to right, #d2b109, #ffcc29);
+  color: #fff;
+  font-weight: bold;
+  border: none;
+  border-radius: 12px;
+  font-size: 1.05rem;
+  box-shadow: 0 6px 14px rgba(0, 0, 0, 0.15);
+  transition: transform 0.2s ease, box-shadow 0.3s ease;
+  cursor: pointer;
+  animation: popIn 0.3s ease;
+}
+
+.add-budget-toggle:hover {
+  transform: scale(1.04);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+}
+
+.budget-form-wrapper {
+  display: flex;
+  justify-content: center;
+  margin-top: 2rem;
+  animation: fadeInScale 0.3s ease;
+}
+
+.budget-form-inline {
+  margin-top: 1rem;
+  padding: 1.5rem;
+  background-color: #fffef8;
+  border: 1px solid #f7e48b;
+  border-radius: 16px;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.08);
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  min-width: 320px;
+  max-width: 500px;
+  width: 100%;
+  animation: slideFade 0.4s ease-out;
+  transition: all 0.3s ease;
+}
+
+.budget-form-inline select,
+.budget-form-inline input {
+  padding: 0.75rem;
+  font-size: 1rem;
+  border-radius: 10px;
+  border: 1px solid #ddd;
+  transition: border-color 0.2s;
+}
+
+.budget-form-inline select:focus,
+.budget-form-inline input:focus {
+  border-color: #d2b109;
+  outline: none;
+}
+
+.budget-form-inline button {
+  padding: 0.75rem 1.5rem;
+  font-size: 1rem;
+  font-weight: bold;
+  border-radius: 10px;
+  cursor: pointer;
+  border: none;
+  transition: all 0.2s ease-in-out;
+}
+
+.budget-form-inline button[type="submit"] {
+  background-color: #1565c0;
+  color: #fff;
+}
+
+.budget-form-inline button[type="submit"]:hover {
+  background-color: #0d47a1;
+  transform: translateY(-1px);
+}
+
+.budget-form-inline .cancel-btn {
+  background-color: #888;
+  color: white;
+}
+
+.budget-form-inline .cancel-btn:hover {
+  background-color: #555;
+  transform: scale(1.02);
+}
+
+.budget-bar.high,
+.budget-bar.over {
+  background-color: #fff4f4;
+  border-radius: 10px;
+  padding: 1rem;
+  margin: 0 -1rem;
+  border: 1px solid #ffdada;
+  transition: background-color 0.3s ease;
+}
+
+.budget-bar.high {
+  box-shadow: inset 0 0 0 2px rgba(255, 0, 0, 0.05);
+}
+
+@keyframes slideFade {
+  from {
+    opacity: 0;
+    transform: translateY(20px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes popIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+@media (max-width: 480px) {
+  .budget-bar .label {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.3rem;
+    font-size: 1rem;
+  }
+
+  .budget-bar .label strong,
+  .budget-bar .label span {
+    display: block;
+    width: 100%;
+    line-height: 1.4;
+    text-align: left;
+  }
+
+  .budget-bar .label span.budget-actions {
+    align-self: flex-end;
+    margin-top: 0.3rem;
+  }
+}
+@media (max-width: 480px) {
+  .budget-bar .label {
+    font-weight: normal;
+    font-size: 0.95rem;
+  }
+
+  .budget-form-inline {
+    padding: 1rem;
+    max-width: 100%;
+    border-radius: 12px;
+  }
+
+  .add-budget-toggle {
+    font-size: 1rem;
+    padding: 0.6rem 1rem;
+  }
+}
+.budget-bar .label span,
+.budget-bar .label strong {
+  word-break: keep-all;
+  white-space: nowrap;
+}

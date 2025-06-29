@@ -11,10 +11,8 @@ import { toast } from 'react-toastify';
 
 export default function SettingsSidebar({
   onClose,
-  onBudgetModeClick,
 }: {
   onClose: () => void;
-  onBudgetModeClick: () => void;
 }) {
   const { language, setLanguage, t } = useLanguage();
   const [currency, setCurrency] = useState<'EUR' | 'USD' | 'MKD'>('EUR');
@@ -106,7 +104,6 @@ export default function SettingsSidebar({
     Papa.parse(file, {
       header: true,
       complete: async (results: Papa.ParseResult<any>) => {
-
         const currentMonth = new Date().getMonth();
         const currentYear = new Date().getFullYear();
 
@@ -129,11 +126,10 @@ export default function SettingsSidebar({
             category: row.Category,
             amount: parseFloat(row.Amount),
             description: row.Description || '',
-            method: 'cash', 
+            method: 'cash',
             timestamp: Timestamp.fromDate(new Date(row.Date))
           })
         );
-
 
         await Promise.all(adds);
         toast.success('Import completed ✅');
@@ -169,13 +165,6 @@ export default function SettingsSidebar({
           <label>{t('data')}</label>
           <button className="danger-btn" onClick={() => setShowConfirm(true)}>
             {t('erase')}
-          </button>
-        </div>
-
-        <div className="setting-group">
-          <label>Budget</label>
-          <button className="budget-mode-btn" onClick={onBudgetModeClick}>
-            💼 Budget Mode
           </button>
         </div>
 

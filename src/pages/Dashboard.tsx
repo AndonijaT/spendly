@@ -10,11 +10,11 @@ import { useNavigate } from 'react-router-dom';
 import SettingsSidebar from '../components/SettingsSidebar';
 import Joyride from 'react-joyride';
 import type { Step } from 'react-joyride';
-import SetCategoryBudgetModal from '../components/SetCategoryBudgetModal';
 import { query, where } from 'firebase/firestore';
 import TransactionHistory from '../pages/TransactionHistory';
 import { addDoc, serverTimestamp } from 'firebase/firestore';
 import AIAdviceModal from '../components/AIAdviceModal'; 
+import BudgetManager from '../components/BudgetManager';
 
 type Transaction = {
   id: string;
@@ -59,12 +59,7 @@ export default function Dashboard() {
   const navigate = useNavigate();
   // const showAllButton = transactions.length > 10;
   const [showSettings, setShowSettings] = useState(false);
-  const [showBudgetModal, setShowBudgetModal] = useState(false);
-  const handleBudgetMode = () => {
-    setShowSettings(false); // Close sidebar
-    setShowBudgetModal(true); // Open budget modal
-  };
-
+ 
   const recentTransactions = [...transactions]
     .sort((a, b) => b.timestamp.seconds - a.timestamp.seconds)
     .slice(0, 3);
@@ -121,7 +116,59 @@ const [overrunMessage, setOverrunMessage] = useState<string | null>(null);
   };
 
   const [budgets, setBudgets] = useState<Budget[]>([]);
+ const fetchBudgets = async () => {
+    const user = auth.currentUser;
+    if (!user) return;
 
+    const allUIDs = [user.uid];
+
+    if (viewMode === 'shared') {
+      try {
+        const q = await getDocs(collection(db, 'users'));
+        q.forEach((doc) => {
+          const sharedWith = doc.data().sharedWith || [];
+          const docUid = doc.id;
+
+          // They shared with me
+          if (sharedWith.includes(user.uid) && !allUIDs.includes(docUid)) {
+            allUIDs.push(docUid);
+          }
+
+          // I shared with them
+          if (user.uid === docUid && Array.isArray(sharedWith)) {
+            sharedWith.forEach((uid: string) => {
+              if (!allUIDs.includes(uid)) {
+                allUIDs.push(uid);
+              }
+            });
+          }
+        });
+      } catch (err) {
+        console.error("❌ Error finding shared budgets:", err);
+      }
+    }
+
+    const nowMonth = format(new Date(), 'yyyy-MM');
+    const budgetData: Budget[] = [];
+
+    for (const uid of allUIDs) {
+      const q = query(
+        collection(db, 'users', uid, 'budgets'),
+        where('month', '==', nowMonth)
+      );
+
+      try {
+        const snapshot = await getDocs(q);
+        snapshot.forEach((docSnap) => {
+          budgetData.push({ id: docSnap.id, ...docSnap.data() } as Budget);
+        });
+      } catch (err) {
+        console.error("❌ Error fetching budgets for UID:", uid, err);
+      }
+    }
+
+    setBudgets(budgetData);
+  };
 
   useEffect(() => {
     const savedMonth = localStorage.getItem('selectedMonth');
@@ -259,59 +306,7 @@ useEffect(() => {
 }, [showHistoryModal]);
 
  useEffect(() => {
-  const fetchBudgets = async () => {
-    const user = auth.currentUser;
-    if (!user) return;
-
-    const allUIDs = [user.uid];
-
-    if (viewMode === 'shared') {
-      try {
-        const q = await getDocs(collection(db, 'users'));
-        q.forEach((doc) => {
-          const sharedWith = doc.data().sharedWith || [];
-          const docUid = doc.id;
-
-          // They shared with me
-          if (sharedWith.includes(user.uid) && !allUIDs.includes(docUid)) {
-            allUIDs.push(docUid);
-          }
-
-          // I shared with them
-          if (user.uid === docUid && Array.isArray(sharedWith)) {
-            sharedWith.forEach((uid: string) => {
-              if (!allUIDs.includes(uid)) {
-                allUIDs.push(uid);
-              }
-            });
-          }
-        });
-      } catch (err) {
-        console.error("❌ Error finding shared budgets:", err);
-      }
-    }
-
-    const nowMonth = format(new Date(), 'yyyy-MM');
-    const budgetData: Budget[] = [];
-
-    for (const uid of allUIDs) {
-      const q = query(
-        collection(db, 'users', uid, 'budgets'),
-        where('month', '==', nowMonth)
-      );
-
-      try {
-        const snapshot = await getDocs(q);
-        snapshot.forEach((docSnap) => {
-          budgetData.push({ id: docSnap.id, ...docSnap.data() } as Budget);
-        });
-      } catch (err) {
-        console.error("❌ Error fetching budgets for UID:", uid, err);
-      }
-    }
-
-    setBudgets(budgetData);
-  };
+ 
 
   fetchBudgets();
 }, [viewMode]);
@@ -589,37 +584,15 @@ const [hideAdviceTrigger, setHideAdviceTrigger] = useState(false);
       </div>
 
 
-      <div className="dashboard-section">
-        <div className="budget-usage-section">
-          <h3>Budget Usage</h3>
-          {budgetProgress.map((bp) => (
-            <div key={bp.category} className="budget-bar">
-              <div className="label">
-                <strong>{bp.category}</strong>: {bp.spent.toFixed(2)} / {bp.limit.toFixed(2)} {bp.currency} ({Math.min(bp.percent, 100).toFixed(0)}%)
-              </div>
-              <div className="progress-bar-container">
-                <div
-                  className="progress"
-                  style={{
-                    width: `${Math.min(bp.percent, 100)}%`,
-                    backgroundColor:
-                      bp.warningLevel === 'over'
-                        ? '#c62828'
-                        : bp.warningLevel === 'high'
-                          ? '#ff9800'
-                          : bp.warningLevel === 'mid'
-                            ? '#fbc02d'
-                            : '#d2b109',
-                  }}
-                />
-              </div>
-              {bp.warningLevel === 'mid' && <p className="warning-text">⚠️ 50% of your budget used.</p>}
-              {bp.warningLevel === 'high' && <p className="warning-text">⚠️ 75% of your budget used!</p>}
-              {bp.warningLevel === 'over' && <p className="warning-text">🚨 Over budget!</p>}
-            </div>
-          ))}
-        </div>
-      </div>
+  
+      
+<div className="dashboard-section">
+<BudgetManager
+  budgets={budgets}
+  transactions={transactions}
+  onRefresh={fetchBudgets}
+/>
+</div>
 <div className="dashboard-section" style={{ textAlign: 'center', padding: '1rem' }}>
   <button
     className="go-to-reports-btn"
@@ -728,13 +701,10 @@ const [hideAdviceTrigger, setHideAdviceTrigger] = useState(false);
       {showSettings && (
         <SettingsSidebar
           onClose={() => setShowSettings(false)}
-          onBudgetModeClick={handleBudgetMode}
         />
       )}
 
-      {showBudgetModal && (
-        <SetCategoryBudgetModal onClose={() => setShowBudgetModal(false)} />
-      )}
+     
       {auth.currentUser && showHistoryModal && (
         <TransactionHistory onClose={() => setShowHistoryModal(false)} />
       )}
