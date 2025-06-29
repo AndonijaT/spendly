@@ -18,12 +18,21 @@
   ],
   "hosting": {
     "public": "dist",
-    "ignore": ["firebase.json", "**/.*", "**/node_modules/**"],
-    "rewrites": [
-      {
-        "source": "**",
-        "destination": "/index.html"
-      }
-    ]
+    "ignore": [
+      "firebase.json",
+      "**/.*",
+      "**/node_modules/**"
+    ],
+   "rewrites": [
+  {
+    "source": "/email-verified**",
+    "destination": "/emailVerified.html"
+  },
+  {
+    "source": "**",
+    "destination": "/index.html"
+  }
+]
+
   }
 }

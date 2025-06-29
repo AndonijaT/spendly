@@ -1,4 +1,3 @@
-// src/components/RegisterForm.tsx
 import { useState } from 'react';
 import {
   createUserWithEmailAndPassword,
@@ -26,7 +25,10 @@ function RegisterForm({
     try {
       const userCred = await createUserWithEmailAndPassword(auth, email, password);
       await updateProfile(userCred.user, { displayName: name });
-      await sendEmailVerification(userCred.user);
+await sendEmailVerification(userCred.user, {
+  url: 'https://spendly-f30b5.web.app/?verified=true'
+});
+
       toast.success('Verification email sent. Please check your inbox.');
 
       await auth.signOut(); // ✅ Sign them out immediately

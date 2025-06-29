@@ -58,10 +58,11 @@ function LoginForm({
     const userCred = await signInWithEmailAndPassword(auth, email, password);
 
     if (!userCred.user.emailVerified) {
-      await auth.signOut();
-      toast.error('Please verify your email before logging in.');
-      return;
-    }
+  toast.warn('Email not verified. Please check your inbox.');
+  await auth.signOut();
+  return;
+}
+
 
     onSuccess(); // 🎉
   } catch (err: any) {
