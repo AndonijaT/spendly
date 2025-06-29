@@ -487,17 +487,19 @@ const [hideAdviceTrigger, setHideAdviceTrigger] = useState(false);
 
 {overrunMessage && (
   <div
-    className="budget-alert"
+    className="budget-alert-overlay"
     onClick={() => {
       const currentMonth = format(new Date(), 'yyyy-MM');
-      const category = overrunMessage.split(' ')[0]; // crude but works
+      const category = overrunMessage.split(' ')[0];
       localStorage.setItem(`dismissed_${category}_${currentMonth}`, 'true');
       setOverrunMessage(null);
     }}
   >
-    <div>🚨 <strong>Budget Overrun:</strong></div>
-    <div style={{ marginTop: '0.5rem' }}>{overrunMessage}</div>
-    <div className="budget-dismiss-note">Click anywhere to dismiss</div>
+    <div className="budget-alert-box" onClick={(e) => e.stopPropagation()}>
+      <div>🚨 <strong>Budget Overrun:</strong></div>
+      <div style={{ marginTop: '0.5rem' }}>{overrunMessage}</div>
+      <div className="budget-dismiss-note">Click anywhere to dismiss</div>
+    </div>
   </div>
 )}
 
