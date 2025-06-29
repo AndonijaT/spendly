@@ -1,35 +1,38 @@
 const functions = require("firebase-functions/v1");
 const admin = require("firebase-admin");
 const cors = require("cors");
+const { OpenAI } = require("openai");
 
 admin.initializeApp();
 const db = admin.firestore();
 
-
+// enable CORS for all origins (can restrict later)
 const corsHandler = cors({ origin: true });
-const { OpenAI } = require("openai");
 
 const openai = new OpenAI({
   apiKey: functions.config().openai.key,
   baseURL: "https://openrouter.ai/api/v1", //  required for OpenRouter
 });
 
-
 exports.getAdvice = functions
   .runWith({ runtime: "nodejs18" })
-  .https.onRequest(async (req, res) => {
-    res.set('Access-Control-Allow-Origin', 'http://127.0.0.1:5173');
-    res.set('Access-Control-Allow-Methods', 'POST, OPTIONS');
-    res.set('Access-Control-Allow-Headers', 'Content-Type');
+  .https.onRequest((req, res) => {
+    corsHandler(req, res, async () => {
+      if (req.method === 'OPTIONS') {
+        return res.status(204).send('');
+      }
 
-    if (req.method === 'OPTIONS') {
-      return res.status(204).send('');
-    }
+      const openai = new OpenAI({
+        apiKey: functions.config().openai.key,
+        baseURL: "https://openrouter.ai/api/v1",
+      });
 
-    try {
-      const { budgets, transactions } = req.body;
+      try {
+        const { budgets, transactions } = req.body;
+        console.log("Incoming budgets:", budgets);
+        console.log("Incoming transactions:", transactions);
 
-      const prompt = `
+        const prompt = `
 You are an AI assistant helping users manage personal finances in an app called Spendly.
 
 Budgets:
@@ -39,20 +42,24 @@ Transactions:
 ${JSON.stringify(transactions, null, 2)}
 
 Provide 2–3 helpful insights or suggestions related to saving money, staying within budget, or spotting trends. Be friendly and specific.
-      `;
+        `;
+        console.log("Generated prompt:", prompt);
 
-   const chat = await openai.chat.completions.create({
-  model: "gpt-3.5-turbo", 
-  messages: [{ role: "user", content: prompt }],
-});
+        const chat = await openai.chat.completions.create({
+model: "openai/gpt-3.5-turbo-16k",
+          messages: [{ role: "user", content: prompt }],
+        });
+        console.log("OpenAI response:", chat);
 
-      const response = chat.choices[0].message.content;
-      return res.status(200).json({ advice: response });
-    } catch (err) {
-      console.error(" Error:", err);
-      return res.status(500).json({ error: "Advice failed" });
-    }
+        const response = chat.choices[0].message.content;
+        return res.status(200).json({ advice: response });
+      } catch (err) {
+        console.error("Error:", err);
+        return res.status(500).json({ error: "Advice failed" });
+      }
+    });
   });
+
 
 exports.createUserDocument = functions
   .runWith({ runtime: 'nodejs18' })
@@ -66,6 +73,7 @@ exports.createUserDocument = functions
     });
     console.log(` Created user doc for ${email}`);
   });
+
 const { getFirestore } = require('firebase-admin/firestore');
 
 /**
