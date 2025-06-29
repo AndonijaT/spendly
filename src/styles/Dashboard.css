@@ -53,7 +53,11 @@ html {
   box-shadow: 0 6px 16px rgba(0, 0, 0, 0.3);
 }
 
-
+.hidden-month-input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
 
 
 .month-picker label {
@@ -596,7 +600,11 @@ html {
   transform: scale(1.1);
 }
 
-
+.hidden-month-input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
 .fab-container {
   position: fixed;
   bottom: 2rem;
@@ -755,7 +763,11 @@ html {
 .overview-button .icon {
   font-size: 1.2rem;
 }
-
+.overview-button-wrapper {
+  text-align: center;
+  margin-bottom: 1.5rem;
+  transition: opacity 0.3s ease;
+}
 
 .overview-button {
   background: #eef3f7;
@@ -781,8 +793,14 @@ html {
   transition: transform 0.2s ease;
 }
 
-
-
+.fab-button:hover,
+.floating-fab:hover {
+  transform: scale(1.05);
+}
+.fab-button:hover,
+.floating-fab:hover {
+  box-shadow: 0 0 8px rgba(0, 0, 0, 0.2);
+}
 .go-to-reports-btn {
   padding: 0.75rem 1.2rem;
   background-color: #1565c0;
@@ -822,6 +840,23 @@ html {
   background-color: #d2b109;
   color: white;
 }
+.budget-alert {
+  position: fixed;
+  top: 20%;
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: #ff3b30;
+  color: white;
+  padding: 1.2rem 2rem;
+  border: 3px solid white;
+  border-radius: 12px;
+  font-size: 1.2rem;
+  font-weight: bold;
+  box-shadow: 0 0 30px rgba(255, 0, 0, 0.8);
+  z-index: 9999;
+  animation: blink 1s step-start infinite;
+}
+
 @keyframes blink {
   50% {
     opacity: 0.6;
@@ -992,10 +1027,4 @@ html {
   max-width: 90%;
   text-align: center;
   animation: popIn 0.3s ease;
-}
-
-.fab-button:hover,
-.floating-fab:hover {
-  transform: scale(1.05);
-  box-shadow: 0 0 8px rgba(0, 0, 0, 0.2);
 }

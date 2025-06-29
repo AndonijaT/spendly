@@ -15,6 +15,7 @@ import TransactionHistory from '../pages/TransactionHistory';
 import { addDoc, serverTimestamp } from 'firebase/firestore';
 import AIAdviceModal from '../components/AIAdviceModal'; 
 import BudgetManager from '../components/BudgetManager';
+import { onSnapshot } from 'firebase/firestore';
 
 type Transaction = {
   id: string;
@@ -189,108 +190,108 @@ const [overrunMessage, setOverrunMessage] = useState<string | null>(null);
     fetchUserEmails();
   }, []);
 
-   const fetchTransactions = async () => {
-    const user = auth.currentUser;
-    if (!user) return;
+  //  const fetchTransactions = async () => {
+  //   const user = auth.currentUser;
+  //   if (!user) return;
 
-    console.log("Your current user is:", user.uid);
+  //   console.log("Your current user is:", user.uid);
 
-    const allUIDs = [user.uid];
+  //   const allUIDs = [user.uid];
 
-    if (viewMode === 'shared') {
-      try {
-        const q = await getDocs(collection(db, 'users'));
-        q.forEach((doc) => {
-          const sharedWith = doc.data().sharedWith || [];
-          const docUid = doc.id;
+  //   if (viewMode === 'shared') {
+  //     try {
+  //       const q = await getDocs(collection(db, 'users'));
+  //       q.forEach((doc) => {
+  //         const sharedWith = doc.data().sharedWith || [];
+  //         const docUid = doc.id;
 
-          // They shared with me
-          if (sharedWith.includes(user.uid) && !allUIDs.includes(docUid)) {
-            allUIDs.push(docUid);
-          }
+  //         // They shared with me
+  //         if (sharedWith.includes(user.uid) && !allUIDs.includes(docUid)) {
+  //           allUIDs.push(docUid);
+  //         }
 
-          // I shared with them
-          if (user.uid === docUid && Array.isArray(sharedWith)) {
-            sharedWith.forEach((uid: string) => {
-              if (!allUIDs.includes(uid)) {
-                allUIDs.push(uid);
-              }
-            });
-          }
-        });
-      } catch (err) {
-        console.error("❌ Error while finding shared accounts:", err);
-      }
-    }
+  //         // I shared with them
+  //         if (user.uid === docUid && Array.isArray(sharedWith)) {
+  //           sharedWith.forEach((uid: string) => {
+  //             if (!allUIDs.includes(uid)) {
+  //               allUIDs.push(uid);
+  //             }
+  //           });
+  //         }
+  //       });
+  //     } catch (err) {
+  //       console.error("❌ Error while finding shared accounts:", err);
+  //     }
+  //   }
 
-    console.log("Will fetch transactions from UIDs:", allUIDs);
+  //   console.log("Will fetch transactions from UIDs:", allUIDs);
 
-    const allData: Transaction[] = [];
+  //   const allData: Transaction[] = [];
 
-    for (const uid of allUIDs) {
-      try {
-        const snapshot = await getDocs(collection(db, 'users', uid, 'transactions'));
-        snapshot.forEach((docSnap) => {
-          const data = docSnap.data();
+  //   for (const uid of allUIDs) {
+  //     try {
+  //       const snapshot = await getDocs(collection(db, 'users', uid, 'transactions'));
+  //       snapshot.forEach((docSnap) => {
+  //         const data = docSnap.data();
 
-          if (
-            data.type &&
-            data.category &&
-            data.amount !== undefined &&
-            data.timestamp?.seconds
-          ) {
-            const tx: Transaction = {
-              id: docSnap.id,
-              type: data.type,
-              category: data.category,
-              amount: data.amount,
-              timestamp: data.timestamp,
-              method: data.method,
-              direction: data.direction,
-              description: data.description,
-              ownerUid: uid,
-            };
+  //         if (
+  //           data.type &&
+  //           data.category &&
+  //           data.amount !== undefined &&
+  //           data.timestamp?.seconds
+  //         ) {
+  //           const tx: Transaction = {
+  //             id: docSnap.id,
+  //             type: data.type,
+  //             category: data.category,
+  //             amount: data.amount,
+  //             timestamp: data.timestamp,
+  //             method: data.method,
+  //             direction: data.direction,
+  //             description: data.description,
+  //             ownerUid: uid,
+  //           };
 
-            allData.push(tx);
-          } else {
-            console.warn(`Skipping incomplete transaction from ${uid}:`, data);
-          }
-        });
+  //           allData.push(tx);
+  //         } else {
+  //           console.warn(`Skipping incomplete transaction from ${uid}:`, data);
+  //         }
+  //       });
 
-        console.log(`Fetched ${snapshot.size} transactions from ${uid}`);
-      } catch (err) {
-        console.error(`Error fetching transactions for ${uid}:`, err);
-      }
-    }
+  //       console.log(`Fetched ${snapshot.size} transactions from ${uid}`);
+  //     } catch (err) {
+  //       console.error(`Error fetching transactions for ${uid}:`, err);
+  //     }
+  //   }
 
-    const filtered = allData.filter((tx) => {
-      if (!tx.timestamp?.seconds) return false;
-      const date = new Date(tx.timestamp.seconds * 1000);
-      return format(date, 'yyyy-MM') === selectedMonth;
-    });
+  //   const filtered = allData.filter((tx) => {
+  //     if (!tx.timestamp?.seconds) return false;
+  //     const date = new Date(tx.timestamp.seconds * 1000);
+  //     return format(date, 'yyyy-MM') === selectedMonth;
+  //   });
 
-    console.log(`Filtered ${filtered.length} transactions for selected month: ${selectedMonth}`);
+  //   console.log(`Filtered ${filtered.length} transactions for selected month: ${selectedMonth}`);
 
-    setTransactions(filtered);
+  //   setTransactions(filtered);
 
-    let income = 0;
-    let expenses = 0;
+  //   let income = 0;
+  //   let expenses = 0;
 
-    filtered.forEach((tx) => {
-      const amt = Number(tx.amount);
-      if (tx.type === 'income') income += amt;
-      else if (tx.type === 'expense') expenses += amt;
-    });
+  //   filtered.forEach((tx) => {
+  //     const amt = Number(tx.amount);
+  //     if (tx.type === 'income') income += amt;
+  //     else if (tx.type === 'expense') expenses += amt;
+  //   });
 
-    setIncomeTotal(income);
-    setExpenseTotal(expenses);
-  };
+  //   setIncomeTotal(income);
+  //   setExpenseTotal(expenses);
+  // };
 
 
-  useEffect(() => {
-  if (!selectedMonth) return;
-  fetchTransactions();
-}, [selectedMonth, viewMode]);
+//   useEffect(() => {
+//   if (!selectedMonth) return;
+//   fetchTransactions();
+// }, [selectedMonth, viewMode]);
 
 
 useEffect(() => {
@@ -422,6 +423,95 @@ useEffect(() => {
   const expensesRef = useRef<HTMLDivElement>(null);
 const [showAdviceModal, setShowAdviceModal] = useState(false);
 const [hideAdviceTrigger, setHideAdviceTrigger] = useState(false);
+useEffect(() => {
+  const user = auth.currentUser;
+  if (!user || !selectedMonth) return;
+
+  const allUIDs = [user.uid];
+  let unsubscribers: (() => void)[] = [];
+
+  const setupListeners = async () => {
+    if (viewMode === 'shared') {
+      const snap = await getDocs(collection(db, 'users'));
+      snap.forEach((doc) => {
+        const sharedWith = doc.data().sharedWith || [];
+        const docUid = doc.id;
+
+        if (sharedWith.includes(user.uid) && !allUIDs.includes(docUid)) {
+          allUIDs.push(docUid);
+        }
+        if (user.uid === docUid && Array.isArray(sharedWith)) {
+          sharedWith.forEach((uid: string) => {
+            if (!allUIDs.includes(uid)) {
+              allUIDs.push(uid);
+            }
+          });
+        }
+      });
+    }
+
+    let allTx: Transaction[] = [];
+
+    for (const uid of allUIDs) {
+      const ref = collection(db, 'users', uid, 'transactions');
+      const unsubscribe = onSnapshot(ref, (snap) => {
+        const txs: Transaction[] = [];
+
+        snap.forEach((doc) => {
+          const data = doc.data();
+          if (
+            data.type &&
+            data.category &&
+            data.amount !== undefined &&
+            data.timestamp?.seconds
+          ) {
+            const date = new Date(data.timestamp.seconds * 1000);
+            const month = format(date, 'yyyy-MM');
+            if (month === selectedMonth) {
+              txs.push({
+                id: doc.id,
+                type: data.type,
+                category: data.category,
+                amount: data.amount,
+                timestamp: data.timestamp,
+                method: data.method,
+                direction: data.direction,
+                description: data.description,
+                ownerUid: uid,
+              });
+            }
+          }
+        });
+
+        allTx = allTx
+          .filter((t) => t.ownerUid !== uid) // remove old ones from same UID
+          .concat(txs); // add new ones
+
+        allTx.sort((a, b) => b.timestamp.seconds - a.timestamp.seconds);
+        setTransactions(allTx);
+
+        // Update totals
+        let income = 0;
+        let expense = 0;
+        allTx.forEach((tx) => {
+          const amt = Number(tx.amount);
+          if (tx.type === 'income') income += amt;
+          else if (tx.type === 'expense') expense += amt;
+        });
+        setIncomeTotal(income);
+        setExpenseTotal(expense);
+      });
+
+      unsubscribers.push(unsubscribe);
+    }
+  };
+
+  setupListeners();
+
+  return () => {
+    unsubscribers.forEach((unsub) => unsub());
+  };
+}, [selectedMonth, viewMode]);
 
   return (
     <div className="dashboard-container">
@@ -639,13 +729,7 @@ const [hideAdviceTrigger, setHideAdviceTrigger] = useState(false);
     <button className="see-all-link" onClick={() => setShowHistoryModal(true)}>
       See all
     </button>
-   <button
-  className="refresh-button"
-  title="Refresh transactions"
-  onClick={fetchTransactions}
->
-  🔄
-</button>
+ 
 
   </div>
 </div>
