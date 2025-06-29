@@ -11,6 +11,8 @@ import { format } from 'date-fns';
 import { toast } from 'react-toastify';
 import '../styles/BudgetManager.css';
 import { useRef } from 'react';
+import { useEffect } from 'react';
+import { useMemo } from 'react';
 
 type Budget = {
     id: string;
@@ -30,11 +32,15 @@ type Transaction = {
 export default function BudgetManager({
     budgets,
     transactions,
-    onRefresh
+    onRefresh,
+    onOverrunDetected, 
+
 }: {
     budgets: Budget[];
     transactions: Transaction[];
     onRefresh: () => void;
+    onOverrunDetected?: (msg: string, category: string) => void;
+
 }) {
     const [category, setCategory] = useState('');
     const [limit, setLimit] = useState('');
@@ -112,22 +118,37 @@ const startEditBudget = (b: Budget) => {
         }
     };
 
-   const budgetProgress = budgets.map((b) => {
-  const spent = transactions
-    .filter((tx) => tx.type === b.type && tx.category === b.category)
-    .reduce((sum, tx) => sum + tx.amount, 0);
 
-  const rawPercent = (spent / b.limit) * 100;
-  const percent = Math.min(rawPercent, 100);
+const budgetProgress = useMemo(() => {
+  return budgets.map((b) => {
+    const spent = transactions
+      .filter((tx) => tx.type === b.type && tx.category === b.category)
+      .reduce((sum, tx) => sum + tx.amount, 0);
 
-  let warningLevel: 'none' | 'mid' | 'high' | 'over' = 'none';
-  if (rawPercent >= 100) warningLevel = 'over';
-  else if (rawPercent >= 75) warningLevel = 'high';
-  else if (rawPercent >= 50) warningLevel = 'mid';
+    const rawPercent = (spent / b.limit) * 100;
+    const percent = Math.min(rawPercent, 100);
 
-  return { ...b, spent, percent, rawPercent, warningLevel };
-});
+    let warningLevel: 'none' | 'mid' | 'high' | 'over' = 'none';
+    if (rawPercent >= 100) warningLevel = 'over';
+    else if (rawPercent >= 75) warningLevel = 'high';
+    else if (rawPercent >= 50) warningLevel = 'mid';
 
+    return { ...b, spent, percent, rawPercent, warningLevel };
+  });
+}, [budgets, transactions]);
+
+useEffect(() => {
+  const nowMonth = format(new Date(), 'yyyy-MM');
+  budgetProgress.forEach((bp) => {
+    if (bp.warningLevel === 'over') {
+      const key = `dismissed_${bp.category}_${nowMonth}`;
+      if (!localStorage.getItem(key) && onOverrunDetected) {
+        const msg = `${bp.category} over by ${(bp.spent - bp.limit).toFixed(2)} ${bp.currency}`;
+        onOverrunDetected(msg, bp.category);
+      }
+    }
+  });
+}, [budgetProgress, onOverrunDetected]);
 
     return (
         <div className="budget-manager-section">

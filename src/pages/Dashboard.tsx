@@ -591,7 +591,23 @@ const [hideAdviceTrigger, setHideAdviceTrigger] = useState(false);
   budgets={budgets}
   transactions={transactions}
   onRefresh={fetchBudgets}
+  onOverrunDetected={(msg, category) => {
+    setOverrunMessage(msg);
+
+    const currentUser = auth.currentUser;
+    if (!currentUser) return;
+
+    const ref = collection(db, 'users', currentUser.uid, 'notifications');
+    addDoc(ref, {
+      type: 'budget_alert',
+      message: `🚨 You've exceeded your budget for "${category}"!`,
+      toastType: 'error',
+      dismissed: false,
+      timestamp: serverTimestamp(),
+    });
+  }}
 />
+
 </div>
 <div className="dashboard-section" style={{ textAlign: 'center', padding: '1rem' }}>
   <button
