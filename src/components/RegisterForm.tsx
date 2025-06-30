@@ -19,9 +19,14 @@ function RegisterForm({
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [name, setName] = useState('');
+const [acceptedTerms, setAcceptedTerms] = useState(false);
 
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
+     if (!acceptedTerms) {
+    toast.error('Please accept the terms and privacy policy.');
+    return;
+  }
     try {
       const userCred = await createUserWithEmailAndPassword(auth, email, password);
       await updateProfile(userCred.user, { displayName: name });
@@ -60,8 +65,25 @@ await sendEmailVerification(userCred.user, {
       <input type="text" placeholder="Full Name" onChange={(e) => setName(e.target.value)} required />
       <input type="email" placeholder="Email" onChange={(e) => setEmail(e.target.value)} required />
       <input type="password" placeholder="Password" onChange={(e) => setPassword(e.target.value)} required />
-      <button type="submit">Sign Up</button>
+     <div className="terms-container">
+  <input
+    type="checkbox"
+    id="accept"
+    checked={acceptedTerms}
+    onChange={(e) => setAcceptedTerms(e.target.checked)}
+    required
+  />
+  <label htmlFor="accept" className="terms-label">
+    I have read and accepted the{' '}
+    <a href="/terms" target="_blank" rel="noopener noreferrer">Terms of Service</a>{' '}
+    and{' '}
+    <a href="/privacy-policy" target="_blank" rel="noopener noreferrer">Privacy Policy</a>.
+  </label>
+</div>
 
+  <button type="submit" disabled={!acceptedTerms}>
+    Sign Up
+  </button>
       <div className="auth-separator">or</div>
       <button className="google-btn" type="button" onClick={handleGoogleSignup}>
         <img src="/google-icon.png" alt="Google" style={{ width: '20px', marginRight: '8px' }} />

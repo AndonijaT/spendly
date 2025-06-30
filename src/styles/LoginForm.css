@@ -56,3 +56,35 @@
   font-weight: 500;
   font-size: 0.95rem;
 }
+.terms-container {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  margin: 16px 0 20px;
+  font-size: 0.88rem;
+  color: #333;
+}
+
+.terms-container input[type='checkbox'] {
+  margin-top: 2px;
+  width: 16px;
+  height: 16px;
+  accent-color: #d2b109;
+  cursor: pointer;
+}
+
+.terms-label {
+  display: inline;
+  line-height: 1.5;
+  font-weight: 500;
+}
+
+
+.terms-label a {
+  color: #007bff;
+  text-decoration: underline;
+}
+
+.terms-label a:hover {
+  color: #0056b3;
+}

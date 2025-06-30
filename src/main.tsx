@@ -19,7 +19,7 @@ import './emailInit';
 import PrivacyPolicy from './pages/PrivacyPolicy';
 import TermsOfUse from './pages/TermsOfUse';
 import Reports from './pages/Reports';
-
+import Terms from './pages/Terms';
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
     <LanguageProvider>
@@ -36,7 +36,7 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
             <Route path="/privacy-policy" element={<PrivacyPolicy />} />
             <Route path="/terms-of-use" element={<TermsOfUse />} />
             <Route path="/reports" element={<Reports />} />
-
+            <Route path="/terms" element={<Terms />} />
             {/* PROTECTED routes */}
             <Route path="account" element={<PrivateRoute><Account /></PrivateRoute>} />
             <Route path="dashboard" element={<PrivateRoute><Dashboard /></PrivateRoute>} />
