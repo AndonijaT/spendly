@@ -184,14 +184,7 @@ export default function SettingsSidebar({
           />
         </div>
 
-        <div className="setting-group links">
-          <a href="/privacy-policy" target="_blank" rel="noopener noreferrer">
-            {t('privacy')}
-          </a>
-          <a href="/terms-of-use" target="_blank" rel="noopener noreferrer">
-            {t('terms')}
-          </a>
-        </div>
+       
       </div>
 
       {showConfirm && (
