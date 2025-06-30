@@ -23,7 +23,6 @@ import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { auth, db, storage } from '../firebase/firebaseConfig';
 import { toast } from 'react-toastify';
 import '../styles/AccountPage.css';
-import { saveNotificationToHistory } from './../utils/saveNotification';
 import { confirmAlert } from 'react-confirm-alert';
 import 'react-confirm-alert/src/react-confirm-alert.css';
 
@@ -91,12 +90,8 @@ export default function Account() {
                 timestamp: localTimestamp, // keep consistent with local history
             });
 
-            // save to local history
-            await saveNotificationToHistory({
-                message: `${fromEmail} ${status} your invite.`,
-                type: 'invite_response',
-                toastType: 'info',
-            });
+           toast.info(`${fromEmail} ${status} your invite.`);
+
 
         };
 

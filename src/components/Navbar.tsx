@@ -10,7 +10,7 @@ import { signOut } from 'firebase/auth';
 import { auth } from '../firebase/firebaseConfig';
 import { toast } from 'react-toastify';
 
-function Navbar({ toggleNotifications }: { toggleNotifications: () => void }) {
+function Navbar() {
   const { user } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
@@ -42,25 +42,26 @@ function Navbar({ toggleNotifications }: { toggleNotifications: () => void }) {
     location.pathname.startsWith('/statistics') ||
     location.pathname.startsWith('/about') ||
     location.pathname.startsWith('/features') ||
-    location.pathname.startsWith('/reports') ;
-const isAboutPage = location.pathname === '/about';
-const handleSignOut = async () => {
-  try {
-    await signOut(auth);
-    navigate('/');
-  } catch {
-    toast.error('Sign out failed.');
-  }
-};
+    location.pathname.startsWith('/reports');
+    
+  const isAboutPage = location.pathname === '/about';
 
+  const handleSignOut = async () => {
+    try {
+      await signOut(auth);
+      navigate('/');
+    } catch {
+      toast.error('Sign out failed.');
+    }
+  };
 
   return (
     <>
-<nav className={`navbar 
-  ${useDarkText ? 'navbar-light' : ''} 
-  ${menuOpen ? 'open' : ''} 
-  ${scrolled ? 'scrolled' : ''} 
-  ${isAboutPage ? 'navbar-about' : ''}`}>
+      <nav className={`navbar 
+        ${useDarkText ? 'navbar-light' : ''} 
+        ${menuOpen ? 'open' : ''} 
+        ${scrolled ? 'scrolled' : ''} 
+        ${isAboutPage ? 'navbar-about' : ''}`}>
         <div className="navbar-logo">
           <Link to="/">Spendly</Link>
         </div>
@@ -78,37 +79,23 @@ const handleSignOut = async () => {
           <li><Link to="/about" onClick={() => setMenuOpen(false)}>About Us</Link></li>
           <li><Link to="/features" onClick={() => setMenuOpen(false)}>Features</Link></li>
           {user && <li><Link to="/dashboard" onClick={() => setMenuOpen(false)}>Dashboard</Link></li>}
-         <li>
-  <button className="account-button" onClick={() => { setMenuOpen(false); handleAccountClick(); }}>
-    {user ? 'Account' : 'Log In'}
-  </button>
-</li>
 
-          
+          <li>
+            <button className="account-button" onClick={() => { setMenuOpen(false); handleAccountClick(); }}>
+              {user ? 'Account' : 'Log In'}
+            </button>
+          </li>
+
           {user && (
-  <li>
-    <button
-      className="account-button"
-      onClick={() => { toggleNotifications(); setMenuOpen(false); }}
-      aria-label="Notifications"
-    >
-      Notifications
-    </button>
-  </li>
-
-)}
-{user && (
-  <li>
-    <button
-      className="account-button"
-      onClick={() => { handleSignOut(); setMenuOpen(false); }}
-    >
-      Sign Out
-    </button>
-  </li>
-)}
-
-
+            <li>
+              <button
+                className="account-button"
+                onClick={() => { handleSignOut(); setMenuOpen(false); }}
+              >
+                Sign Out
+              </button>
+            </li>
+          )}
         </ul>
       </nav>
 
@@ -120,7 +107,7 @@ const handleSignOut = async () => {
               switchToLogin={() => setAuthMode('login')}
             />
           )}
-          {authMode == 'login' && (
+          {authMode === 'login' && (
             <LoginForm
               onSuccess={() => setShowAuthModal(false)}
               switchToRegister={() => setAuthMode('register')}
