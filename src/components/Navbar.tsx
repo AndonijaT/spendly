@@ -42,8 +42,7 @@ function Navbar({ toggleNotifications }: { toggleNotifications: () => void }) {
     location.pathname.startsWith('/statistics') ||
     location.pathname.startsWith('/about') ||
     location.pathname.startsWith('/features') ||
-    location.pathname.startsWith('/reports') ||
-    location.pathname.startsWith('/contact');
+    location.pathname.startsWith('/reports') ;
 const isAboutPage = location.pathname === '/about';
 const handleSignOut = async () => {
   try {
@@ -78,13 +77,13 @@ const handleSignOut = async () => {
           <li><Link to="/" onClick={() => setMenuOpen(false)}>Home</Link></li>
           <li><Link to="/about" onClick={() => setMenuOpen(false)}>About Us</Link></li>
           <li><Link to="/features" onClick={() => setMenuOpen(false)}>Features</Link></li>
-          <li><Link to="/contact" onClick={() => setMenuOpen(false)}>Contact Us</Link></li>
           {user && <li><Link to="/dashboard" onClick={() => setMenuOpen(false)}>Dashboard</Link></li>}
-          <li>
-            <button className="account-button" onClick={() => { setMenuOpen(false); handleAccountClick(); }}>
-              Account
-            </button>
-          </li>
+         <li>
+  <button className="account-button" onClick={() => { setMenuOpen(false); handleAccountClick(); }}>
+    {user ? 'Account' : 'Log In'}
+  </button>
+</li>
+
           
           {user && (
   <li>
