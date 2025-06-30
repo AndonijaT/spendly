@@ -104,7 +104,7 @@
 }
 
 /* Mobile */
-@media (max-width: 768px) {
+@media (max-width: 1024px) {
   .hamburger {
     display: block;
     z-index: 1001;
