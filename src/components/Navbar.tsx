@@ -6,6 +6,9 @@ import LoginForm from './LoginForm';
 import RegisterForm from './RegisterForm';
 import ForgotPasswordForm from './ForgotPasswordForm';
 import './Navbar.css';
+import { signOut } from 'firebase/auth';
+import { auth } from '../firebase/firebaseConfig';
+import { toast } from 'react-toastify';
 
 function Navbar({ toggleNotifications }: { toggleNotifications: () => void }) {
   const { user } = useAuth();
@@ -42,6 +45,15 @@ function Navbar({ toggleNotifications }: { toggleNotifications: () => void }) {
     location.pathname.startsWith('/reports') ||
     location.pathname.startsWith('/contact');
 const isAboutPage = location.pathname === '/about';
+const handleSignOut = async () => {
+  try {
+    await signOut(auth);
+    navigate('/');
+  } catch {
+    toast.error('Sign out failed.');
+  }
+};
+
 
   return (
     <>
@@ -73,6 +85,7 @@ const isAboutPage = location.pathname === '/about';
               Account
             </button>
           </li>
+          
           {user && (
   <li>
     <button
@@ -83,7 +96,19 @@ const isAboutPage = location.pathname === '/about';
       Notifications
     </button>
   </li>
+
 )}
+{user && (
+  <li>
+    <button
+      className="account-button"
+      onClick={() => { handleSignOut(); setMenuOpen(false); }}
+    >
+      Sign Out
+    </button>
+  </li>
+)}
+
 
         </ul>
       </nav>
