@@ -20,9 +20,13 @@ import PrivacyPolicy from './pages/PrivacyPolicy';
 import TermsOfUse from './pages/TermsOfUse';
 import Reports from './pages/Reports';
 import Terms from './pages/Terms';
+import { CurrencyProvider } from './context/CurrencyContext';
+
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
     <LanguageProvider>
+      <CurrencyProvider>
+
       <Router>
         <ToastContainer position="top-right" autoClose={3000} pauseOnHover theme="light" />
         <Routes>
@@ -47,6 +51,8 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
           <Route path="*" element={<NotFound />} />
         </Routes>
       </Router>
+      </CurrencyProvider>
+
     </LanguageProvider>
   </React.StrictMode>
 );

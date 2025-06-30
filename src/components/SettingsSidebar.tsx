@@ -8,6 +8,7 @@ import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import Papa from 'papaparse';
 import { toast } from 'react-toastify';
+import { useCurrency } from '../context/CurrencyContext';
 
 export default function SettingsSidebar({
   onClose,
@@ -15,7 +16,7 @@ export default function SettingsSidebar({
   onClose: () => void;
 }) {
   const { language, setLanguage, t } = useLanguage();
-  const [currency, setCurrency] = useState<'EUR' | 'USD' | 'MKD'>('EUR');
+const { currency, setCurrency } = useCurrency();
   const [showConfirm, setShowConfirm] = useState(false);
   const [confirmSuccess, setConfirmSuccess] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);

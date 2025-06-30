@@ -13,10 +13,11 @@ import type { Step } from 'react-joyride';
 import { query, where } from 'firebase/firestore';
 import TransactionHistory from '../pages/TransactionHistory';
 import { addDoc, serverTimestamp } from 'firebase/firestore';
-import AIAdviceModal from '../components/AIAdviceModal'; 
+import AIAdviceModal from '../components/AIAdviceModal';
 import BudgetManager from '../components/BudgetManager';
 import { onSnapshot } from 'firebase/firestore';
-import Footer from '../components/Footer'; 
+import Footer from '../components/Footer';
+import { useCurrency } from '../context/CurrencyContext';
 
 type Transaction = {
   id: string;
@@ -61,7 +62,9 @@ export default function Dashboard() {
   const navigate = useNavigate();
   // const showAllButton = transactions.length > 10;
   const [showSettings, setShowSettings] = useState(false);
- 
+  const { currency } = useCurrency();
+  const symbol = currency === 'EUR' ? '€' : currency === 'USD' ? '$' : 'ден';
+
   const recentTransactions = [...transactions]
     .sort((a, b) => b.timestamp.seconds - a.timestamp.seconds)
     .slice(0, 3);
@@ -70,34 +73,34 @@ export default function Dashboard() {
   const [fabOpen, setFabOpen] = useState(false);
   const monthInputRef = useRef<HTMLInputElement>(null);
 
- const steps: Step[] = [
-  {
-    target: '.account-toggle',
-    placement: 'bottom',
-    content: '👥 Switch between "My View" (just your data) and "Shared View" (includes transactions from users you’ve connected with).',
-    disableBeacon: true,
-  },
-  {
-    target: '.cash-card-balance-section',
-    placement: 'bottom',
-    content: '💰 This is your total available balance, split between Cash and Card.',
-  },
+  const steps: Step[] = [
+    {
+      target: '.account-toggle',
+      placement: 'bottom',
+      content: '👥 Switch between "My View" (just your data) and "Shared View" (includes transactions from users you’ve connected with).',
+      disableBeacon: true,
+    },
+    {
+      target: '.cash-card-balance-section',
+      placement: 'bottom',
+      content: '💰 This is your total available balance, split between Cash and Card.',
+    },
 
-  {
-    target: '.floating-advice-button',
-    placement: 'left',
-    content: '🤖 Need help saving money? Ask our smart assistant for personalized advice!',
-  },
-  {
-    target: '.floating-fab',
-    placement: 'left',
-    content: '☰ Tap here to access settings (⚙️), choose a month (📅), or quickly add a new transaction (+).',
-  }
-];
+    {
+      target: '.floating-advice-button',
+      placement: 'left',
+      content: '🤖 Need help saving money? Ask our smart assistant for personalized advice!',
+    },
+    {
+      target: '.floating-fab',
+      placement: 'left',
+      content: '☰ Tap here to access settings (⚙️), choose a month (📅), or quickly add a new transaction (+).',
+    }
+  ];
 
-const [viewMode, setViewMode] = useState<'personal' | 'shared'>('shared');
+  const [viewMode, setViewMode] = useState<'personal' | 'shared'>('shared');
 
-const [overrunMessage, setOverrunMessage] = useState<string | null>(null);
+  const [overrunMessage, setOverrunMessage] = useState<string | null>(null);
 
   useEffect(() => {
     const seen = localStorage.getItem('seenSpendlyTutorial');
@@ -118,7 +121,7 @@ const [overrunMessage, setOverrunMessage] = useState<string | null>(null);
   };
 
   const [budgets, setBudgets] = useState<Budget[]>([]);
- const fetchBudgets = async () => {
+  const fetchBudgets = async () => {
     const user = auth.currentUser;
     if (!user) return;
 
@@ -289,29 +292,29 @@ const [overrunMessage, setOverrunMessage] = useState<string | null>(null);
   // };
 
 
-//   useEffect(() => {
-//   if (!selectedMonth) return;
-//   fetchTransactions();
-// }, [selectedMonth, viewMode]);
+  //   useEffect(() => {
+  //   if (!selectedMonth) return;
+  //   fetchTransactions();
+  // }, [selectedMonth, viewMode]);
 
 
-useEffect(() => {
-  if (showHistoryModal) {
-    document.body.style.overflow = 'hidden';
-  } else {
-    document.body.style.overflow = '';
-  }
+  useEffect(() => {
+    if (showHistoryModal) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
 
-  return () => {
-    document.body.style.overflow = '';
-  };
-}, [showHistoryModal]);
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, [showHistoryModal]);
 
- useEffect(() => {
- 
+  useEffect(() => {
 
-  fetchBudgets();
-}, [viewMode]);
+
+    fetchBudgets();
+  }, [viewMode]);
 
 
   const expenseByCategory = transactions
@@ -321,7 +324,7 @@ useEffect(() => {
       return acc;
     }, {} as Record<string, number>);
   const budgetProgress = budgets.map((budget) => {
-       const spent = transactions
+    const spent = transactions
       .filter((tx) => tx.type === budget.type && tx.category === budget.category)
       .reduce((sum, tx) => sum + tx.amount, 0);
 
@@ -338,34 +341,34 @@ useEffect(() => {
       warningLevel,
     };
   });
-useEffect(() => {
-  const user = auth.currentUser;
-  if (!user) return;
+  useEffect(() => {
+    const user = auth.currentUser;
+    if (!user) return;
 
-  const currentMonth = format(new Date(), 'yyyy-MM');
+    const currentMonth = format(new Date(), 'yyyy-MM');
 
-  budgetProgress.forEach(async (bp) => {
-    if (bp.warningLevel === 'over') {
-      const localKey = `dismissed_${bp.category}_${currentMonth}`;
-      const wasDismissed = localStorage.getItem(localKey);
-      if (wasDismissed) return; // do not show if dismissed already
+    budgetProgress.forEach(async (bp) => {
+      if (bp.warningLevel === 'over') {
+        const localKey = `dismissed_${bp.category}_${currentMonth}`;
+        const wasDismissed = localStorage.getItem(localKey);
+        if (wasDismissed) return; // do not show if dismissed already
 
-      const message = `${bp.category} over by ${(bp.spent - bp.limit).toFixed(2)} ${bp.currency}`;
-      setOverrunMessage(message);
+        const message = `${bp.category} over by ${(bp.spent - bp.limit).toFixed(2)} ${symbol}`;
+        setOverrunMessage(message);
 
-      const notif = {
-        type: 'budget_alert',
-        message: `🚨 You've exceeded your budget for "${bp.category}"!`,
-        toastType: 'error',
-        dismissed: false,
-        timestamp: serverTimestamp(),
-      };
+        const notif = {
+          type: 'budget_alert',
+          message: `🚨 You've exceeded your budget for "${bp.category}"!`,
+          toastType: 'error',
+          dismissed: false,
+          timestamp: serverTimestamp(),
+        };
 
-      const ref = collection(db, 'users', user.uid, 'notifications');
-      await addDoc(ref, notif);
-    }
-  });
-}, [budgetProgress]);
+        const ref = collection(db, 'users', user.uid, 'notifications');
+        await addDoc(ref, notif);
+      }
+    });
+  }, [budgetProgress]);
 
 
   const pieData = {
@@ -422,97 +425,97 @@ useEffect(() => {
   // };
 
   const expensesRef = useRef<HTMLDivElement>(null);
-const [showAdviceModal, setShowAdviceModal] = useState(false);
-const [hideAdviceTrigger, setHideAdviceTrigger] = useState(false);
-useEffect(() => {
-  const user = auth.currentUser;
-  if (!user || !selectedMonth) return;
+  const [showAdviceModal, setShowAdviceModal] = useState(false);
+  const [hideAdviceTrigger, setHideAdviceTrigger] = useState(false);
+  useEffect(() => {
+    const user = auth.currentUser;
+    if (!user || !selectedMonth) return;
 
-  const allUIDs = [user.uid];
-  let unsubscribers: (() => void)[] = [];
+    const allUIDs = [user.uid];
+    let unsubscribers: (() => void)[] = [];
 
-  const setupListeners = async () => {
-    if (viewMode === 'shared') {
-      const snap = await getDocs(collection(db, 'users'));
-      snap.forEach((doc) => {
-        const sharedWith = doc.data().sharedWith || [];
-        const docUid = doc.id;
-
-        if (sharedWith.includes(user.uid) && !allUIDs.includes(docUid)) {
-          allUIDs.push(docUid);
-        }
-        if (user.uid === docUid && Array.isArray(sharedWith)) {
-          sharedWith.forEach((uid: string) => {
-            if (!allUIDs.includes(uid)) {
-              allUIDs.push(uid);
-            }
-          });
-        }
-      });
-    }
-
-    let allTx: Transaction[] = [];
-
-    for (const uid of allUIDs) {
-      const ref = collection(db, 'users', uid, 'transactions');
-      const unsubscribe = onSnapshot(ref, (snap) => {
-        const txs: Transaction[] = [];
-
+    const setupListeners = async () => {
+      if (viewMode === 'shared') {
+        const snap = await getDocs(collection(db, 'users'));
         snap.forEach((doc) => {
-          const data = doc.data();
-          if (
-            data.type &&
-            data.category &&
-            data.amount !== undefined &&
-            data.timestamp?.seconds
-          ) {
-            const date = new Date(data.timestamp.seconds * 1000);
-            const month = format(date, 'yyyy-MM');
-            if (month === selectedMonth) {
-              txs.push({
-                id: doc.id,
-                type: data.type,
-                category: data.category,
-                amount: data.amount,
-                timestamp: data.timestamp,
-                method: data.method,
-                direction: data.direction,
-                description: data.description,
-                ownerUid: uid,
-              });
-            }
+          const sharedWith = doc.data().sharedWith || [];
+          const docUid = doc.id;
+
+          if (sharedWith.includes(user.uid) && !allUIDs.includes(docUid)) {
+            allUIDs.push(docUid);
+          }
+          if (user.uid === docUid && Array.isArray(sharedWith)) {
+            sharedWith.forEach((uid: string) => {
+              if (!allUIDs.includes(uid)) {
+                allUIDs.push(uid);
+              }
+            });
           }
         });
+      }
 
-        allTx = allTx
-          .filter((t) => t.ownerUid !== uid) // remove old ones from same UID
-          .concat(txs); // add new ones
+      let allTx: Transaction[] = [];
 
-        allTx.sort((a, b) => b.timestamp.seconds - a.timestamp.seconds);
-        setTransactions(allTx);
+      for (const uid of allUIDs) {
+        const ref = collection(db, 'users', uid, 'transactions');
+        const unsubscribe = onSnapshot(ref, (snap) => {
+          const txs: Transaction[] = [];
 
-        // Update totals
-        let income = 0;
-        let expense = 0;
-        allTx.forEach((tx) => {
-          const amt = Number(tx.amount);
-          if (tx.type === 'income') income += amt;
-          else if (tx.type === 'expense') expense += amt;
+          snap.forEach((doc) => {
+            const data = doc.data();
+            if (
+              data.type &&
+              data.category &&
+              data.amount !== undefined &&
+              data.timestamp?.seconds
+            ) {
+              const date = new Date(data.timestamp.seconds * 1000);
+              const month = format(date, 'yyyy-MM');
+              if (month === selectedMonth) {
+                txs.push({
+                  id: doc.id,
+                  type: data.type,
+                  category: data.category,
+                  amount: data.amount,
+                  timestamp: data.timestamp,
+                  method: data.method,
+                  direction: data.direction,
+                  description: data.description,
+                  ownerUid: uid,
+                });
+              }
+            }
+          });
+
+          allTx = allTx
+            .filter((t) => t.ownerUid !== uid) // remove old ones from same UID
+            .concat(txs); // add new ones
+
+          allTx.sort((a, b) => b.timestamp.seconds - a.timestamp.seconds);
+          setTransactions(allTx);
+
+          // Update totals
+          let income = 0;
+          let expense = 0;
+          allTx.forEach((tx) => {
+            const amt = Number(tx.amount);
+            if (tx.type === 'income') income += amt;
+            else if (tx.type === 'expense') expense += amt;
+          });
+          setIncomeTotal(income);
+          setExpenseTotal(expense);
         });
-        setIncomeTotal(income);
-        setExpenseTotal(expense);
-      });
 
-      unsubscribers.push(unsubscribe);
-    }
-  };
+        unsubscribers.push(unsubscribe);
+      }
+    };
 
-  setupListeners();
+    setupListeners();
 
-  return () => {
-    unsubscribers.forEach((unsub) => unsub());
-  };
-}, [selectedMonth, viewMode]);
+    return () => {
+      unsubscribers.forEach((unsub) => unsub());
+    };
+  }, [selectedMonth, viewMode]);
 
   return (
     <div className="dashboard-container">
@@ -526,20 +529,20 @@ useEffect(() => {
         </div>
 
       </div>
-<div className="account-toggle">
-  <button
-    className={viewMode === 'shared' ? 'active' : ''}
-    onClick={() => setViewMode('shared')}
-  >
-    Shared View
-  </button>
-  <button
-    className={viewMode === 'personal' ? 'active' : ''}
-    onClick={() => setViewMode('personal')}
-  >
-    My View
-  </button>
-</div>
+      <div className="account-toggle">
+        <button
+          className={viewMode === 'shared' ? 'active' : ''}
+          onClick={() => setViewMode('shared')}
+        >
+          Shared View
+        </button>
+        <button
+          className={viewMode === 'personal' ? 'active' : ''}
+          onClick={() => setViewMode('personal')}
+        >
+          My View
+        </button>
+      </div>
 
 
 
@@ -576,23 +579,23 @@ useEffect(() => {
 
 
 
-{overrunMessage && (
-  <div
-    className="budget-alert-overlay"
-    onClick={() => {
-      const currentMonth = format(new Date(), 'yyyy-MM');
-      const category = overrunMessage.split(' ')[0];
-      localStorage.setItem(`dismissed_${category}_${currentMonth}`, 'true');
-      setOverrunMessage(null);
-    }}
-  >
-    <div className="budget-alert-box" onClick={(e) => e.stopPropagation()}>
-      <div>🚨 <strong>Budget Overrun:</strong></div>
-      <div style={{ marginTop: '0.5rem' }}>{overrunMessage}</div>
-      <div className="budget-dismiss-note">Click anywhere to dismiss</div>
-    </div>
-  </div>
-)}
+      {overrunMessage && (
+        <div
+          className="budget-alert-overlay"
+          onClick={() => {
+            const currentMonth = format(new Date(), 'yyyy-MM');
+            const category = overrunMessage.split(' ')[0];
+            localStorage.setItem(`dismissed_${category}_${currentMonth}`, 'true');
+            setOverrunMessage(null);
+          }}
+        >
+          <div className="budget-alert-box" onClick={(e) => e.stopPropagation()}>
+            <div>🚨 <strong>Budget Overrun:</strong></div>
+            <div style={{ marginTop: '0.5rem' }}>{overrunMessage}</div>
+            <div className="budget-dismiss-note">Click anywhere to dismiss</div>
+          </div>
+        </div>
+      )}
 
 
 
@@ -606,19 +609,19 @@ useEffect(() => {
               <h3>Total Balance</h3>
               <div className="balance-display">
                 {totalBalance >= 0 ? (
-                  <span className="balance-positive">{totalBalance.toFixed(2)} €</span>
+                  <span className="balance-positive">{totalBalance.toFixed(2)} {symbol}</span>
                 ) : (
-                  <span className="balance-negative">- {(Math.abs(totalBalance)).toFixed(2)} €</span>
+                  <span className="balance-negative">- {(Math.abs(totalBalance)).toFixed(2)} {symbol}</span>
                 )}
               </div>
               <div className="balance-breakdown">
                 <div className="balance-line">
                   <span className="label">Cash</span>
-                  <span>{cash.toFixed(2)} €</span>
+                  <span>{cash.toFixed(2)} {symbol}</span>
                 </div>
                 <div className="balance-line">
                   <span className="label">Card</span>
-                  <span>{card.toFixed(2)} €</span>
+                  <span>{card.toFixed(2)} {symbol}</span>
                 </div>
               </div>
             </div>
@@ -628,8 +631,8 @@ useEffect(() => {
 
         <div className="dashboard-section">
           <div className="summary-row">
-            <div className="summary-box income">Income: +{incomeTotal.toFixed(2)} €</div>
-            <div className="summary-box expense">Expenses: -{expenseTotal.toFixed(2)} €</div>
+            <div className="summary-box income">Income: +{incomeTotal.toFixed(2)} {symbol}</div>
+            <div className="summary-box expense">Expenses: -{expenseTotal.toFixed(2)} {symbol}</div>
           </div>
         </div>
       </div>
@@ -667,8 +670,9 @@ useEffect(() => {
                     {category} ({percent}%)
                   </div>
                   <div className="category-amount">
-                    {amount.toFixed(2)} €
+                    {amount.toFixed(2)} {symbol}
                   </div>
+
                 </div>
               );
             })}
@@ -677,63 +681,63 @@ useEffect(() => {
       </div>
 
 
-  
-      
-<div className="dashboard-section">
-<BudgetManager
-  budgets={budgets}
-  transactions={transactions}
-  onRefresh={fetchBudgets}
-  onOverrunDetected={(msg, category) => {
-    setOverrunMessage(msg);
 
-    const currentUser = auth.currentUser;
-    if (!currentUser) return;
 
-    const ref = collection(db, 'users', currentUser.uid, 'notifications');
-    addDoc(ref, {
-      type: 'budget_alert',
-      message: `🚨 You've exceeded your budget for "${category}"!`,
-      toastType: 'error',
-      dismissed: false,
-      timestamp: serverTimestamp(),
-    });
-  }}
-/>
+      <div className="dashboard-section">
+        <BudgetManager
+          budgets={budgets}
+          transactions={transactions}
+          onRefresh={fetchBudgets}
+          onOverrunDetected={(msg, category) => {
+            setOverrunMessage(msg);
 
-</div>
-<div className="dashboard-section" style={{ textAlign: 'center', padding: '1rem' }}>
-  <button
-    className="go-to-reports-btn"
-    onClick={() => navigate('/reports')}
-    style={{
-      padding: '0.75rem 1.2rem',
-      backgroundColor: '#1565c0',
-      color: 'white',
-      border: 'none',
-      borderRadius: '8px',
-      fontSize: '1rem',
-      fontWeight: 600,
-      cursor: 'pointer',
-      boxShadow: '0 2px 6px rgba(0,0,0,0.1)',
-    }}
-  >
-    📈 View Full Spending Report
-  </button>
-</div>
+            const currentUser = auth.currentUser;
+            if (!currentUser) return;
+
+            const ref = collection(db, 'users', currentUser.uid, 'notifications');
+            addDoc(ref, {
+              type: 'budget_alert',
+              message: `🚨 You've exceeded your budget for "${category}"!`,
+              toastType: 'error',
+              dismissed: false,
+              timestamp: serverTimestamp(),
+            });
+          }}
+        />
+
+      </div>
+      <div className="dashboard-section" style={{ textAlign: 'center', padding: '1rem' }}>
+        <button
+          className="go-to-reports-btn"
+          onClick={() => navigate('/reports')}
+          style={{
+            padding: '0.75rem 1.2rem',
+            backgroundColor: '#1565c0',
+            color: 'white',
+            border: 'none',
+            borderRadius: '8px',
+            fontSize: '1rem',
+            fontWeight: 600,
+            cursor: 'pointer',
+            boxShadow: '0 2px 6px rgba(0,0,0,0.1)',
+          }}
+        >
+          📈 View Full Spending Report
+        </button>
+      </div>
 
       <div className="dashboard-section">
         <div className="recent-transactions">
-         <div className="recent-header">
-  <h3>Latest transactions</h3>
-  <div className="recent-actions">
-    <button className="see-all-link" onClick={() => setShowHistoryModal(true)}>
-      See all
-    </button>
- 
+          <div className="recent-header">
+            <h3>Latest transactions</h3>
+            <div className="recent-actions">
+              <button className="see-all-link" onClick={() => setShowHistoryModal(true)}>
+                See all
+              </button>
 
-  </div>
-</div>
+
+            </div>
+          </div>
 
           <ul>
             {recentTransactions.map((tx) => {
@@ -762,8 +766,9 @@ useEffect(() => {
 
                   </div>
                   <div className="recent-amount">
-                    {tx.type === 'income' ? '+' : '-'}{tx.amount.toFixed(2)} €
+                    {tx.type === 'income' ? '+' : '-'}{tx.amount.toFixed(2)} {symbol}
                   </div>
+
                 </li>
               );
             })}
@@ -807,45 +812,45 @@ useEffect(() => {
         />
       )}
 
-     
-     {auth.currentUser && showHistoryModal && (
-  <TransactionHistory
-    viewMode={viewMode}
-    onClose={() => setShowHistoryModal(false)}
-  />
-)}
 
-{showAdviceModal && (
-  <div
-    className="advice-modal-overlay"
-    onClick={() => setShowAdviceModal(false)}
-  >
-    <div
-      className="advice-modal-content"
-      onClick={(e) => e.stopPropagation()}
-    >
-      <button
-        className="close-advice-modal"
-        onClick={() => setShowAdviceModal(false)}
-        aria-label="Close"
-      >
-        ×
-      </button>
+      {auth.currentUser && showHistoryModal && (
+        <TransactionHistory
+          viewMode={viewMode}
+          onClose={() => setShowHistoryModal(false)}
+        />
+      )}
 
-      <AIAdviceModal
-        budgets={budgets}
-        transactions={transactions}
-        onClose={() => setShowAdviceModal(false)}
-      />
-    </div>
-  </div>
-)}
-{!hideAdviceTrigger && (
-  <div className="floating-advice-button">
-    <span onClick={() => setShowAdviceModal(true)}>💬Hey! I am here to help!</span>
-    <button className="close-advice" onClick={() => setHideAdviceTrigger(true)}>×</button>
-  </div>
-)}
+      {showAdviceModal && (
+        <div
+          className="advice-modal-overlay"
+          onClick={() => setShowAdviceModal(false)}
+        >
+          <div
+            className="advice-modal-content"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <button
+              className="close-advice-modal"
+              onClick={() => setShowAdviceModal(false)}
+              aria-label="Close"
+            >
+              ×
+            </button>
+
+            <AIAdviceModal
+              budgets={budgets}
+              transactions={transactions}
+              onClose={() => setShowAdviceModal(false)}
+            />
+          </div>
+        </div>
+      )}
+      {!hideAdviceTrigger && (
+        <div className="floating-advice-button">
+          <span onClick={() => setShowAdviceModal(true)}>💬Hey! I am here to help!</span>
+          <button className="close-advice" onClick={() => setHideAdviceTrigger(true)}>×</button>
+        </div>
+      )}
 
       <Footer />
 
