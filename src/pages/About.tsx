@@ -2,6 +2,8 @@ import usePageTitle from '../hooks/usePageTitle';
 import '../styles/About.css';
 import TypingIntro from '../components/TypingIntro';
 import { useAuth } from '../firebase/firebaseConfig'; 
+import Footer from '../components/Footer'; 
+
 function About() {
   usePageTitle('About Spendly');
   const { user } = useAuth();
@@ -111,11 +113,10 @@ function About() {
   </section>
 )}
 
-
-      <footer className="about-footer">
-        <p>© {new Date().getFullYear()} Spendly — Built with purpose.</p>
-      </footer>
+<Footer />
+    
     </div>
+    
   );
 }
 
