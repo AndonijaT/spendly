@@ -8,7 +8,6 @@ import {
     RecaptchaVerifier,
     EmailAuthProvider,
     reauthenticateWithCredential,
-    signOut,
 } from 'firebase/auth';
 import {
     collection,
@@ -90,7 +89,7 @@ export default function Account() {
                 timestamp: localTimestamp, // keep consistent with local history
             });
 
-           toast.info(`${fromEmail} ${status} your invite.`);
+            toast.info(`${fromEmail} ${status} your invite.`);
 
 
         };
@@ -259,45 +258,37 @@ export default function Account() {
         }
     };
 
-    const handleSignOut = async () => {
-        try {
-            await signOut(auth);
-            toast.success('Signed out.');
-            window.location.href = '/';
-        } catch {
-            toast.error('Sign out failed.');
-        }
-    };
-   const handleDeleteAccount = () => {
-  confirmAlert({
-    title: 'Delete Your Account',
-    message: '⚠️ Are you sure you want to permanently delete your account? This action cannot be undone.',
-    buttons: [
-      {
-        label: 'Yes, Delete',
-        onClick: async () => {
-          try {
-            if (!user?.email) throw new Error('Missing user email');
-            const password = prompt('Re-enter your password to confirm:');
-            if (!password) return;
 
-            const credential = EmailAuthProvider.credential(user.email, password);
-            await reauthenticateWithCredential(user, credential);
-            await user.delete();
-            toast.success('Account deleted.');
-            window.location.href = '/';
-          } catch (err: any) {
-            toast.error(err.message || 'Failed to delete account.');
-          }
-        }
-      },
-      {
-        label: 'Cancel',
-        onClick: () => toast.info('Deletion cancelled')
-      }
-    ]
-  });
-};
+    const handleDeleteAccount = () => {
+        confirmAlert({
+            title: 'Delete Your Account',
+            message: '⚠️ Are you sure you want to permanently delete your account? This action cannot be undone.',
+            buttons: [
+                {
+                    label: 'Yes, Delete',
+                    onClick: async () => {
+                        try {
+                            if (!user?.email) throw new Error('Missing user email');
+                            const password = prompt('Re-enter your password to confirm:');
+                            if (!password) return;
+
+                            const credential = EmailAuthProvider.credential(user.email, password);
+                            await reauthenticateWithCredential(user, credential);
+                            await user.delete();
+                            toast.success('Account deleted.');
+                            window.location.href = '/';
+                        } catch (err: any) {
+                            toast.error(err.message || 'Failed to delete account.');
+                        }
+                    }
+                },
+                {
+                    label: 'Cancel',
+                    onClick: () => toast.info('Deletion cancelled')
+                }
+            ]
+        });
+    };
 
     console.log('Current user:', user);
 
@@ -306,14 +297,14 @@ export default function Account() {
             <h2>My Account</h2>
 
             <div className="account-header">
-                <img src={photoURL} alt="Profile" className="profile-image" />
+                <img src={photoURL} alt="" className="profile-image" />
                 <div className="info">
                     <h3>{name || 'Your Name'}</h3>
                     <p>{email}</p>
                 </div>
             </div>
 
-            <div className="account-section">
+            <div className="account-section collaborate-section">
                 <div className="section-header">
                     <h3>Personal Details</h3>
                     {!editing && <button onClick={() => setEditing(true)}>Edit</button>}
@@ -342,37 +333,37 @@ export default function Account() {
                 )}
             </div>
 
-            <div className="account-section">
+            <div className="account-section collaborate-section twofa-section">
                 <h3>Two-Factor Authentication</h3>
                 {mfaEnabled ? (
-                    <p>2FA is enabled.</p>
+                    <p>✅ 2FA is enabled on your account.</p>
                 ) : (
                     <>
-                        <input
-                            type="tel"
-                            placeholder="Phone Number (e.g. +386...)"
-                            value={phoneNumber}
-                            onChange={(e) => setPhoneNumber(e.target.value)}
-                        />
-                        <button onClick={sendVerificationCode}>Send Code</button>
-                        <input
-                            type="text"
-                            placeholder="Enter Code"
-                            value={code}
-                            onChange={(e) => setCode(e.target.value)}
-                        />
-                        <button onClick={verifyCodeAndEnable2FA}>Verify & Enable</button>
+                        <div className="twofa-input-row">
+                            <input
+                                type="tel"
+                                placeholder="Phone Number (e.g. +386...)"
+                                value={phoneNumber}
+                                onChange={(e) => setPhoneNumber(e.target.value)}
+                            />
+                            <button onClick={sendVerificationCode}>Send Code</button>
+                        </div>
+                        <div className="twofa-input-row">
+                            <input
+                                type="text"
+                                placeholder="Enter Code"
+                                value={code}
+                                onChange={(e) => setCode(e.target.value)}
+                            />
+                            <button onClick={verifyCodeAndEnable2FA}>Verify & Enable</button>
+                        </div>
                         <div id="recaptcha-container" />
                     </>
                 )}
             </div>
 
-         <div className="account-buttons">
-  <button className="signout-btn" onClick={handleSignOut}>Sign Out</button>
-  <button className="delete-account-outlined-btn" onClick={handleDeleteAccount}>
-    <span className="delete-icon">❌</span> Delete My Account
-  </button>
-</div>
+
+
 
 
 
@@ -397,7 +388,11 @@ export default function Account() {
                 </div>
                 {inviteStatus && <p className="invite-status">{inviteStatus}</p>}
             </div>
-
+            <div className="account-buttons">
+                <button className="delete-account-outlined-btn" onClick={handleDeleteAccount}>
+                    <span className="delete-icon">❌</span> Delete My Account
+                </button>
+            </div>
         </div>
     );
 }
