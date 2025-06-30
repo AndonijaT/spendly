@@ -14,7 +14,14 @@ interface Transaction {
   ownerUid?: string;
 }
 
-export default function TransactionHistory({ onClose }: { onClose?: () => void }) {
+export default function TransactionHistory({
+  onClose,
+  viewMode = 'shared', // default fallback
+}: {
+  onClose?: () => void;
+  viewMode?: 'personal' | 'shared';
+}) 
+ {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [uidToEmail, setUidToEmail] = useState<Record<string, string>>({});
 
@@ -25,32 +32,35 @@ export default function TransactionHistory({ onClose }: { onClose?: () => void }
 
       const allUIDs = [user.uid];
 
-      try {
-        const userDocs = await getDocs(collection(db, 'users'));
-        userDocs.forEach((doc) => {
-          const sharedWith = doc.data().sharedWith || [];
-          const docUid = doc.id;
+if (viewMode === 'shared') {
+  try {
+    const userDocs = await getDocs(collection(db, 'users'));
+    userDocs.forEach((doc) => {
+      const sharedWith = doc.data().sharedWith || [];
+      const docUid = doc.id;
 
-          if (sharedWith.includes(user.uid) && !allUIDs.includes(docUid)) {
-            allUIDs.push(docUid);
-          }
-
-          if (docUid === user.uid && Array.isArray(sharedWith)) {
-            sharedWith.forEach((uid: string) => {
-              if (!allUIDs.includes(uid)) allUIDs.push(uid);
-            });
-          }
-        });
-
-        const emailMap: Record<string, string> = {};
-        userDocs.forEach((doc) => {
-          const email = doc.data().email;
-          if (email) emailMap[doc.id] = email;
-        });
-        setUidToEmail(emailMap);
-      } catch (err) {
-        console.error("Error fetching shared users:", err);
+      if (sharedWith.includes(user.uid) && !allUIDs.includes(docUid)) {
+        allUIDs.push(docUid);
       }
+
+      if (docUid === user.uid && Array.isArray(sharedWith)) {
+        sharedWith.forEach((uid: string) => {
+          if (!allUIDs.includes(uid)) allUIDs.push(uid);
+        });
+      }
+    });
+
+    const emailMap: Record<string, string> = {};
+    userDocs.forEach((doc) => {
+      const email = doc.data().email;
+      if (email) emailMap[doc.id] = email;
+    });
+    setUidToEmail(emailMap);
+  } catch (err) {
+    console.error("Error fetching shared users:", err);
+  }
+}
+
 
       const allData: Transaction[] = [];
 

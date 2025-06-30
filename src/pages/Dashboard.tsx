@@ -808,9 +808,13 @@ useEffect(() => {
       )}
 
      
-      {auth.currentUser && showHistoryModal && (
-        <TransactionHistory onClose={() => setShowHistoryModal(false)} />
-      )}
+     {auth.currentUser && showHistoryModal && (
+  <TransactionHistory
+    viewMode={viewMode}
+    onClose={() => setShowHistoryModal(false)}
+  />
+)}
+
 {showAdviceModal && (
   <div
     className="advice-modal-overlay"
