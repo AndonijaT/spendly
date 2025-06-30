@@ -454,60 +454,62 @@ export default function Dashboard() {
         });
       }
 
-      let allTx: Transaction[] = [];
+   const txMap = new Map<string, Transaction[]>(); // ownerUid => transactions
 
-      for (const uid of allUIDs) {
-        const ref = collection(db, 'users', uid, 'transactions');
-        const unsubscribe = onSnapshot(ref, (snap) => {
-          const txs: Transaction[] = [];
+for (const uid of allUIDs) {
+  const ref = collection(db, 'users', uid, 'transactions');
+  const unsubscribe = onSnapshot(ref, (snap) => {
+    const txs: Transaction[] = [];
 
-          snap.forEach((doc) => {
-            const data = doc.data();
-            if (
-              data.type &&
-              data.category &&
-              data.amount !== undefined &&
-              data.timestamp?.seconds
-            ) {
-              const date = new Date(data.timestamp.seconds * 1000);
-              const month = format(date, 'yyyy-MM');
-              if (month === selectedMonth) {
-                txs.push({
-                  id: doc.id,
-                  type: data.type,
-                  category: data.category,
-                  amount: data.amount,
-                  timestamp: data.timestamp,
-                  method: data.method,
-                  direction: data.direction,
-                  description: data.description,
-                  ownerUid: uid,
-                });
-              }
-            }
+    snap.forEach((doc) => {
+      const data = doc.data();
+      if (
+        data.type &&
+        data.category &&
+        data.amount !== undefined &&
+        data.timestamp?.seconds
+      ) {
+        const date = new Date(data.timestamp.seconds * 1000);
+        const month = format(date, 'yyyy-MM');
+        if (month === selectedMonth) {
+          txs.push({
+            id: doc.id,
+            type: data.type,
+            category: data.category,
+            amount: data.amount,
+            timestamp: data.timestamp,
+            method: data.method,
+            direction: data.direction,
+            description: data.description,
+            ownerUid: uid,
           });
-
-          allTx = allTx
-            .filter((t) => t.ownerUid !== uid) // remove old ones from same UID
-            .concat(txs); // add new ones
-
-          allTx.sort((a, b) => b.timestamp.seconds - a.timestamp.seconds);
-          setTransactions(allTx);
-
-          // Update totals
-          let income = 0;
-          let expense = 0;
-          allTx.forEach((tx) => {
-            const amt = Number(tx.amount);
-            if (tx.type === 'income') income += amt;
-            else if (tx.type === 'expense') expense += amt;
-          });
-          setIncomeTotal(income);
-          setExpenseTotal(expense);
-        });
-
-        unsubscribers.push(unsubscribe);
+        }
       }
+    });
+
+    // 🔄 Store for this UID
+    txMap.set(uid, txs);
+
+    // 🔁 Recompute all transactions from scratch
+    const combined = Array.from(txMap.values()).flat();
+    combined.sort((a, b) => b.timestamp.seconds - a.timestamp.seconds);
+    setTransactions(combined);
+
+    // Update totals
+    let income = 0;
+    let expense = 0;
+    combined.forEach((tx) => {
+      const amt = Number(tx.amount);
+      if (tx.type === 'income') income += amt;
+      else if (tx.type === 'expense') expense += amt;
+    });
+    setIncomeTotal(income);
+    setExpenseTotal(expense);
+  });
+
+  unsubscribers.push(unsubscribe);
+}
+
     };
 
     setupListeners();
