@@ -6,6 +6,7 @@ import Modal from '../components/Modal';
 import LoginForm from '../components/LoginForm';
 import RegisterForm from '../components/RegisterForm';
 import ForgotPasswordForm from '../components/ForgotPasswordForm';
+import Footer from '../components/Footer'; // ✅ import
 import { useEffect, useState } from 'react';
 
 function Home() {
@@ -35,18 +36,11 @@ function Home() {
   return (
     <>
       <div className="video-background">
-        <video
-          autoPlay
-          loop
-          muted
-          playsInline
-  
->
-        <source src="/video.mp4" type="video/mp4" />
-        Your browser does not support the video tag.
-      </video>
-
-    </div >
+        <video autoPlay loop muted playsInline>
+          <source src="/video.mp4" type="video/mp4" />
+          Your browser does not support the video tag.
+        </video>
+      </div>
 
       <div className="home">
         <div className="hero">
@@ -54,7 +48,9 @@ function Home() {
             <div className="hero-text guest">
               <h1>The smarter way to manage money</h1>
               <p>Spendly helps you track every expense...</p>
-              <button className="cta-button" onClick={openRegisterModal}>Get started</button>
+              <button className="cta-button" onClick={openRegisterModal}>
+                Get started
+              </button>
             </div>
           ) : (
             <div className="hero-text user">
@@ -66,14 +62,28 @@ function Home() {
 
         {showAuthModal && (
           <Modal onClose={() => setShowAuthModal(false)}>
-            {authMode === 'register' && <RegisterForm onSuccess={() => setShowAuthModal(false)} switchToLogin={() => setAuthMode('login')} />}
-            {authMode === 'login' && <LoginForm onSuccess={() => setShowAuthModal(false)} switchToRegister={() => setAuthMode('register')} switchToForgot={() => setAuthMode('forgot')} />}
+            {authMode === 'register' && (
+              <RegisterForm
+                onSuccess={() => setShowAuthModal(false)}
+                switchToLogin={() => setAuthMode('login')}
+              />
+            )}
+            {authMode === 'login' && (
+              <LoginForm
+                onSuccess={() => setShowAuthModal(false)}
+                switchToRegister={() => setAuthMode('register')}
+                switchToForgot={() => setAuthMode('forgot')}
+              />
+            )}
             {authMode === 'forgot' && <ForgotPasswordForm onBack={() => setAuthMode('login')} />}
           </Modal>
         )}
       </div>
-  </>
-);
 
+      <div className="footer-wrapper">
+        <Footer />
+      </div>
+    </>
+  );
 }
 export default Home;

@@ -136,3 +136,25 @@ html, body {
     padding: 0.6rem 1.2rem;
   }
 }
+html, body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  overflow: auto; /* allow scrolling */
+}
+
+#root {
+  height: 100%;
+}
+
+.home {
+  min-height: 100vh;
+  width: 100vw;
+  font-family: 'Segoe UI', sans-serif;
+  position: relative;
+  overflow: hidden;
+}
+
+.footer-wrapper {
+  margin-top: 100vh; /* makes the user scroll to see it */
+}
