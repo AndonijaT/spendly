@@ -5,6 +5,8 @@ import { toast } from 'react-toastify';
 import '../styles/AddTransactionModal.css';
 import { useLanguage } from '../context/LanguageContext';
 import { getDocs } from 'firebase/firestore';
+import { useRef } from 'react';
+
 
 const categories = [
   "groceries", "home", "eating out", "food delivery", "coffee", "car", "health",
@@ -20,8 +22,15 @@ export default function AddTransactionModal({ onClose }: { onClose: () => void }
   const [direction, setDirection] = useState<'to_cash' | 'to_card'>('to_cash');
   const { t } = useLanguage();
   const [description, setDescription] = useState('');
-const [errorMessage, setErrorMessage] = useState('');
+  const [errorMessage, setErrorMessage] = useState('');
+  const carouselRef = useRef<HTMLDivElement | null>(null);
 
+
+  const scrollCategory = (dir: -1 | 1) => {
+    if (carouselRef.current) {
+      carouselRef.current.scrollBy({ left: dir * 220, behavior: 'smooth' });
+    }
+  };
   useEffect(() => {
     document.body.classList.add('modal-open');
     return () => {
@@ -29,86 +38,109 @@ const [errorMessage, setErrorMessage] = useState('');
     };
   }, []);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    const user = auth.currentUser;
-    if (!user) return toast.error(t('userNotLoggedIn'));
+const handleSubmit = async (e: React.FormEvent) => {
+  e.preventDefault();
+  const user = auth.currentUser;
+  if (!user) return toast.error(t('userNotLoggedIn'));
 
-    try {
-      const payload: any = {
-        type,
-        amount: parseFloat(amount),
-        timestamp: serverTimestamp(),
-        description: description.trim(),
-      };
+  try {
+    const amt = parseFloat(amount);
 
-      if (type === 'income' || type === 'expense') {
-        payload.method = method;
-        payload.category = category;
-      }
-
-      if (type === 'transfer') {
-        payload.direction = direction;
-      }
-if (type === 'expense') {
-  const amt = parseFloat(amount);
-  if (method === 'cash' && amt > currentCash) {
-    setErrorMessage('🚨 Balance too low! Not enough cash.');
-    return;
-  }
-  if (method === 'card' && amt > currentCard) {
-    setErrorMessage('🚨 Balance too low! Not enough card balance.');
-    return;
-  }
-}
-
-      await addDoc(collection(db, 'users', user.uid, 'transactions'), payload);
-
-      toast.success(t('transactionAdded'));
-      onClose();
-    } catch (err) {
-      toast.error(t('errorSaving'));
-      console.error(err);
+    //validate amount is a number and greater than 0
+    if (isNaN(amt) || amt <= 0) {
+      setErrorMessage('🚨 Please enter a valid amount greater than 0.');
+      return;
     }
-  };
-const [currentCash, setCurrentCash] = useState(0);
-const [currentCard, setCurrentCard] = useState(0);
 
-useEffect(() => {
-  const fetchBalances = async () => {
-    const user = auth.currentUser;
-    if (!user) return;
+    const payload: any = {
+      type,
+      amount: amt,
+      timestamp: serverTimestamp(),
+      description: description.trim(),
+    };
 
-    const snapshot = await getDocs(collection(db, 'users', user.uid, 'transactions'));
-    let cash = 0;
-    let card = 0;
+    if (type === 'income' || type === 'expense') {
+      payload.method = method;
+      payload.category = category;
+    }
 
-    snapshot.forEach((doc) => {
-      const tx = doc.data();
-      const amt = Number(tx.amount);
-      if (tx.type === 'income') {
-        if (tx.method === 'cash') cash += amt;
-        if (tx.method === 'card') card += amt;
-      } else if (tx.type === 'expense') {
-        if (tx.method === 'cash') cash -= amt;
-        if (tx.method === 'card') card -= amt;
-      } else if (tx.type === 'transfer') {
-        if (tx.direction === 'to_cash') {
-          card -= amt;
-          cash += amt;
-        } else if (tx.direction === 'to_card') {
-          cash -= amt;
-          card += amt;
-        }
+    if (type === 'transfer') {
+      payload.direction = direction;
+    }
+
+    //check balances for expense
+    if (type === 'expense') {
+      if (method === 'cash' && amt > currentCash) {
+        setErrorMessage('🚨 Balance too low! Not enough cash.');
+        return;
       }
-    });
+      if (method === 'card' && amt > currentCard) {
+        setErrorMessage('🚨 Balance too low! Not enough card balance.');
+        return;
+      }
+    }
 
-    setCurrentCash(cash);
-    setCurrentCard(card);
-  };
+    //check balances for transfer
+    if (type === 'transfer') {
+      if (direction === 'to_card' && amt > currentCash) {
+        setErrorMessage('🚨 Cannot transfer. Not enough cash balance.');
+        return;
+      }
+      if (direction === 'to_cash' && amt > currentCard) {
+        setErrorMessage('🚨 Cannot transfer. Not enough card balance.');
+        return;
+      }
+    }
 
-  fetchBalances();
-}, []);
+    //Proceed to add
+    await addDoc(collection(db, 'users', user.uid, 'transactions'), payload);
+
+    toast.success(t('transactionAdded'));
+    onClose();
+  } catch (err) {
+    toast.error(t('errorSaving'));
+    console.error(err);
+  }
+};
+
+  const [currentCash, setCurrentCash] = useState(0);
+  const [currentCard, setCurrentCard] = useState(0);
+
+  useEffect(() => {
+    const fetchBalances = async () => {
+      const user = auth.currentUser;
+      if (!user) return;
+
+      const snapshot = await getDocs(collection(db, 'users', user.uid, 'transactions'));
+      let cash = 0;
+      let card = 0;
+
+      snapshot.forEach((doc) => {
+        const tx = doc.data();
+        const amt = Number(tx.amount);
+        if (tx.type === 'income') {
+          if (tx.method === 'cash') cash += amt;
+          if (tx.method === 'card') card += amt;
+        } else if (tx.type === 'expense') {
+          if (tx.method === 'cash') cash -= amt;
+          if (tx.method === 'card') card -= amt;
+        } else if (tx.type === 'transfer') {
+          if (tx.direction === 'to_cash') {
+            card -= amt;
+            cash += amt;
+          } else if (tx.direction === 'to_card') {
+            cash -= amt;
+            card += amt;
+          }
+        }
+      });
+
+      setCurrentCash(cash);
+      setCurrentCard(card);
+    };
+
+    fetchBalances();
+  }, []);
 
   return (
     <div className="modal-backdrop">
@@ -126,34 +158,58 @@ useEffect(() => {
             🔄 {t('transfer') || 'Transfer'}
           </button>
         </div>
-{errorMessage && (
-  <div className="error-warning">{errorMessage}</div>
-)}
+        {errorMessage && (
+          <div className="error-warning">{errorMessage}</div>
+        )}
 
         <form onSubmit={handleSubmit}>
           {type !== 'transfer' && (
-            <label>{t('method')}:
-              <select value={method} onChange={(e) => setMethod(e.target.value as 'cash' | 'card')}>
-                <option value="cash">{t('cash')}</option>
-                <option value="card">{t('card')}</option>
-              </select>
-            </label>
-          )}
-
-          {type === 'expense' && (
-            <div className="category-grid">
-              {categories.map((cat) => (
-                <div
-                  key={cat}
-                  className={`category-item ${category === cat ? 'selected' : ''}`}
-                  onClick={() => setCategory(cat)}
+            <div className="method-toggle">
+              <label>{t('method')}:</label>
+              <div className="method-buttons">
+                <button
+                  type="button"
+                  className={method === 'cash' ? 'active' : ''}
+                  onClick={() => setMethod('cash')}
                 >
-                  <img src={`/categories/${cat.replace(/ /g, '_')}.png`} alt={cat} />
-                  <span>{t(cat)}</span>
-                </div>
-              ))}
+                  {t('cash')}
+                </button>
+                <button
+                  type="button"
+                  className={method === 'card' ? 'active' : ''}
+                  onClick={() => setMethod('card')}
+                >
+                  {t('card')}
+                </button>
+              </div>
             </div>
           )}
+
+
+          {type === 'expense' && (
+            <>
+              <label style={{ fontWeight: 'bold', marginBottom: '0.25rem' }}>{t('category')}:</label>
+              <div className="category-carousel-wrapper">
+                <button type="button" className="carousel-arrow left" onClick={() => scrollCategory(-1)}>‹</button>
+                <div className="category-carousel" ref={carouselRef}>
+                  {categories.map((cat) => (
+                    <div
+                      key={cat}
+                      className={`category-item ${category === cat ? 'selected' : ''}`}
+                      onClick={() => setCategory(cat)}
+                    >
+                      <img src={`/categories/${cat.replace(/ /g, '_')}.png`} alt={cat} />
+                      <span>{t(cat)}</span>
+                    </div>
+                  ))}
+                </div>
+                <button type="button" className="carousel-arrow right" onClick={() => scrollCategory(1)}>›</button>
+              </div>
+            </>
+
+          )}
+
+
 
           {type === 'income' && (
             <label>{t('source')}:
