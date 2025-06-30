@@ -17,7 +17,7 @@ import AIAdviceModal from '../components/AIAdviceModal';
 import BudgetManager from '../components/BudgetManager';
 import { onSnapshot } from 'firebase/firestore';
 import Footer from '../components/Footer';
-import { useCurrency } from '../context/CurrencyContext';
+import { useCurrency, } from '../context/CurrencyContext';
 
 type Transaction = {
   id: string;
@@ -26,6 +26,7 @@ type Transaction = {
   direction?: 'to_cash' | 'to_card';
   category: string;
   amount: number;
+  currency: 'EUR' | 'USD' | 'MKD'; // <-- add this
   description?: string;
   timestamp: { seconds: number };
   ownerUid: string;
@@ -37,6 +38,7 @@ export default function Dashboard() {
   const [showOverviewBtn, setShowOverviewBtn] = useState(true);
   const overviewAnchorRef = useRef<HTMLDivElement>(null);
   const [showHistoryModal, setShowHistoryModal] = useState(false);
+  const { convertToUserCurrency, getSymbol } = useCurrency();
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -101,6 +103,7 @@ export default function Dashboard() {
   const [viewMode, setViewMode] = useState<'personal' | 'shared'>('shared');
 
   const [overrunMessage, setOverrunMessage] = useState<string | null>(null);
+const [overrunCategory, setOverrunCategory] = useState<string | null>(null);
 
   useEffect(() => {
     const seen = localStorage.getItem('seenSpendlyTutorial');
@@ -165,8 +168,20 @@ export default function Dashboard() {
       try {
         const snapshot = await getDocs(q);
         snapshot.forEach((docSnap) => {
-          budgetData.push({ id: docSnap.id, ...docSnap.data() } as Budget);
+          const data = docSnap.data();
+
+          if (!data.category || !data.type) return;
+
+          budgetData.push({
+            id: docSnap.id,
+            category: data.category,
+            type: data.type,
+            currency: data.currency ?? 'EUR',
+            limit: convertToUserCurrency(data.limit, data.currency ?? 'EUR'),
+          });
         });
+
+
       } catch (err) {
         console.error("❌ Error fetching budgets for UID:", uid, err);
       }
@@ -355,6 +370,7 @@ export default function Dashboard() {
 
         const message = `${bp.category} over by ${(bp.spent - bp.limit).toFixed(2)} ${symbol}`;
         setOverrunMessage(message);
+        setOverrunCategory(bp.category);
 
         const notif = {
           type: 'budget_alert',
@@ -389,7 +405,7 @@ export default function Dashboard() {
   let card = 0;
 
   transactions.forEach((tx) => {
-    const amt = Number(tx.amount);
+    const amt = convertToUserCurrency(Number(tx.amount), tx.currency ?? 'EUR');
 
     if (tx.type === 'income') {
       if (tx.method === 'cash') cash += amt;
@@ -454,61 +470,64 @@ export default function Dashboard() {
         });
       }
 
-   const txMap = new Map<string, Transaction[]>(); // ownerUid => transactions
+      const txMap = new Map<string, Transaction[]>(); // ownerUid => transactions
 
-for (const uid of allUIDs) {
-  const ref = collection(db, 'users', uid, 'transactions');
-  const unsubscribe = onSnapshot(ref, (snap) => {
-    const txs: Transaction[] = [];
+      for (const uid of allUIDs) {
+        const ref = collection(db, 'users', uid, 'transactions');
+        const unsubscribe = onSnapshot(ref, (snap) => {
+          const txs: Transaction[] = [];
 
-    snap.forEach((doc) => {
-      const data = doc.data();
-      if (
-        data.type &&
-        data.category &&
-        data.amount !== undefined &&
-        data.timestamp?.seconds
-      ) {
-        const date = new Date(data.timestamp.seconds * 1000);
-        const month = format(date, 'yyyy-MM');
-        if (month === selectedMonth) {
-          txs.push({
-            id: doc.id,
-            type: data.type,
-            category: data.category,
-            amount: data.amount,
-            timestamp: data.timestamp,
-            method: data.method,
-            direction: data.direction,
-            description: data.description,
-            ownerUid: uid,
+          snap.forEach((doc) => {
+            const data = doc.data();
+            if (
+              data.type &&
+              data.category &&
+              data.amount !== undefined &&
+              data.timestamp?.seconds
+            ) {
+              const date = new Date(data.timestamp.seconds * 1000);
+              const month = format(date, 'yyyy-MM');
+              if (month === selectedMonth) {
+                txs.push({
+                  id: doc.id,
+                  type: data.type,
+                  category: data.category,
+                  amount: convertToUserCurrency(data.amount, data.currency ?? 'EUR'), // Convert ONCE here
+                  currency: currency, // store the current user's selected currency
+                  timestamp: data.timestamp,
+                  method: data.method,
+                  direction: data.direction,
+                  description: data.description,
+                  ownerUid: uid,
+                });
+
+              }
+            }
           });
-        }
+
+          //Store for this UID
+          txMap.set(uid, txs);
+
+          // Recompute all transactions from scratch
+          const combined = Array.from(txMap.values()).flat();
+          combined.sort((a, b) => b.timestamp.seconds - a.timestamp.seconds);
+          setTransactions(combined);
+
+          // Update totals
+          let income = 0;
+          let expense = 0;
+          combined.forEach((tx) => {
+            const amt = tx.amount;
+            if (tx.type === 'income') income += amt;
+            else if (tx.type === 'expense') expense += amt;
+
+          });
+          setIncomeTotal(income);
+          setExpenseTotal(expense);
+        });
+
+        unsubscribers.push(unsubscribe);
       }
-    });
-
-    // 🔄 Store for this UID
-    txMap.set(uid, txs);
-
-    // 🔁 Recompute all transactions from scratch
-    const combined = Array.from(txMap.values()).flat();
-    combined.sort((a, b) => b.timestamp.seconds - a.timestamp.seconds);
-    setTransactions(combined);
-
-    // Update totals
-    let income = 0;
-    let expense = 0;
-    combined.forEach((tx) => {
-      const amt = Number(tx.amount);
-      if (tx.type === 'income') income += amt;
-      else if (tx.type === 'expense') expense += amt;
-    });
-    setIncomeTotal(income);
-    setExpenseTotal(expense);
-  });
-
-  unsubscribers.push(unsubscribe);
-}
 
     };
 
@@ -585,10 +604,13 @@ for (const uid of allUIDs) {
         <div
           className="budget-alert-overlay"
           onClick={() => {
-            const currentMonth = format(new Date(), 'yyyy-MM');
-            const category = overrunMessage.split(' ')[0];
-            localStorage.setItem(`dismissed_${category}_${currentMonth}`, 'true');
-            setOverrunMessage(null);
+            if (overrunCategory) {
+  const currentMonth = format(new Date(), 'yyyy-MM');
+  localStorage.setItem(`dismissed_${overrunCategory}_${currentMonth}`, 'true');
+  setOverrunMessage(null);
+  setOverrunCategory(null);
+}
+
           }}
         >
           <div className="budget-alert-box" onClick={(e) => e.stopPropagation()}>
@@ -768,8 +790,14 @@ for (const uid of allUIDs) {
 
                   </div>
                   <div className="recent-amount">
-                    {tx.type === 'income' ? '+' : '-'}{tx.amount.toFixed(2)} {symbol}
+                    {tx.type === 'income' ? '+' : '-'}
+                    {tx.amount.toFixed(2)} {symbol}
+                    {/* Optional: Show source currency info */}
+                    {tx.currency !== currency && (
+                      <span className="original-currency"> ({tx.currency})</span>
+                    )}
                   </div>
+
 
                 </li>
               );
