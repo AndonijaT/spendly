@@ -13,6 +13,7 @@ import { auth } from '../firebase/firebaseConfig';
 import { toast } from 'react-toastify';
 import './../styles/LoginForm.css';
 import { useLanguage } from '../context/LanguageContext';
+import { AiOutlineEye, AiOutlineEyeInvisible } from 'react-icons/ai';
 
 function LoginForm({
   onSuccess,
@@ -32,6 +33,7 @@ function LoginForm({
   const [mfaVisible, setMfaVisible] = useState(false);
   const [smsCode, setSmsCode] = useState('');
   const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
   useEffect(() => {
     if (!window.recaptchaVerifier && typeof window !== 'undefined') {
@@ -197,17 +199,34 @@ function LoginForm({
           required
         />
 
-        <input
-          id="login-password"
-          name="password"
-          type="password"
-          placeholder={t('password') || 'Password'}
-          onChange={(e) => {
-            setPassword(e.target.value);
-            setError('');
-          }}
-          required
-        />
+        <div className="password-input-wrapper">
+          <input
+            id="login-password"
+            name="password"
+            type={showPassword ? 'text' : 'password'}
+            placeholder={t('password') || 'Password'}
+            onChange={(e) => {
+              setPassword(e.target.value);
+              setError('');
+            }}
+            required
+          />
+          <span
+  className="toggle-password"
+  onClick={() => setShowPassword((prev) => !prev)}
+  style={{ userSelect: 'none', cursor: 'pointer' }}
+  role="button"
+  tabIndex={0}
+  onKeyDown={(e) => {
+    if (e.key === 'Enter' || e.key === ' ') setShowPassword((prev) => !prev);
+  }}
+  aria-label={showPassword ? 'Hide password' : 'Show password'}
+>
+  {showPassword ? <AiOutlineEyeInvisible /> : <AiOutlineEye />}
+</span>
+
+        </div>
+
 
         <button type="submit" disabled={loading}>
           {loading ? t('loggingIn') || 'Logging in…' : t('login') || 'Log In'}

@@ -9,6 +9,7 @@ import {
 import { auth } from '../firebase/firebaseConfig';
 import { toast } from 'react-toastify';
 import { useLanguage } from '../context/LanguageContext';
+import { AiOutlineEye, AiOutlineEyeInvisible } from 'react-icons/ai';
 
 function RegisterForm({
   onSuccess,
@@ -22,6 +23,7 @@ function RegisterForm({
   const [name, setName] = useState('');
   const [acceptedTerms, setAcceptedTerms] = useState(false);
   const { t } = useLanguage();
+  const [showPassword, setShowPassword] = useState(false);
 
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -81,12 +83,37 @@ function RegisterForm({
         onChange={(e) => setEmail(e.target.value)}
         required
       />
-      <input
-        type="password"
-        placeholder={t('password') || 'Password'}
-        onChange={(e) => setPassword(e.target.value)}
-        required
-      />
+      <div className="password-input-wrapper">
+        <input
+          type={showPassword ? 'text' : 'password'}
+          placeholder={t('password') || 'Password'}
+          onChange={(e) => setPassword(e.target.value)}
+          required
+        />
+      <span
+    className="toggle-password"
+    onClick={() => setShowPassword((prev) => !prev)}
+    style={{
+      userSelect: 'none',
+      cursor: 'pointer',
+      position: 'absolute',
+      right: '10px',
+      top: '50%',
+      transform: 'translateY(-50%)',
+      color: '#555',
+      fontSize: '20px',
+    }}
+    role="button"
+    tabIndex={0}
+    onKeyDown={(e) => {
+      if (e.key === 'Enter' || e.key === ' ') setShowPassword((prev) => !prev);
+    }}
+    aria-label={showPassword ? 'Hide password' : 'Show password'}
+  >
+    {showPassword ? <AiOutlineEyeInvisible /> : <AiOutlineEye />}
+  </span>
+      </div>
+
 
       <div className="terms-container">
         <input

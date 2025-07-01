@@ -88,3 +88,25 @@
 .terms-label a:hover {
   color: #0056b3;
 }
+.password-input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.password-input-wrapper input {
+  flex: 1;
+  padding-right: 40px; /* space for the icon */
+}
+
+.toggle-password {
+  position: absolute;
+  right: 10px;
+  font-size: 18px;
+}
+.password-input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  width: 100%; /* make it full width */
+}
