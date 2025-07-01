@@ -1,4 +1,5 @@
-import '../styles/SettingsSidebar.css';
+// SettingsSidebar.tsx
+import '../styles/SettingsSidebar.css'; 
 import { useState, useRef } from 'react';
 import { auth, db } from '../firebase/firebaseConfig';
 import { deleteDoc, collection, getDocs, doc, addDoc, Timestamp } from 'firebase/firestore';
@@ -16,7 +17,7 @@ export default function SettingsSidebar({
   onClose: () => void;
 }) {
   const { language, setLanguage, t } = useLanguage();
-const { currency, setCurrency } = useCurrency();
+  const { currency, setCurrency } = useCurrency();
   const [showConfirm, setShowConfirm] = useState(false);
   const [confirmSuccess, setConfirmSuccess] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -46,7 +47,7 @@ const { currency, setCurrency } = useCurrency();
     const snapshot = await getDocs(collection(db, 'users', user.uid, 'transactions'));
     const transactions = snapshot.docs.map((doc) => doc.data());
 
-    const headers = ['Type', 'Category', 'Amount', 'Description', 'Date'];
+    const headers = [t('type'), t('category'), t('amount'), t('description'), t('date')];
     const rows = transactions.map(tx => [
       tx.type,
       tx.category,
@@ -66,7 +67,7 @@ const { currency, setCurrency } = useCurrency();
     link.click();
     document.body.removeChild(link);
 
-    toast.success('Export completed ✅');
+    toast.success(t('exportSuccess') || 'Export completed ✅');
   };
 
   const handleExportPDF = async () => {
@@ -77,11 +78,11 @@ const { currency, setCurrency } = useCurrency();
     const transactions = snapshot.docs.map((doc) => doc.data());
 
     const docPDF = new jsPDF();
-    docPDF.text('Transactions Report', 14, 15);
+    docPDF.text(t('transactionHistory') + ' ' + 'Report', 14, 15);
 
     autoTable(docPDF, {
       startY: 20,
-      head: [['Type', 'Category', 'Amount', 'Description', 'Date']],
+      head: [[t('type'), t('category'), t('amount'), t('description'), t('date')]],
       body: transactions.map(tx => [
         tx.type,
         tx.category,
@@ -92,7 +93,7 @@ const { currency, setCurrency } = useCurrency();
     });
 
     docPDF.save('transactions.pdf');
-    toast.success('Export completed ✅');
+    toast.success(t('exportSuccess') || 'Export completed ✅');
   };
 
   const handleImportCSV = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -133,7 +134,7 @@ const { currency, setCurrency } = useCurrency();
         );
 
         await Promise.all(adds);
-        toast.success('Import completed ✅');
+        toast.success(t('importSuccess') || 'Import completed ✅');
         if (fileInputRef.current) fileInputRef.current.value = '';
       },
     });
@@ -169,13 +170,13 @@ const { currency, setCurrency } = useCurrency();
         </div>
 
         <div className="setting-group">
-          <label>Export</label>
-          <button onClick={handleExportCSV}>📁 Export CSV</button>
-          <button onClick={handleExportPDF}>📄 Export PDF</button>
+          <label>{t('export') || 'Export'}</label>
+          <button onClick={handleExportCSV}>📁 {t('exportCSV') || 'Export CSV'}</button>
+          <button onClick={handleExportPDF}>📄 {t('exportPDF') || 'Export PDF'}</button>
         </div>
 
         <div className="setting-group">
-          <label>Import CSV (Current Month)</label>
+          <label>{t('importCSV') || 'Import CSV (Current Month)'}</label>
           <input
             type="file"
             accept=".csv"
@@ -183,8 +184,6 @@ const { currency, setCurrency } = useCurrency();
             onChange={handleImportCSV}
           />
         </div>
-
-       
       </div>
 
       {showConfirm && (
