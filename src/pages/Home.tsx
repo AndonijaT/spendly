@@ -6,11 +6,13 @@ import Modal from '../components/Modal';
 import LoginForm from '../components/LoginForm';
 import RegisterForm from '../components/RegisterForm';
 import ForgotPasswordForm from '../components/ForgotPasswordForm';
-import Footer from '../components/Footer'; // ✅ import
+import Footer from '../components/Footer';
 import { useEffect, useState } from 'react';
+import { useLanguage } from '../context/LanguageContext';
 
 function Home() {
   usePageTitle('Home');
+  const { t } = useLanguage();
   const [isGuest, setIsGuest] = useState(true);
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [authMode, setAuthMode] = useState<'login' | 'register' | 'forgot'>('register');
@@ -38,7 +40,7 @@ function Home() {
       <div className="video-background">
         <video autoPlay loop muted playsInline>
           <source src="/video.mp4" type="video/mp4" />
-          Your browser does not support the video tag.
+          {t('videoNotSupported') || 'Your browser does not support the video tag.'}
         </video>
       </div>
 
@@ -46,16 +48,16 @@ function Home() {
         <div className="hero">
           {isGuest ? (
             <div className="hero-text guest">
-              <h1>The smarter way to manage money</h1>
-              <p>Spendly helps you track every expense...</p>
+              <h1>{t('heroTitle') || 'The smarter way to manage money'}</h1>
+              <p>{t('heroSubtitle') || 'Spendly helps you track every expense...'}</p>
               <button className="cta-button" onClick={openRegisterModal}>
-                Get started
+                {t('getStarted') || 'Get started'}
               </button>
             </div>
           ) : (
             <div className="hero-text user">
-              <h1>Hi {userName},</h1>
-              <p>Hope you're having a good day! ☀️</p>
+              <h1>{t('greeting') || 'Hi'}, {userName}</h1>
+              <p>{t('greetingMessage') || "Hope you're having a good day! ☀️"}</p>
             </div>
           )}
         </div>
@@ -86,4 +88,5 @@ function Home() {
     </>
   );
 }
+
 export default Home;
