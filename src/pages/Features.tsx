@@ -57,7 +57,9 @@ const features: Feature[] = [
 ];
 
 function Features() {
+  const { t } = useLanguage();
   const [showTip, setShowTip] = useState(false);
+  const [randomFact, setRandomFact] = useState('');
   const [selectedFeature, setSelectedFeature] = useState<Feature | null>(null);
   const [isGuest, setIsGuest] = useState(true);
   const [showAuthModal, setShowAuthModal] = useState(false);
@@ -69,12 +71,31 @@ function Features() {
     });
     return () => unsubscribe();
   }, []);
-const { t } = useLanguage();
+
+  const funFacts: string[] = [
+    t('fact1') || 'People who track expenses save up to 20% more each month!',
+    t('fact2') || 'Budgeting helps reduce impulse purchases by 25%.',
+    t('fact3') || 'Couples who share budgets argue 30% less about money.',
+    t('fact4') || 'Checking your budget weekly improves savings consistency.',
+    t('fact5') || 'Spending awareness boosts financial confidence in 2 weeks.',
+    t('fact6') || 'Tracking cash flow can reveal hidden subscriptions.',
+    t('fact7') || 'Budgeters are 2x more likely to reach savings goals.',
+    t('fact8') || 'Young adults using budget apps save 15% more yearly.',
+    t('fact9') || 'Most overspending happens in the last 5 days of the month.',
+    t('fact10') || 'Visual graphs boost budget retention by 70%.',
+  ];
+
+  const showRandomTip = () => {
+    const index = Math.floor(Math.random() * funFacts.length);
+    setRandomFact(funFacts[index]);
+    setShowTip(true);
+  };
 
   const openRegisterModal = () => {
     setAuthMode('register');
     setShowAuthModal(true);
   };
+
 
  return (
   <div className="features-container">
@@ -115,7 +136,7 @@ const { t } = useLanguage();
     </div>
 
     <div className="features-tip">
-      <button onClick={() => setShowTip(true)}>💡 {t('funFact') || 'Fun Fact'}</button>
+<button onClick={showRandomTip}>💡 {t('funFact') || 'Fun Fact'}</button>
 
       {showTip && (
         <div className="features-modal-wrapper">
@@ -124,10 +145,9 @@ const { t } = useLanguage();
 
             <div className="features-popup">
               <p>
-                <strong>{t('didYouKnow') || 'Did you know?'}</strong>{' '}
-                {t('statFact') || 'People who track expenses save up to'} <u>20%</u>{' '}
-                {t('statMonth') || 'more each month!'}
-              </p>
+  <strong>{t('didYouKnow') || 'Did you know?'}</strong> {randomFact}
+</p>
+
               <button onClick={() => setShowTip(false)}>{t('close') || 'Close'}</button>
             </div>
           </div>

@@ -283,8 +283,18 @@ const translations: Record<Language, Record<string, string>> = {
   "fullHistory": "Full Transaction History",
   "historyText": "Your entire spending history, beautifully displayed.",
   "multiDevice": "Multi-Device Support",
-  "multiDeviceText": "Keep your budget in sync across all devices effortlessly."
-
+  "multiDeviceText": "Keep your budget in sync across all devices effortlessly.",
+ 
+  "fact1": "People who track expenses save up to 20% more each month!",
+  "fact2": "Budgeting helps reduce impulse purchases by 25%.",
+  "fact3": "Couples who share budgets argue 30% less about money.",
+  "fact4": "Checking your budget weekly improves savings consistency.",
+  "fact5": "Spending awareness boosts financial confidence in 2 weeks.",
+  "fact6": "Tracking cash flow can reveal hidden subscriptions.",
+  "fact7": "Budgeters are 2x more likely to reach savings goals.",
+  "fact8": "Young adults using budget apps save 15% more yearly.",
+  "fact9": "Most overspending happens in the last 5 days of the month.",
+  "fact10": "Visual graphs boost budget retention by 70%."
 
 
 
@@ -569,8 +579,18 @@ const translations: Record<Language, Record<string, string>> = {
   "fullHistory": "Celotna zgodovina transakcij",
   "historyText": "Vaša celotna finančna zgodovina, lepo prikazana.",
   "multiDevice": "Podpora za več naprav",
-  "multiDeviceText": "Enostavno sinhronizirajte svoj proračun na vseh napravah."
-
+  "multiDeviceText": "Enostavno sinhronizirajte svoj proračun na vseh napravah.",
+ 
+  "fact1": "Ljudje, ki spremljajo stroške, prihranijo do 20 % več na mesec!",
+  "fact2": "Proračun zmanjšuje impulzivne nakupe za 25 %.",
+  "fact3": "Pari, ki delijo proračun, se prepirajo 30 % manj o denarju.",
+  "fact4": "Redno tedensko preverjanje proračuna poveča konsistentnost varčevanja.",
+  "fact5": "Zavedanje o porabi poveča finančno samozavest že v 2 tednih.",
+  "fact6": "Spremljanje denarnega toka razkrije skrite naročnine.",
+  "fact7": "Uporabniki proračunov 2x pogosteje dosežejo varčevalne cilje.",
+  "fact8": "Mladi odrasli z aplikacijami za proračun prihranijo 15 % več letno.",
+  "fact9": "Največ prekomerne porabe se zgodi v zadnjih 5 dneh v mesecu.",
+  "fact10": "Vizualni grafi povečajo zapomnitev proračuna za 70 %."
 
 
 
