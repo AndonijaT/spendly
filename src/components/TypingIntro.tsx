@@ -1,7 +1,14 @@
 import { useState, useEffect } from 'react';
+import { useLanguage } from '../context/LanguageContext';
 
 function TypingIntro({ name }: { name: string }) {
-  const phrases = [`Hi ${name || 'there'}.`, 'Nice to meet you!'];
+  const { t } = useLanguage();
+
+  const phrases = [
+    `${t('hi') || 'Hi'} ${name || t('there') || 'there'}.`,
+    t('niceToMeet') || 'Nice to meet you!',
+  ];
+
   const [text, setText] = useState('');
   const [phraseIndex, setPhraseIndex] = useState(0);
   const [charIndex, setCharIndex] = useState(0);
@@ -33,7 +40,7 @@ function TypingIntro({ name }: { name: string }) {
         }, 1200);
       }
     }
-  }, [charIndex, phraseIndex, done]);
+  }, [charIndex, phraseIndex, done, phrases]);
 
   return (
     <div className="typing-wrapper">
