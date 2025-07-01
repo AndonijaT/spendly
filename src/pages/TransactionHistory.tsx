@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { collection, getDocs, query, orderBy } from 'firebase/firestore';
 import { auth, db } from '../firebase/firebaseConfig';
 import '../styles/TransactionList.css';
+import { useLanguage } from '../context/LanguageContext';
 
 interface Transaction {
   id: string;
@@ -16,12 +17,12 @@ interface Transaction {
 
 export default function TransactionHistory({
   onClose,
-  viewMode = 'shared', // default fallback
+  viewMode = 'shared',
 }: {
   onClose?: () => void;
   viewMode?: 'personal' | 'shared';
-}) 
- {
+}) {
+  const { t } = useLanguage();
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [uidToEmail, setUidToEmail] = useState<Record<string, string>>({});
 
@@ -32,35 +33,34 @@ export default function TransactionHistory({
 
       const allUIDs = [user.uid];
 
-if (viewMode === 'shared') {
-  try {
-    const userDocs = await getDocs(collection(db, 'users'));
-    userDocs.forEach((doc) => {
-      const sharedWith = doc.data().sharedWith || [];
-      const docUid = doc.id;
+      if (viewMode === 'shared') {
+        try {
+          const userDocs = await getDocs(collection(db, 'users'));
+          userDocs.forEach((doc) => {
+            const sharedWith = doc.data().sharedWith || [];
+            const docUid = doc.id;
 
-      if (sharedWith.includes(user.uid) && !allUIDs.includes(docUid)) {
-        allUIDs.push(docUid);
+            if (sharedWith.includes(user.uid) && !allUIDs.includes(docUid)) {
+              allUIDs.push(docUid);
+            }
+
+            if (docUid === user.uid && Array.isArray(sharedWith)) {
+              sharedWith.forEach((uid: string) => {
+                if (!allUIDs.includes(uid)) allUIDs.push(uid);
+              });
+            }
+          });
+
+          const emailMap: Record<string, string> = {};
+          userDocs.forEach((doc) => {
+            const email = doc.data().email;
+            if (email) emailMap[doc.id] = email;
+          });
+          setUidToEmail(emailMap);
+        } catch (err) {
+          console.error("Error fetching shared users:", err);
+        }
       }
-
-      if (docUid === user.uid && Array.isArray(sharedWith)) {
-        sharedWith.forEach((uid: string) => {
-          if (!allUIDs.includes(uid)) allUIDs.push(uid);
-        });
-      }
-    });
-
-    const emailMap: Record<string, string> = {};
-    userDocs.forEach((doc) => {
-      const email = doc.data().email;
-      if (email) emailMap[doc.id] = email;
-    });
-    setUidToEmail(emailMap);
-  } catch (err) {
-    console.error("Error fetching shared users:", err);
-  }
-}
-
 
       const allData: Transaction[] = [];
 
@@ -107,7 +107,7 @@ if (viewMode === 'shared') {
   return (
     <div className={onClose ? 'modal-backdrop fade-in' : 'history-page'}>
       <div className="history-panel">
-        <h2>Transaction History</h2>
+        <h2>{t('transactionHistory') || 'Transaction History'}</h2>
         <ul className="transaction-list">
           {transactions.map((tx) => (
             <li key={tx.id} className={`transaction-item ${tx.type}`}>
@@ -122,7 +122,7 @@ if (viewMode === 'shared') {
                   <span className="transaction-date">{formatDate(tx.timestamp)}</span>
                   {tx.ownerUid !== auth.currentUser?.uid && (
                     <span className="transaction-shared">
-                      Shared by: {uidToEmail[tx.ownerUid!] || 'Another user'}
+                      {t('sharedBy') || 'Shared by'}: {uidToEmail[tx.ownerUid!] || t('anotherUser') || 'Another user'}
                     </span>
                   )}
                 </div>
@@ -135,7 +135,7 @@ if (viewMode === 'shared') {
         </ul>
         {onClose && (
           <button className="close-modal" onClick={onClose}>
-            × Close
+            × {t('close') || 'Close'}
           </button>
         )}
       </div>
