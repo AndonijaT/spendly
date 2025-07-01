@@ -5,7 +5,6 @@ import Layout from './components/Layout';
 import App from './App';
 import Dashboard from './pages/Dashboard';
 import Budget from './pages/Budget';
-import Statistics from './pages/Statistics';
 import NotFound from './pages/NotFound';
 import About from './pages/About';
 import Features from './pages/Features';
@@ -19,7 +18,6 @@ import './emailInit';
 import PrivacyPolicy from './pages/PrivacyPolicy';
 import TermsOfUse from './pages/TermsOfUse';
 import Reports from './pages/Reports';
-import Terms from './pages/Terms';
 import { CurrencyProvider } from './context/CurrencyContext';
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
@@ -40,12 +38,10 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
             <Route path="/privacy-policy" element={<PrivacyPolicy />} />
             <Route path="/terms-of-use" element={<TermsOfUse />} />
             <Route path="/reports" element={<Reports />} />
-            <Route path="/terms" element={<Terms />} />
             {/* PROTECTED routes */}
             <Route path="account" element={<PrivateRoute><Account /></PrivateRoute>} />
             <Route path="dashboard" element={<PrivateRoute><Dashboard /></PrivateRoute>} />
             <Route path="budget" element={<PrivateRoute><Budget /></PrivateRoute>} />
-            <Route path="statistics" element={<PrivateRoute><Statistics /></PrivateRoute>} />
           </Route>
 
           <Route path="*" element={<NotFound />} />
