@@ -45,6 +45,7 @@ type Transaction = {
 };
 
 export default function Reports() {
+  
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [filterType, setFilterType] = useState<'all' | 'day' | 'week' | 'month' | 'range' | 'year'>('month');
   const [customRange, setCustomRange] = useState<{ start: string; end: string }>({ start: '', end: '' });
@@ -52,6 +53,7 @@ export default function Reports() {
   const { t } = useLanguage();
 
   useEffect(() => {
+    
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
       if (!user) return;
       const snapshot = await getDocs(collection(db, 'users', user.uid, 'transactions'));
@@ -148,7 +150,6 @@ export default function Reports() {
     const imgProps = pdf.getImageProperties(imgData);
 
     const pageWidth = pdf.internal.pageSize.getWidth();
-    const pageHeight = pdf.internal.pageSize.getHeight();
 
     const imgWidth = pageWidth - 20;
     const imgHeight = (imgProps.height * imgWidth) / imgProps.width;
@@ -444,41 +445,75 @@ export default function Reports() {
           )}
         </div>
 
-        <div className="chart-card">
-          {Object.keys(methodBreakdown).length > 1 ? (
-            <Doughnut
-              data={{
-                labels: Object.keys(methodBreakdown),
-                datasets: [
-                  {
-                    data: Object.values(methodBreakdown),
-                    backgroundColor: ['#42a5f5', '#ffca28'],
-                  },
-                ],
-              }}
-              options={{
-                plugins: {
-                  title: { display: true, text: t('chartDoughnutTitle') || 'Spending: Card vs Cash' },
-                  legend: { position: 'bottom' },
-                },
-              }}
-            />
-          ) : (
-            <div style={{
-              height: '100%',
-              display: 'flex',
-              justifyContent: 'center',
-              alignItems: 'center',
-              textAlign: 'center',
-              fontSize: '1.1rem',
-              color: '#777',
-              border: '1px dashed #ccc',
-              borderRadius: '10px'
-            }}>
-              Only one payment method used in this filter.
-            </div>
-          )}
-        </div>
+      <div className="chart-card">
+  {Object.keys(methodBreakdown).length > 1 ? (
+    <Doughnut
+      data={{
+        labels: Object.keys(methodBreakdown),
+        datasets: [
+          {
+            data: Object.values(methodBreakdown),
+            backgroundColor: ['#42a5f5', '#ffca28'],
+          },
+        ],
+      }}
+      options={{
+        plugins: {
+          title: {
+            display: true,
+            text: t('chartDoughnutTitle') || 'Spending: Card vs Cash',
+          },
+          legend: {
+            position: 'bottom',
+          },
+        },
+      }}
+      plugins={[
+        {
+          id: 'centerLabel',
+          beforeDraw: (chart) => {
+            const { width, height, ctx } = chart;
+            const cash = (methodBreakdown.cash || 0).toFixed(2);
+            const card = (methodBreakdown.card || 0).toFixed(2);
+            ctx.restore();
+            ctx.font = 'bold 14px sans-serif';
+            ctx.fillStyle = '#333';
+            ctx.textBaseline = 'middle';
+            ctx.textAlign = 'center';
+
+            const textLines = [`Cash: €${cash}`, `Card: €${card}`];
+            const lineHeight = 20;
+            const x = width / 2;
+            const y = height / 2 - (lineHeight / 2);
+
+            textLines.forEach((line, i) => {
+              ctx.fillText(line, x, y + i * lineHeight);
+            });
+
+            ctx.save();
+          },
+        },
+      ]}
+    />
+  ) : (
+    <div
+      style={{
+        height: '100%',
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+        textAlign: 'center',
+        fontSize: '1.1rem',
+        color: '#777',
+        border: '1px dashed #ccc',
+        borderRadius: '10px',
+      }}
+    >
+      Only one payment method used in this filter.
+    </div>
+  )}
+</div>
+
       </div>
 
       <div className="chart-card">
