@@ -756,8 +756,8 @@ export default function Dashboard() {
       <div className="dashboard-section">
         <div className="recent-transactions">
           <div className="recent-header">
-            <h3><h3>{t('latestTransactions') || 'Latest transactions'}</h3>
-              transactions</h3>
+         <h3>{t('latestTransactions') || 'Latest transactions'} transactions</h3>
+
             <div className="recent-actions">
               <button className="see-all-link" onClick={() => setShowHistoryModal(true)}>
                 {t('seeAll') || 'See all'}
@@ -882,7 +882,7 @@ export default function Dashboard() {
       )}
       {!hideAdviceTrigger && (
         <div className="floating-advice-button">
-<span onClick={() => setShowAdviceModal(true)}>💬 {t('assistantMessage') || 'Hey! I am here to help!'}</span>
+          <span onClick={() => setShowAdviceModal(true)}>💬 {t('assistantMessage') || 'Hey! I am here to help!'}</span>
           <button className="close-advice" onClick={() => setHideAdviceTrigger(true)}>×</button>
         </div>
       )}
