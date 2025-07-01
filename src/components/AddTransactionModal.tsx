@@ -1,14 +1,11 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { db, auth } from '../firebase/firebaseConfig';
-import { addDoc, collection, serverTimestamp } from 'firebase/firestore';
+import { addDoc, collection, serverTimestamp, getDocs } from 'firebase/firestore';
 import { toast } from 'react-toastify';
 import '../styles/AddTransactionModal.css';
 import { useLanguage } from '../context/LanguageContext';
-import { getDocs } from 'firebase/firestore';
-import { useRef } from 'react';
 import { useCurrency } from '../context/CurrencyContext';
 import type { Currency } from '../context/CurrencyContext';
-
 
 const categories = [
   "groceries", "home", "eating out", "food delivery", "coffee", "car", "health",
@@ -27,20 +24,60 @@ export default function AddTransactionModal({ onClose }: { onClose: () => void }
   const [errorMessage, setErrorMessage] = useState('');
   const carouselRef = useRef<HTMLDivElement | null>(null);
   const { currency, getSymbol } = useCurrency();
-  
-
+  const [currentCash, setCurrentCash] = useState(0);
+  const [currentCard, setCurrentCard] = useState(0);
 
   const scrollCategory = (dir: -1 | 1) => {
     if (carouselRef.current) {
       carouselRef.current.scrollBy({ left: dir * 220, behavior: 'smooth' });
     }
   };
+
   useEffect(() => {
     document.body.classList.add('modal-open');
     return () => {
       document.body.classList.remove('modal-open');
     };
   }, []);
+
+  useEffect(() => {
+    const fetchBalances = async () => {
+      const user = auth.currentUser;
+      if (!user) return;
+
+      const snapshot = await getDocs(collection(db, 'users', user.uid, 'transactions'));
+      let cash = 0;
+      let card = 0;
+
+      snapshot.forEach((doc) => {
+        const tx = doc.data();
+        if (tx.currency !== currency) return;
+
+        const amt = Number(tx.amount);
+
+        if (tx.type === 'income') {
+          if (tx.method === 'cash') cash += amt;
+          if (tx.method === 'card') card += amt;
+        } else if (tx.type === 'expense') {
+          if (tx.method === 'cash') cash -= amt;
+          if (tx.method === 'card') card -= amt;
+        } else if (tx.type === 'transfer') {
+          if (tx.direction === 'to_cash') {
+            card -= amt;
+            cash += amt;
+          } else if (tx.direction === 'to_card') {
+            cash -= amt;
+            card += amt;
+          }
+        }
+      });
+
+      setCurrentCash(cash);
+      setCurrentCard(card);
+    };
+
+    fetchBalances();
+  }, [currency]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -49,10 +86,8 @@ export default function AddTransactionModal({ onClose }: { onClose: () => void }
 
     try {
       const amt = parseFloat(amount);
-
-      //validate amount is a number and greater than 0
       if (isNaN(amt) || amt <= 0) {
-        setErrorMessage('🚨 Please enter a valid amount greater than 0.');
+        setErrorMessage(t('invalidAmount') || '🚨 Please enter a valid amount greater than 0.');
         return;
       }
 
@@ -64,7 +99,6 @@ export default function AddTransactionModal({ onClose }: { onClose: () => void }
         currency,
       };
 
-
       if (type === 'income' || type === 'expense') {
         payload.method = method;
         payload.category = category;
@@ -74,33 +108,29 @@ export default function AddTransactionModal({ onClose }: { onClose: () => void }
         payload.direction = direction;
       }
 
-      //check balances for expense
       if (type === 'expense') {
         if (method === 'cash' && amt > currentCash) {
-          setErrorMessage('🚨 Balance too low! Not enough cash.');
+          setErrorMessage(t('notEnoughCash') || '🚨 Balance too low! Not enough cash.');
           return;
         }
         if (method === 'card' && amt > currentCard) {
-          setErrorMessage('🚨 Balance too low! Not enough card balance.');
+          setErrorMessage(t('notEnoughCard') || '🚨 Balance too low! Not enough card balance.');
           return;
         }
       }
 
-      //check balances for transfer
       if (type === 'transfer') {
         if (direction === 'to_card' && amt > currentCash) {
-          setErrorMessage('🚨 Cannot transfer. Not enough cash balance.');
+          setErrorMessage(t('transferNotEnoughCash') || '🚨 Cannot transfer. Not enough cash balance.');
           return;
         }
         if (direction === 'to_cash' && amt > currentCard) {
-          setErrorMessage('🚨 Cannot transfer. Not enough card balance.');
+          setErrorMessage(t('transferNotEnoughCard') || '🚨 Cannot transfer. Not enough card balance.');
           return;
         }
       }
 
-      //Proceed to add
       await addDoc(collection(db, 'users', user.uid, 'transactions'), payload);
-
       toast.success(t('transactionAdded'));
       onClose();
     } catch (err) {
@@ -108,49 +138,6 @@ export default function AddTransactionModal({ onClose }: { onClose: () => void }
       console.error(err);
     }
   };
-
-  const [currentCash, setCurrentCash] = useState(0);
-  const [currentCard, setCurrentCard] = useState(0);
-
-  useEffect(() => {
-    const fetchBalances = async () => {
-      const user = auth.currentUser;
-      if (!user) return;
-
-      const snapshot = await getDocs(collection(db, 'users', user.uid, 'transactions'));
-      let cash = 0;
-      let card = 0;
-
-     snapshot.forEach((doc) => {
-  const tx = doc.data();
-  if (tx.currency !== currency) return; // 👈 ignore other currency entries
-
-  const amt = Number(tx.amount);
-
-  if (tx.type === 'income') {
-    if (tx.method === 'cash') cash += amt;
-    if (tx.method === 'card') card += amt;
-  } else if (tx.type === 'expense') {
-    if (tx.method === 'cash') cash -= amt;
-    if (tx.method === 'card') card -= amt;
-  } else if (tx.type === 'transfer') {
-    if (tx.direction === 'to_cash') {
-      card -= amt;
-      cash += amt;
-    } else if (tx.direction === 'to_card') {
-      cash -= amt;
-      card += amt;
-    }
-  }
-});
-
-      setCurrentCash(cash);
-      setCurrentCard(card);
-    };
-
-    fetchBalances();
-  }, []);
-console.log('t(amount):', t('amount'));
 
   return (
     <div className="modal-backdrop">
@@ -165,36 +152,26 @@ console.log('t(amount):', t('amount'));
             {t('income')}
           </button>
           <button className={type === 'transfer' ? 'active' : ''} onClick={() => setType('transfer')}>
-            🔄 {t('transfer') || 'Transfer'}
+            🔄 {t('transfer')}
           </button>
         </div>
-        {errorMessage && (
-          <div className="error-warning">{errorMessage}</div>
-        )}
+
+        {errorMessage && <div className="error-warning">{errorMessage}</div>}
 
         <form onSubmit={handleSubmit}>
           {type !== 'transfer' && (
             <div className="method-toggle">
               <label>{t('method')}:</label>
               <div className="method-buttons">
-                <button
-                  type="button"
-                  className={method === 'cash' ? 'active' : ''}
-                  onClick={() => setMethod('cash')}
-                >
+                <button type="button" className={method === 'cash' ? 'active' : ''} onClick={() => setMethod('cash')}>
                   {t('cash')}
                 </button>
-                <button
-                  type="button"
-                  className={method === 'card' ? 'active' : ''}
-                  onClick={() => setMethod('card')}
-                >
+                <button type="button" className={method === 'card' ? 'active' : ''} onClick={() => setMethod('card')}>
                   {t('card')}
                 </button>
               </div>
             </div>
           )}
-
 
           {type === 'expense' && (
             <>
@@ -216,10 +193,7 @@ console.log('t(amount):', t('amount'));
                 <button type="button" className="carousel-arrow right" onClick={() => scrollCategory(1)}>›</button>
               </div>
             </>
-
           )}
-
-
 
           {type === 'income' && (
             <label>{t('source')}:
@@ -234,10 +208,10 @@ console.log('t(amount):', t('amount'));
           )}
 
           {type === 'transfer' && (
-            <label>{t('direction') || 'Transfer direction'}:
+            <label>{t('direction')}:
               <select value={direction} onChange={(e) => setDirection(e.target.value as 'to_cash' | 'to_card')}>
-                <option value="to_cash">💶 Card → Cash</option>
-                <option value="to_card">💳 Cash → Card</option>
+                <option value="to_cash">💶 {t('cardToCash') || 'Card → Cash'}</option>
+                <option value="to_card">💳 {t('cashToCard') || 'Cash → Card'}</option>
               </select>
             </label>
           )}
@@ -245,7 +219,6 @@ console.log('t(amount):', t('amount'));
           <label>{t('amount')} ({getSymbol()}):
             <input type="number" value={amount} onChange={(e) => setAmount(e.target.value)} required />
           </label>
-
 
           <label>{t('description')} ({t('optional')}):
             <textarea
