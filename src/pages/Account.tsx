@@ -24,6 +24,7 @@ import { toast } from 'react-toastify';
 import '../styles/AccountPage.css';
 import { confirmAlert } from 'react-confirm-alert';
 import 'react-confirm-alert/src/react-confirm-alert.css';
+import { useLanguage } from '../context/LanguageContext';
 
 declare global {
     interface Window {
@@ -44,6 +45,7 @@ export default function Account() {
     const [mfaEnabled, setMfaEnabled] = useState(false);
     const [inviteEmail, setInviteEmail] = useState('');
     const [inviteStatus, setInviteStatus] = useState('');
+const { t } = useLanguage();
 
     useEffect(() => {
         console.log('auth object:', auth);
@@ -293,106 +295,109 @@ export default function Account() {
     console.log('Current user:', user);
 
     return (
-        <div className="account-page">
-            <h2>My Account</h2>
+  <div className="account-page">
+    <h2>{t('account.myAccount') || 'My Account'}</h2>
 
-            <div className="account-header">
-                <img src={photoURL} alt="" className="profile-image" />
-                <div className="info">
-                    <h3>{name || 'Your Name'}</h3>
-                    <p>{email}</p>
-                </div>
-            </div>
+    <div className="account-header">
+      <img src={photoURL} alt="" className="profile-image" />
+      <div className="info">
+        <h3>{name || t('account.defaultName') || 'Your Name'}</h3>
+        <p>{email}</p>
+      </div>
+    </div>
 
-            <div className="account-section collaborate-section">
-                <div className="section-header">
-                    <h3>Personal Details</h3>
-                    {!editing && <button onClick={() => setEditing(true)}>Edit</button>}
-                </div>
-                {editing && (
-                    <div className="edit-form">
-                        <label>
-                            Full Name:
-                            <input value={name} onChange={(e) => setName(e.target.value)} />
-                        </label>
-                        <label>
-                            Profile Photo:
-                            <input type="file" accept="image/*" onChange={(e) => e.target.files && handleImageUpload(e.target.files[0])} />
-                        </label>
-                        <label>
-                            Email:
-                            <input type="email" value={email} disabled />
-                        </label>
-                        <div className="action-buttons">
-                            <button className="save-btn" onClick={handleSave} disabled={uploading}>
-                                {uploading ? 'Uploading...' : 'Save'}
-                            </button>
-                            <button className="cancel-btn" onClick={() => setEditing(false)}>Cancel</button>
-                        </div>
-                    </div>
-                )}
-            </div>
-
-            <div className="account-section collaborate-section twofa-section">
-                <h3>Two-Factor Authentication</h3>
-                {mfaEnabled ? (
-                    <p>✅ 2FA is enabled on your account.</p>
-                ) : (
-                    <>
-                        <div className="twofa-input-row">
-                            <input
-                                type="tel"
-                                placeholder="Phone Number (e.g. +386...)"
-                                value={phoneNumber}
-                                onChange={(e) => setPhoneNumber(e.target.value)}
-                            />
-                            <button onClick={sendVerificationCode}>Send Code</button>
-                        </div>
-                        <div className="twofa-input-row">
-                            <input
-                                type="text"
-                                placeholder="Enter Code"
-                                value={code}
-                                onChange={(e) => setCode(e.target.value)}
-                            />
-                            <button onClick={verifyCodeAndEnable2FA}>Verify & Enable</button>
-                        </div>
-                        <div id="recaptcha-container" />
-                    </>
-                )}
-            </div>
-
-
-
-
-
-
-
-
-
-            <div className="account-section collaborate-section">
-                <h3> Collaborate</h3>
-                <p className="collab-description">
-                    Want to track finances with a partner, friend, or family member? Enter their email address below to invite them.
-                    Once they accept, you'll both see the same budget and transactions — in real-time.
-                </p>
-                <div className="collab-input-group">
-                    <input
-                        type="email"
-                        className="collab-input"
-                        placeholder="e.g. partner@email.com"
-                        value={inviteEmail}
-                        onChange={(e) => setInviteEmail(e.target.value)}
-                    />
-                    <button className="collab-button" onClick={handleInvite}>Send Invite</button>
-                </div>
-                {inviteStatus && <p className="invite-status">{inviteStatus}</p>}
-            </div>
-            <div className="account-buttons">
-                <button className="delete-account-outlined-btn" onClick={handleDeleteAccount}>
-                    <span className="delete-icon">❌</span> Delete My Account
-                </button>
-            </div>
+    <div className="account-section collaborate-section">
+      <div className="section-header">
+        <h3>{t('account.personalDetails') || 'Personal Details'}</h3>
+        {!editing && <button onClick={() => setEditing(true)}>{t('edit') || 'Edit'}</button>}
+      </div>
+      {editing && (
+        <div className="edit-form">
+          <label>
+            {t('account.fullName') || 'Full Name'}:
+            <input value={name} onChange={(e) => setName(e.target.value)} />
+          </label>
+          <label>
+            {t('account.profilePhoto') || 'Profile Photo'}:
+            <input
+              type="file"
+              accept="image/*"
+              onChange={(e) => e.target.files && handleImageUpload(e.target.files[0])}
+            />
+          </label>
+          <label>
+            {t('email') || 'Email'}:
+            <input type="email" value={email} disabled />
+          </label>
+          <div className="action-buttons">
+            <button className="save-btn" onClick={handleSave} disabled={uploading}>
+              {uploading ? t('uploading') || 'Uploading...' : t('save') || 'Save'}
+            </button>
+            <button className="cancel-btn" onClick={() => setEditing(false)}>
+              {t('cancel') || 'Cancel'}
+            </button>
+          </div>
         </div>
-    );
+      )}
+    </div>
+
+    <div className="account-section collaborate-section twofa-section">
+      <h3>{t('account.twofaTitle') || 'Two-Factor Authentication'}</h3>
+      {mfaEnabled ? (
+        <p>{t('account.twofaEnabled') || '✅ 2FA is enabled on your account.'}</p>
+      ) : (
+        <>
+          <div className="twofa-input-row">
+            <input
+              type="tel"
+              placeholder={t('account.phonePlaceholder') || 'Phone Number (e.g. +386...)'}
+              value={phoneNumber}
+              onChange={(e) => setPhoneNumber(e.target.value)}
+            />
+            <button onClick={sendVerificationCode}>{t('account.sendCode') || 'Send Code'}</button>
+          </div>
+          <div className="twofa-input-row">
+            <input
+              type="text"
+              placeholder={t('account.enterCode') || 'Enter Code'}
+              value={code}
+              onChange={(e) => setCode(e.target.value)}
+            />
+            <button onClick={verifyCodeAndEnable2FA}>
+              {t('account.verifyEnable') || 'Verify & Enable'}
+            </button>
+          </div>
+          <div id="recaptcha-container" />
+        </>
+      )}
+    </div>
+
+    <div className="account-section collaborate-section">
+      <h3>{t('account.collaborateTitle') || 'Collaborate'}</h3>
+      <p className="collab-description">
+        {t('account.collabDescription') ||
+          "Want to track finances with a partner, friend, or family member? Enter their email address below to invite them. Once they accept, you'll both see the same budget and transactions — in real-time."}
+      </p>
+      <div className="collab-input-group">
+        <input
+          type="email"
+          className="collab-input"
+          placeholder={t('account.emailPlaceholder') || 'e.g. partner@email.com'}
+          value={inviteEmail}
+          onChange={(e) => setInviteEmail(e.target.value)}
+        />
+        <button className="collab-button" onClick={handleInvite}>
+          {t('sendInvite') || 'Send Invite'}
+        </button>
+      </div>
+      {inviteStatus && <p className="invite-status">{inviteStatus}</p>}
+    </div>
+
+    <div className="account-buttons">
+      <button className="delete-account-outlined-btn" onClick={handleDeleteAccount}>
+        <span className="delete-icon">❌</span> {t('account.deleteAccount') || 'Delete My Account'}
+      </button>
+    </div>
+  </div>
+);
 }
