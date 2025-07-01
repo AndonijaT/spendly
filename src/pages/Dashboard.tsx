@@ -18,6 +18,7 @@ import BudgetManager from '../components/BudgetManager';
 import { onSnapshot } from 'firebase/firestore';
 import Footer from '../components/Footer';
 import { useCurrency, } from '../context/CurrencyContext';
+import { useLanguage } from '../context/LanguageContext';
 
 type Transaction = {
   id: string;
@@ -39,6 +40,7 @@ export default function Dashboard() {
   const overviewAnchorRef = useRef<HTMLDivElement>(null);
   const [showHistoryModal, setShowHistoryModal] = useState(false);
   const { convertToUserCurrency, getSymbol, currency } = useCurrency();
+  const { t } = useLanguage();
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -64,7 +66,7 @@ export default function Dashboard() {
   const navigate = useNavigate();
   // const showAllButton = transactions.length > 10;
   const [showSettings, setShowSettings] = useState(false);
-const symbol = getSymbol();
+  const symbol = getSymbol();
 
   const recentTransactions = [...transactions]
     .sort((a, b) => b.timestamp.seconds - a.timestamp.seconds)
@@ -78,31 +80,31 @@ const symbol = getSymbol();
     {
       target: '.account-toggle',
       placement: 'bottom',
-      content: '👥 Switch between "My View" (just your data) and "Shared View" (includes transactions from users you’ve connected with).',
+      content: t('tour_account_toggle') || '👥 Switch between "My View"...',
       disableBeacon: true,
     },
     {
       target: '.cash-card-balance-section',
       placement: 'bottom',
-      content: '💰 This is your total available balance, split between Cash and Card.',
+      content: t('tour_balance_section') || '💰 This is your total available balance...',
     },
-
     {
       target: '.floating-advice-button',
       placement: 'left',
-      content: '🤖 Need help saving money? Ask our smart assistant for personalized advice!',
+      content: t('tour_advice_button') || '🤖 Need help saving money?...',
     },
     {
       target: '.floating-fab',
       placement: 'left',
-      content: '☰ Tap here to access settings (⚙️), choose a month (📅), or quickly add a new transaction (+).',
+      content: t('tour_fab') || '☰ Tap here to access settings...',
     }
   ];
+
 
   const [viewMode, setViewMode] = useState<'personal' | 'shared'>('shared');
 
   const [overrunMessage, setOverrunMessage] = useState<string | null>(null);
-const [overrunCategory, setOverrunCategory] = useState<string | null>(null);
+  const [overrunCategory, setOverrunCategory] = useState<string | null>(null);
 
   useEffect(() => {
     const seen = localStorage.getItem('seenSpendlyTutorial');
@@ -604,18 +606,18 @@ const [overrunCategory, setOverrunCategory] = useState<string | null>(null);
           className="budget-alert-overlay"
           onClick={() => {
             if (overrunCategory) {
-  const currentMonth = format(new Date(), 'yyyy-MM');
-  localStorage.setItem(`dismissed_${overrunCategory}_${currentMonth}`, 'true');
-  setOverrunMessage(null);
-  setOverrunCategory(null);
-}
+              const currentMonth = format(new Date(), 'yyyy-MM');
+              localStorage.setItem(`dismissed_${overrunCategory}_${currentMonth}`, 'true');
+              setOverrunMessage(null);
+              setOverrunCategory(null);
+            }
 
           }}
         >
           <div className="budget-alert-box" onClick={(e) => e.stopPropagation()}>
-            <div>🚨 <strong>Budget Overrun:</strong></div>
+            <div>🚨 <strong>{t('budgetOverrunTitle') || 'Budget Overrun:'}</strong></div>
             <div style={{ marginTop: '0.5rem' }}>{overrunMessage}</div>
-            <div className="budget-dismiss-note">Click anywhere to dismiss</div>
+            <div className="budget-dismiss-note">{t('dismissClick') || 'Click anywhere to dismiss'}</div>
           </div>
         </div>
       )}
@@ -629,7 +631,7 @@ const [overrunCategory, setOverrunCategory] = useState<string | null>(null);
         <div className="summary-row" style={{ justifyContent: 'center' }}>
           <div className='dashboard-section'>
             <div className="cash-card-balance-section">
-              <h3>Total Balance</h3>
+              <h3>{t('totalBalance') || 'Total Balance'}</h3>
               <div className="balance-display">
                 {totalBalance >= 0 ? (
                   <span className="balance-positive">{totalBalance.toFixed(2)} {symbol}</span>
@@ -639,11 +641,11 @@ const [overrunCategory, setOverrunCategory] = useState<string | null>(null);
               </div>
               <div className="balance-breakdown">
                 <div className="balance-line">
-                  <span className="label">Cash</span>
+                  <span className="label">{t('cash')}</span>
                   <span>{cash.toFixed(2)} {symbol}</span>
                 </div>
                 <div className="balance-line">
-                  <span className="label">Card</span>
+                  <span className="label">{t('card')}</span>
                   <span>{card.toFixed(2)} {symbol}</span>
                 </div>
               </div>
@@ -654,9 +656,11 @@ const [overrunCategory, setOverrunCategory] = useState<string | null>(null);
 
         <div className="dashboard-section">
           <div className="summary-row">
-            <div className="summary-box income">Income: +{incomeTotal.toFixed(2)} {symbol}</div>
-            <div className="summary-box expense">Expenses: -{expenseTotal.toFixed(2)} {symbol}</div>
-          </div>
+            <div className="summary-box income">
+              {t('income') || 'Income'}: +{incomeTotal.toFixed(2)} {symbol}
+            </div><div className="summary-box expense">
+              {t('expense') || 'Expenses'}: -{expenseTotal.toFixed(2)} {symbol}
+            </div>          </div>
         </div>
       </div>
 
@@ -666,7 +670,7 @@ const [overrunCategory, setOverrunCategory] = useState<string | null>(null);
             className="overview-button"
             onClick={() => expensesRef.current?.scrollIntoView({ behavior: 'smooth' })}
           >
-            <span className="icon">📊</span> Spending Overview →
+            <span className="icon">📊</span> {t('spendingOverview') || 'Spending Overview'} →
           </button>
         )}
       </div>
@@ -674,7 +678,7 @@ const [overrunCategory, setOverrunCategory] = useState<string | null>(null);
 
 
       <div ref={expensesRef} className="dashboard-section expense-breakdown-section">
-        <h3>Expenses by Category</h3>
+        <h3>{t('expensesByCategory') || 'Expenses by Category'}</h3>
         <div className="expense-layout">
           <div className="expense-chart">
             <Pie data={pieData} options={{
@@ -690,7 +694,7 @@ const [overrunCategory, setOverrunCategory] = useState<string | null>(null);
                 <div key={category} className="category-expense-item">
                   <div className="category-color-box" style={{ backgroundColor: color }}></div>
                   <div className="category-label" style={{ color }}>
-                    {category} ({percent}%)
+                    {t(category) || category} ({percent}%)
                   </div>
                   <div className="category-amount">
                     {amount.toFixed(2)} {symbol}
@@ -745,18 +749,20 @@ const [overrunCategory, setOverrunCategory] = useState<string | null>(null);
             boxShadow: '0 2px 6px rgba(0,0,0,0.1)',
           }}
         >
-          📈 View Full Spending Report
+          📈 {t('viewReports') || 'View Full Spending Report'}
         </button>
       </div>
 
       <div className="dashboard-section">
         <div className="recent-transactions">
           <div className="recent-header">
-            <h3>Latest transactions</h3>
+            <h3><h3>{t('latestTransactions') || 'Latest transactions'}</h3>
+              transactions</h3>
             <div className="recent-actions">
               <button className="see-all-link" onClick={() => setShowHistoryModal(true)}>
-                See all
+                {t('seeAll') || 'See all'}
               </button>
+
 
 
             </div>
@@ -768,11 +774,10 @@ const [overrunCategory, setOverrunCategory] = useState<string | null>(null);
               const today = new Date();
               const formatted =
                 date.toDateString() === today.toDateString()
-                  ? 'Today'
+                  ? t('today') || 'Today'
                   : date.toDateString() === new Date(today.getTime() - 86400000).toDateString()
-                    ? 'Yesterday'
+                    ? t('yesterday') || 'Yesterday'
                     : date.toLocaleDateString();
-
               return (
                 <li key={tx.id} className={`recent-item ${tx.type}`}>
                   <div className="recent-left">
@@ -781,7 +786,7 @@ const [overrunCategory, setOverrunCategory] = useState<string | null>(null);
                       {formatted}
                       {tx.ownerUid && (
                         <div className="transaction-owner">
-                          {uidToEmail[tx.ownerUid] || 'Shared User'}
+                          {uidToEmail[tx.ownerUid] || t('sharedUser') || 'Shared User'}
                         </div>
                       )}
                     </div>
@@ -792,9 +797,9 @@ const [overrunCategory, setOverrunCategory] = useState<string | null>(null);
                     {tx.type === 'income' ? '+' : '-'}
                     {tx.amount.toFixed(2)} {symbol}
                     {/* Optional: Show source currency info */}
-                   {(tx.currency !== currency && (tx.currency === 'EUR' || tx.currency === 'USD')) && (
-  <span className="original-currency"> ({tx.currency})</span>
-)}
+                    {(tx.currency !== currency && (tx.currency === 'EUR' || tx.currency === 'USD')) && (
+                      <span className="original-currency"> ({tx.currency})</span>
+                    )}
 
                   </div>
 
@@ -877,7 +882,7 @@ const [overrunCategory, setOverrunCategory] = useState<string | null>(null);
       )}
       {!hideAdviceTrigger && (
         <div className="floating-advice-button">
-          <span onClick={() => setShowAdviceModal(true)}>💬Hey! I am here to help!</span>
+<span onClick={() => setShowAdviceModal(true)}>💬 {t('assistantMessage') || 'Hey! I am here to help!'}</span>
           <button className="close-advice" onClick={() => setHideAdviceTrigger(true)}>×</button>
         </div>
       )}
