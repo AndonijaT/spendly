@@ -12,6 +12,7 @@ import {
 import { auth } from '../firebase/firebaseConfig';
 import { toast } from 'react-toastify';
 import './../styles/LoginForm.css';
+import { useLanguage } from '../context/LanguageContext';
 
 function LoginForm({
   onSuccess,
@@ -22,6 +23,7 @@ function LoginForm({
   switchToRegister: () => void;
   switchToForgot: () => void;
 }) {
+  const { t } = useLanguage();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
@@ -56,7 +58,7 @@ function LoginForm({
       const userCred = await signInWithEmailAndPassword(auth, email, password);
 
       if (!userCred.user.emailVerified) {
-        toast.warn('Email not verified. Please check your inbox.');
+        toast.warn(t('emailNotVerified') || 'Email not verified. Please check your inbox.');
         await auth.signOut();
         return;
       }
@@ -84,13 +86,13 @@ function LoginForm({
           setMfaVisible(true);
           return;
         } catch {
-          toast.error('Failed to send SMS verification code.');
+          toast.error(t('smsFailed') || 'Failed to send SMS verification code.');
           return;
         }
       }
 
       if (code === 'auth/network-request-failed') {
-        toast.warning('Network issue. Retrying...');
+        toast.warning(t('networkIssue') || 'Network issue. Retrying...');
         setTimeout(() => handleLogin(e), 2000);
         return;
       }
@@ -98,23 +100,23 @@ function LoginForm({
       switch (code) {
         case 'auth/wrong-password':
         case 'auth/invalid-credential':
-          setError('Incorrect email or password.');
+          setError(t('errorWrongPassword') || 'Incorrect email or password.');
           break;
         case 'auth/user-not-found':
-          setError('No account found with this email.');
+          setError(t('errorUserNotFound') || 'No account found with this email.');
           break;
         case 'auth/too-many-requests':
-          setError('Too many attempts. Try again later.');
+          setError(t('errorTooManyRequests') || 'Too many attempts. Try again later.');
           break;
         case 'auth/invalid-email':
-          setError('Invalid email format.');
+          setError(t('errorInvalidEmail') || 'Invalid email format.');
           break;
         case 'auth/internal-error':
-          setError('An internal error occurred. Please try again.');
+          setError(t('errorInternal') || 'An internal error occurred. Please try again.');
           break;
         default:
           console.error('[Unhandled Firebase Error]', err);
-          setError('Login failed. Please check your credentials.');
+          setError(t('errorLoginFailed') || 'Login failed. Please check your credentials.');
       }
     } finally {
       setLoading(false);
@@ -129,7 +131,7 @@ function LoginForm({
 
       const user = auth.currentUser;
       if (user && !user.emailVerified) {
-        toast.warn('Google account is not verified. Please verify your email.');
+        toast.warn(t('emailNotVerifiedGoogle') || 'Google account is not verified.');
         await auth.signOut();
         return;
       }
@@ -139,18 +141,18 @@ function LoginForm({
       switch (err.code) {
         case 'auth/popup-blocked':
         case 'auth/popup-closed-by-user':
-          toast.info('Popup blocked. Switching to redirect login...');
+          toast.info(t('popupBlocked') || 'Popup blocked. Switching to redirect login...');
           await signInWithRedirect(auth, provider);
           break;
         case 'auth/account-exists-with-different-credential':
-          setError('Account already exists with this email using another login method.');
+          setError(t('errorAccountExists') || 'Account already exists with this email.');
           break;
         case 'auth/invalid-credential':
-          setError('Invalid Google credentials. Try again.');
+          setError(t('errorGoogleInvalid') || 'Invalid Google credentials.');
           break;
         default:
           console.error('[Google Login Error]', err.code);
-          setError('Google sign-in failed. Please try again.');
+          setError(t('errorGoogleGeneric') || 'Google sign-in failed.');
           break;
       }
     } finally {
@@ -166,28 +168,28 @@ function LoginForm({
 
       if (!userCred.user.emailVerified) {
         await auth.signOut();
-        toast.error('Please verify your email before logging in.');
+        toast.error(t('emailNotVerified') || 'Please verify your email.');
         return;
       }
 
-      toast.success('Verification successful.');
+      toast.success(t('verificationSuccess') || 'Verification successful.');
       setMfaVisible(false);
       onSuccess();
     } catch {
-      toast.error('Invalid code. Please try again.');
+      toast.error(t('smsInvalid') || 'Invalid code. Please try again.');
     }
   };
 
   return (
     <>
       <form onSubmit={handleLogin} className="auth-form">
-        <h2>Log In</h2>
+        <h2>{t('login') || 'Log In'}</h2>
 
         <input
           id="login-email"
           name="email"
           type="email"
-          placeholder="Email"
+          placeholder={t('email') || 'Email'}
           onChange={(e) => {
             setEmail(e.target.value);
             setError('');
@@ -199,7 +201,7 @@ function LoginForm({
           id="login-password"
           name="password"
           type="password"
-          placeholder="Password"
+          placeholder={t('password') || 'Password'}
           onChange={(e) => {
             setPassword(e.target.value);
             setError('');
@@ -208,10 +210,10 @@ function LoginForm({
         />
 
         <button type="submit" disabled={loading}>
-          {loading ? 'Logging in…' : 'Log In'}
+          {loading ? t('loggingIn') || 'Logging in…' : t('login') || 'Log In'}
         </button>
 
-        <div className="auth-separator">or</div>
+        <div className="auth-separator">{t('or') || 'or'}</div>
 
         <button
           className="google-btn"
@@ -220,20 +222,20 @@ function LoginForm({
           disabled={loading}
         >
           <img src="/google-icon.png" alt="Google" style={{ width: '20px', marginRight: '8px' }} />
-          Continue with Google
+          {t('continueGoogle') || 'Continue with Google'}
         </button>
 
         <p className="form-footer">
-          Forgot password?{' '}
+          {t('forgotPassword') || 'Forgot password?'}{' '}
           <span onClick={switchToForgot} className="form-link">
-            Reset
+            {t('reset') || 'Reset'}
           </span>
         </p>
 
         <p className="form-footer">
-          Don’t have an account?{' '}
+          {t('noAccount') || 'Don’t have an account?'}{' '}
           <span onClick={switchToRegister} className="form-link">
-            Sign up
+            {t('signUp') || 'Sign up'}
           </span>
         </p>
 
@@ -243,12 +245,12 @@ function LoginForm({
           <div className="mfa-verification">
             <input
               type="text"
-              placeholder="Enter SMS code"
+              placeholder={t('enterCode') || 'Enter SMS code'}
               value={smsCode}
               onChange={(e) => setSmsCode(e.target.value)}
             />
             <button type="button" onClick={handleVerifySMS}>
-              Verify Code
+              {t('verify') || 'Verify Code'}
             </button>
           </div>
         )}
