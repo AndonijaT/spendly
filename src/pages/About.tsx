@@ -21,25 +21,31 @@ function About() {
       behavior: 'smooth',
     });
   }
- return (
+
+ function scrollToNextSection() {
+  const sections = Array.from(document.querySelectorAll('section'));
+  const offset = window.innerHeight * 0.1; 
+
+  for (const section of sections) {
+    const rect = section.getBoundingClientRect();
+    if (rect.top > offset) {
+      section.scrollIntoView({ behavior: 'smooth' });
+      break;
+    }
+  }
+}
+
+  return (
     <div className="about-page">
       <section className="hero-banner">
         <TypingIntro name={name} />
         <div className="scroll-down">
-          <button
-            className="scroll-arrow"
-            onClick={() => {
-              const target = document.getElementById('founder');
-              if (target) {
-                target.scrollIntoView({ behavior: 'smooth' });
-              }
-            }}
-            aria-label="Scroll to next section"
-          >
+          <button className="scroll-arrow" onClick={scrollToNextSection} aria-label="Scroll to next section">
             ↓
           </button>
         </div>
       </section>
+
       <br />
 
       <section id="founder" className="founder-section">
@@ -52,6 +58,9 @@ function About() {
           <img src="/me.jpg" alt="Andonija Todorova" />
         </div>
       </section>
+      <div className="scroll-down">
+        <button className="scroll-arrow" onClick={scrollToNextSection}>↓</button>
+      </div>
 
       <section id="mission" className="mission-wrapper">
         <div className="mission-container">
@@ -61,6 +70,9 @@ function About() {
           <p>{t('about.mission3')}</p>
         </div>
       </section>
+      <div className="scroll-down">
+        <button className="scroll-arrow" onClick={scrollToNextSection}>↓</button>
+      </div>
 
       <section className="free-marquee">
         <div className="marquee-track">
@@ -68,6 +80,9 @@ function About() {
           <span>{t('about.banner')}</span>
         </div>
       </section>
+      <div className="scroll-down">
+        <button className="scroll-arrow" onClick={scrollToNextSection}>↓</button>
+      </div>
 
       <section id="values" className="values-carousel">
         <h2>{t('about.whySpendly')}</h2>
@@ -100,13 +115,18 @@ function About() {
       </section>
 
       {!user && (
-        <section id="cta" className="cta-final">
-          <h2>{t('about.ctaTitle')}</h2>
-          <p>
-            {t('about.ctaText')} <strong>{t('about.ctaStrong')}</strong>
-          </p>
-          <a className="cta-button" href="/signup">{t('about.ctaButton')}</a>
-        </section>
+        <>
+          <div className="scroll-down">
+            <button className="scroll-arrow" onClick={scrollToNextSection}>↓</button>
+          </div>
+          <section id="cta" className="cta-final">
+            <h2>{t('about.ctaTitle')}</h2>
+            <p>
+              {t('about.ctaText')} <strong>{t('about.ctaStrong')}</strong>
+            </p>
+            <a className="cta-button" href="/signup">{t('about.ctaButton')}</a>
+          </section>
+        </>
       )}
 
       <Footer />
