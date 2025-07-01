@@ -125,49 +125,44 @@ export default function Reports() {
     runningTotal += tx.type === 'income' ? tx.amount : -tx.amount;
     cumulativeBalance.push({ x: date, y: runningTotal });
   });
+  
   const handleExportPDF = async () => {
-    const reportSection = document.querySelector('.reports-container') as HTMLElement;
-    if (!reportSection) return;
+  const pdf = new jsPDF({
+    orientation: 'p',
+    unit: 'mm',
+    format: 'a4',
+  });
 
-    const canvas = await html2canvas(reportSection, {
+  const reportSections = document.querySelectorAll('.chart-card');
+
+  for (let i = 0; i < reportSections.length; i++) {
+    const section = reportSections[i] as HTMLElement;
+
+    const canvas = await html2canvas(section, {
       scale: 2,
       useCORS: true,
       backgroundColor: '#fff',
     });
 
     const imgData = canvas.toDataURL('image/png');
-    const pdf = new jsPDF({
-      orientation: 'p',
-      unit: 'mm',
-      format: 'a4',
-    });
+    const imgProps = pdf.getImageProperties(imgData);
 
     const pageWidth = pdf.internal.pageSize.getWidth();
     const pageHeight = pdf.internal.pageSize.getHeight();
 
-    const imgProps = pdf.getImageProperties(imgData);
-    const imgWidth = pageWidth;
+    const imgWidth = pageWidth - 20;
     const imgHeight = (imgProps.height * imgWidth) / imgProps.width;
 
-    let position = 0;
+    const x = 10;
+    const y = 10;
 
-    // If image is taller than one page, split into multiple pages
-    if (imgHeight < pageHeight) {
-      pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
-    } else {
-      let heightLeft = imgHeight;
+    if (i > 0) pdf.addPage();
+    pdf.addImage(imgData, 'PNG', x, y, imgWidth, imgHeight);
+  }
 
-      while (heightLeft > 0) {
-        pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
-        heightLeft -= pageHeight;
-        position -= pageHeight;
+  pdf.save('Spendly_Report.pdf');
+};
 
-        if (heightLeft > 0) pdf.addPage();
-      }
-    }
-
-    pdf.save('Spendly_Report.pdf');
-  };
 
 
   return (
