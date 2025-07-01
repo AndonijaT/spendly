@@ -269,7 +269,22 @@ const translations: Record<Language, Record<string, string>> = {
   "smsInvalid": "Invalid code. Please try again.",
     "hi": "Hi",
   "there": "there",
-  "niceToMeet": "Nice to meet you!"
+  "niceToMeet": "Nice to meet you!",
+   "homePageTitle": "Home",
+  "whyJoinSpendly": "Why Join Spendly?",
+  "overviewAtGlance": "Dashboard at a glance",
+  "overviewText": "Instantly see your financial health with clear, beautiful visuals.",
+  "smartBudgetTracking": "Smart Budget Tracking",
+  "budgetText": "Never overspend again with intuitive budget tracking.",
+  "categorizeExpenses": "Categorize Expenses",
+  "categorizeText": "Sort your spending into categories with ease.",
+  "detailedAnalytics": "Detailed Analytics",
+  "analyticsText": "Understand your spending habits with insightful analytics.",
+  "fullHistory": "Full Transaction History",
+  "historyText": "Your entire spending history, beautifully displayed.",
+  "multiDevice": "Multi-Device Support",
+  "multiDeviceText": "Keep your budget in sync across all devices effortlessly."
+
 
 
 
@@ -540,7 +555,21 @@ const translations: Record<Language, Record<string, string>> = {
   "smsInvalid": "Neveljavna koda. Poskusite znova.",
    "hi": "Živjo",
   "there": "tam",
-  "niceToMeet": "Lepo te je spoznati!"
+  "niceToMeet": "Lepo te je spoznati!",
+  "homePageTitle": "Domov",
+  "whyJoinSpendly": "Zakaj izbrati Spendly?",
+  "overviewAtGlance": "Pregled dashboarda na prvi pogled",
+  "overviewText": "V trenutku poglejte finančno stanje z jasnimi in lepimi prikazi.",
+  "smartBudgetTracking": "Pametno sledenje proračunu",
+  "budgetText": "Nikoli več ne presezite porabe z intuitivnim sledenjem proračuna.",
+  "categorizeExpenses": "Kategorizacija stroškov",
+  "categorizeText": "Enostavno razvrstite svoje stroške v kategorije.",
+  "detailedAnalytics": "Podrobna analitika",
+  "analyticsText": "Spoznajte svoje potrošniške navade z uporabnimi analitičnimi podatki.",
+  "fullHistory": "Celotna zgodovina transakcij",
+  "historyText": "Vaša celotna finančna zgodovina, lepo prikazana.",
+  "multiDevice": "Podpora za več naprav",
+  "multiDeviceText": "Enostavno sinhronizirajte svoj proračun na vseh napravah."
 
 
 

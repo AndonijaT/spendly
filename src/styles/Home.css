@@ -2,23 +2,24 @@ html, body {
   margin: 0;
   padding: 0;
   height: 100%;
-  overflow: hidden;
+  overflow: auto;
 }
 
 #root {
-  height: 100%;
+  height: auto;
 }
 
 .home {
-  height: 100vh;
+  min-height: 100vh;
   width: 100vw;
   font-family: 'Segoe UI', sans-serif;
   position: relative;
-  overflow: hidden;
+  overflow-x: hidden; /* hide horizontal scroll only */
+  overflow-y: auto; /* allow vertical scroll */
 }
 
 .video-background {
-  position: fixed;
+  position: fixed; /* keeps video fixed in the background */
   top: 0;
   left: 0;
   width: 100vw;
@@ -157,4 +158,82 @@ html, body {
 
 .footer-wrapper {
   margin-top: 100vh; /* makes the user scroll to see it */
+}.convincing-section {
+  padding: 80px 20px;
+  text-align: center;
+  background-color: #00000000;
+  overflow-x: hidden;
+}
+
+.section-title {
+  font-size: 2.5rem;
+  color: #33333300;
+  margin-bottom: 60px;
+}
+
+.feature-scroll {
+  display: flex;
+  flex-direction: column;
+  gap: 80px;
+}
+
+.feature-card {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 40px;
+  flex-wrap: wrap;
+}
+
+.feature-card.reverse {
+  flex-direction: row-reverse;
+}
+
+.feature-content {
+  max-width: 400px;
+  text-align: left;
+}
+
+.feature-content h3 {
+  font-size: 1.8rem;
+  color: #222222;
+  margin-bottom: 15px;
+}
+
+.feature-content p {
+  font-size: 1.1rem;
+  color: #55555500;
+}
+
+.feature-wavy-img {
+  width: 500px;
+  height: auto;
+  border-radius: 60% 40% 70% 30% / 30% 50% 50% 70%;
+  object-fit: cover;
+  box-shadow: 0 10px 20px rgba(0,0,0,0.15);
+  transition: transform 0.3s;
+}
+
+.feature-wavy-img.flipped {
+  border-radius: 40% 60% 30% 70% / 70% 50% 50% 30%;
+}
+
+.feature-wavy-img:hover {
+  transform: scale(1.05);
+}
+
+@media (max-width: 768px) {
+  .feature-card, .feature-card.reverse {
+    flex-direction: column;
+  }
+
+  .feature-wavy-img {
+    width: 90%;
+    margin-bottom: 20px;
+  }
+
+  .feature-content {
+    text-align: center;
+    max-width: 90%;
+  }
 }
