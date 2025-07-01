@@ -1,6 +1,6 @@
 import './../styles/Footer.css';
 import { Link } from 'react-router-dom';
-import { FaFacebookF, FaTwitter, FaGooglePlusG, FaDribbble, FaPinterestP, FaHome, FaPhone, FaEnvelope } from 'react-icons/fa';
+import { FaFacebookF, FaTwitter, FaPinterestP, FaHome, FaPhone, FaEnvelope } from 'react-icons/fa';
 
 export default function Footer() {
   return (

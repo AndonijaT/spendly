@@ -5,7 +5,6 @@ import { toast } from 'react-toastify';
 import '../styles/AddTransactionModal.css';
 import { useLanguage } from '../context/LanguageContext';
 import { useCurrency } from '../context/CurrencyContext';
-import type { Currency } from '../context/CurrencyContext';
 
 const categories = [
   "groceries", "home", "eating out", "food delivery", "coffee", "car", "health",
