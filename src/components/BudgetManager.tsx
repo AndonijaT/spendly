@@ -13,6 +13,7 @@ import '../styles/BudgetManager.css';
 import { useRef } from 'react';
 import { useEffect } from 'react';
 import { useMemo } from 'react';
+import { useCurrency } from '../context/CurrencyContext';
 
 type Budget = {
     id: string;
@@ -33,7 +34,7 @@ export default function BudgetManager({
     budgets,
     transactions,
     onRefresh,
-    onOverrunDetected, 
+    onOverrunDetected,
 
 }: {
     budgets: Budget[];
@@ -42,33 +43,36 @@ export default function BudgetManager({
     onOverrunDetected?: (msg: string, category: string) => void;
 
 }) {
+    const { currency: appCurrency, getSymbol } = useCurrency();
+
     const [category, setCategory] = useState('');
     const [limit, setLimit] = useState('');
-    const [currency, setCurrency] = useState('EUR');
+    const [currency, setCurrency] = useState<'EUR' | 'USD'>(appCurrency as 'EUR' | 'USD');
     const [editingId, setEditingId] = useState<string | null>(null);
     const [showForm, setShowForm] = useState(false);
 
     const resetForm = () => {
         setCategory('');
         setLimit('');
-        setCurrency('EUR');
+        setCurrency(appCurrency as 'EUR' | 'USD');
         setEditingId(null);
     };
 
 
 
-const formRef = useRef<HTMLDivElement>(null);
 
-const startEditBudget = (b: Budget) => {
-  setCategory(b.category);
-  setLimit(b.limit.toString());
-  setCurrency(b.currency);
-  setEditingId(b.id);
-  setShowForm(true);
-  setTimeout(() => {
-    formRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-  }, 100);
-};
+    const formRef = useRef<HTMLDivElement>(null);
+
+    const startEditBudget = (b: Budget) => {
+        setCategory(b.category);
+        setLimit(b.limit.toString());
+        setCurrency(b.currency as 'EUR' | 'USD');
+        setEditingId(b.id);
+        setShowForm(true);
+        setTimeout(() => {
+            formRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }, 100);
+    };
 
     const handleDeleteBudget = async (b: Budget) => {
         const user = auth.currentUser;
@@ -119,75 +123,76 @@ const startEditBudget = (b: Budget) => {
     };
 
 
-const budgetProgress = useMemo(() => {
-  return budgets.map((b) => {
-    const spent = transactions
-      .filter((tx) => tx.type === b.type && tx.category === b.category)
-      .reduce((sum, tx) => sum + tx.amount, 0);
+    const budgetProgress = useMemo(() => {
+        return budgets.map((b) => {
+            const spent = transactions
+                .filter((tx) => tx.type === b.type && tx.category === b.category)
+                .reduce((sum, tx) => sum + tx.amount, 0);
 
-    const rawPercent = (spent / b.limit) * 100;
-    const percent = Math.min(rawPercent, 100);
+            const rawPercent = (spent / b.limit) * 100;
+            const percent = Math.min(rawPercent, 100);
 
-    let warningLevel: 'none' | 'mid' | 'high' | 'over' = 'none';
-    if (rawPercent >= 100) warningLevel = 'over';
-    else if (rawPercent >= 75) warningLevel = 'high';
-    else if (rawPercent >= 50) warningLevel = 'mid';
+            let warningLevel: 'none' | 'mid' | 'high' | 'over' = 'none';
+            if (rawPercent >= 100) warningLevel = 'over';
+            else if (rawPercent >= 75) warningLevel = 'high';
+            else if (rawPercent >= 50) warningLevel = 'mid';
 
-    return { ...b, spent, percent, rawPercent, warningLevel };
-  });
-}, [budgets, transactions]);
+            return { ...b, spent, percent, rawPercent, warningLevel };
+        });
+    }, [budgets, transactions]);
 
-useEffect(() => {
-  const nowMonth = format(new Date(), 'yyyy-MM');
-  budgetProgress.forEach((bp) => {
-    if (bp.warningLevel === 'over') {
-      const key = `dismissed_${bp.category}_${nowMonth}`;
-      if (!localStorage.getItem(key) && onOverrunDetected) {
-        const msg = `${bp.category} over by ${(bp.spent - bp.limit).toFixed(2)} ${bp.currency}`;
-        onOverrunDetected(msg, bp.category);
-      }
-    }
-  });
-}, [budgetProgress, onOverrunDetected]);
+    useEffect(() => {
+        const nowMonth = format(new Date(), 'yyyy-MM');
+        budgetProgress.forEach((bp) => {
+            if (bp.warningLevel === 'over') {
+                const key = `dismissed_${bp.category}_${nowMonth}`;
+                if (!localStorage.getItem(key) && onOverrunDetected) {
+                    const msg = `${bp.category} over by ${(bp.spent - bp.limit).toFixed(2)} ${bp.currency}`;
+                    onOverrunDetected(msg, bp.category);
+                }
+            }
+        });
+    }, [budgetProgress, onOverrunDetected]);
 
     return (
         <div className="budget-manager-section">
             <h3>Budgets</h3>
 
             {budgetProgress.map((bp) => (
-  <div key={bp.id} className={`budget-bar ${bp.warningLevel}`}>
-    <div className="label">
-      <strong>{bp.category}:</strong> {bp.spent.toFixed(2)} / {bp.limit.toFixed(2)} {bp.currency} ({bp.percent.toFixed(0)}%)
-      <span className="budget-actions">
-        <button onClick={() => startEditBudget(bp)}>✏️</button>
-        <button onClick={() => handleDeleteBudget(bp)}>🗑️</button>
-      </span>
-    </div>
-    <div className="progress-bar-container">
-      <div
-        className="progress"
-        style={{
-          width: `${bp.percent}%`,
-          backgroundColor:
-            bp.warningLevel === 'over'
-              ? '#c62828'
-              : bp.warningLevel === 'high'
-              ? '#ff9800'
-              : bp.warningLevel === 'mid'
-              ? '#fbc02d'
-              : '#d2b109',
-        }}
-      />
-    </div>
-    {bp.warningLevel !== 'none' && (
-      <p className="warning-text">
-        {bp.warningLevel === 'over'
-          ? '🚨 Over budget!'
-          : `⚠️ ${bp.rawPercent.toFixed(0)}% used!`}
-      </p>
-    )}
-  </div>
-))}
+                <div key={bp.id} className={`budget-bar ${bp.warningLevel}`}>
+                    <div className="label">
+                        <strong>{bp.category}:</strong> {bp.spent.toFixed(2)} / {bp.limit.toFixed(2)} {getSymbol()}
+
+                        <span className="budget-actions">
+                            <button onClick={() => startEditBudget(bp)}>✏️</button>
+                            <button onClick={() => handleDeleteBudget(bp)}>🗑️</button>
+                        </span>
+                    </div>
+                    <div className="progress-bar-container">
+                        <div
+                            className="progress"
+                            style={{
+                                width: `${bp.percent}%`,
+                                backgroundColor:
+                                    bp.warningLevel === 'over'
+                                        ? '#c62828'
+                                        : bp.warningLevel === 'high'
+                                            ? '#ff9800'
+                                            : bp.warningLevel === 'mid'
+                                                ? '#fbc02d'
+                                                : '#d2b109',
+                            }}
+                        />
+                    </div>
+                    {bp.warningLevel !== 'none' && (
+                        <p className="warning-text">
+                            {bp.warningLevel === 'over'
+                                ? '🚨 Over budget!'
+                                : `⚠️ ${bp.rawPercent.toFixed(0)}% used!`}
+                        </p>
+                    )}
+                </div>
+            ))}
 
 
             {!showForm && (
@@ -198,7 +203,7 @@ useEffect(() => {
 
 
             {showForm && (
-                <div className="budget-form-wrapper"  ref={formRef}>
+                <div className="budget-form-wrapper" ref={formRef}>
 
                     <form
                         onSubmit={(e) => {
@@ -237,11 +242,7 @@ useEffect(() => {
                             required
                         />
 
-                        <select value={currency} onChange={(e) => setCurrency(e.target.value)}>
-                            <option value="EUR">€ EUR</option>
-                            <option value="USD">$ USD</option>
-                            <option value="MKD">MKD</option>
-                        </select>
+
 
                         <div style={{ display: 'flex', gap: '0.5rem' }}>
                             <button type="submit">

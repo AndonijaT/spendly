@@ -330,7 +330,7 @@ const handleExportPDF = async () => {
       y: {
         title: {
           display: true,
-          text: 'Amount (€)',
+          text: 'Amount',
           font: {
             size: 14
           }
@@ -406,7 +406,7 @@ const handleExportPDF = async () => {
       y: {
         title: {
           display: true,
-          text: 'Amount (€)',
+          text: 'Amount',
           font: {
             size: 14
           }

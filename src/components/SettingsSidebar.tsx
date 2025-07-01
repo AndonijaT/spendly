@@ -155,10 +155,9 @@ const { currency, setCurrency } = useCurrency();
 
         <div className="setting-group">
           <label>{t('currency')}</label>
-          <select value={currency} onChange={(e) => setCurrency(e.target.value as 'EUR' | 'USD' | 'MKD')}>
+          <select value={currency} onChange={(e) => setCurrency(e.target.value as 'EUR' | 'USD')}>
             <option value="EUR">€ Euro</option>
             <option value="USD">$ US Dollar</option>
-            <option value="MKD">ден Macedonian Denar</option>
           </select>
         </div>
 

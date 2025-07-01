@@ -26,7 +26,7 @@ type Transaction = {
   direction?: 'to_cash' | 'to_card';
   category: string;
   amount: number;
-  currency: 'EUR' | 'USD' | 'MKD'; // <-- add this
+  currency: 'EUR' | 'USD';
   description?: string;
   timestamp: { seconds: number };
   ownerUid: string;
@@ -38,7 +38,7 @@ export default function Dashboard() {
   const [showOverviewBtn, setShowOverviewBtn] = useState(true);
   const overviewAnchorRef = useRef<HTMLDivElement>(null);
   const [showHistoryModal, setShowHistoryModal] = useState(false);
-  const { convertToUserCurrency, getSymbol } = useCurrency();
+  const { convertToUserCurrency, getSymbol, currency } = useCurrency();
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -64,8 +64,7 @@ export default function Dashboard() {
   const navigate = useNavigate();
   // const showAllButton = transactions.length > 10;
   const [showSettings, setShowSettings] = useState(false);
-  const { currency } = useCurrency();
-  const symbol = currency === 'EUR' ? '€' : currency === 'USD' ? '$' : 'ден';
+const symbol = getSymbol();
 
   const recentTransactions = [...transactions]
     .sort((a, b) => b.timestamp.seconds - a.timestamp.seconds)
@@ -329,7 +328,7 @@ const [overrunCategory, setOverrunCategory] = useState<string | null>(null);
 
 
     fetchBudgets();
-  }, [viewMode]);
+  }, [viewMode, currency]);
 
 
   const expenseByCategory = transactions
@@ -384,7 +383,7 @@ const [overrunCategory, setOverrunCategory] = useState<string | null>(null);
         await addDoc(ref, notif);
       }
     });
-  }, [budgetProgress]);
+  }, [budgetProgress, currency]);
 
 
   const pieData = {
@@ -536,7 +535,7 @@ const [overrunCategory, setOverrunCategory] = useState<string | null>(null);
     return () => {
       unsubscribers.forEach((unsub) => unsub());
     };
-  }, [selectedMonth, viewMode]);
+  }, [selectedMonth, viewMode, currency]);
 
   return (
     <div className="dashboard-container">
@@ -793,9 +792,10 @@ const [overrunCategory, setOverrunCategory] = useState<string | null>(null);
                     {tx.type === 'income' ? '+' : '-'}
                     {tx.amount.toFixed(2)} {symbol}
                     {/* Optional: Show source currency info */}
-                    {tx.currency !== currency && (
-                      <span className="original-currency"> ({tx.currency})</span>
-                    )}
+                   {(tx.currency !== currency && (tx.currency === 'EUR' || tx.currency === 'USD')) && (
+  <span className="original-currency"> ({tx.currency})</span>
+)}
+
                   </div>
 
 

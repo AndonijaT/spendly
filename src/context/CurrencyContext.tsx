@@ -1,11 +1,10 @@
 import { createContext, useContext, useState } from 'react';
 import type { ReactNode } from 'react';
 
-type Currency = 'EUR' | 'USD' | 'MKD';
+export type Currency = 'EUR' | 'USD';
 const conversionRates: Record<Currency, number> = {
   EUR: 1,
   USD: 1.1,   // 1 EUR = 1.1 USD
-  MKD: 61.5,  // 1 EUR = 61.5 MKD
 };
 
 
@@ -22,9 +21,11 @@ const CurrencyContext = createContext<{
 });
 
 export function CurrencyProvider({ children }: { children: ReactNode }) {
-  const [currency, setCurrencyState] = useState<Currency>(() => {
-    return (localStorage.getItem('currency') as Currency) || 'EUR';
-  });
+ const [currency, setCurrencyState] = useState<Currency>(() => {
+  const saved = localStorage.getItem('currency') as Currency | null;
+  return saved === 'USD' || saved === 'EUR' ? saved : 'EUR';
+});
+
 
   const changeCurrency = (c: Currency) => {
     setCurrencyState(c);
@@ -39,7 +40,7 @@ export function CurrencyProvider({ children }: { children: ReactNode }) {
   const getSymbol = () => {
     if (currency === 'EUR') return '€';
     if (currency === 'USD') return '$';
-    return 'ден';
+    return '';
   };
 
   return (
