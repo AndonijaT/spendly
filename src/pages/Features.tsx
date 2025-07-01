@@ -198,7 +198,7 @@ const { t } = useLanguage();
       )}
     </motion.div>
 
-    <Footer />
   </div>
+  
 );
 }export default Features;
