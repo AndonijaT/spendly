@@ -40,40 +40,64 @@ export default function AddTransactionModal({ onClose }: { onClose: () => void }
   }, []);
 
   useEffect(() => {
-    const fetchBalances = async () => {
-      const user = auth.currentUser;
-      if (!user) return;
+  const fetchBalances = async () => {
+  const user = auth.currentUser;
+  if (!user) return;
 
-      const snapshot = await getDocs(collection(db, 'users', user.uid, 'transactions'));
-      let cash = 0;
-      let card = 0;
+  const allUIDs = [user.uid];
 
-      snapshot.forEach((doc) => {
-        const tx = doc.data();
-        if (tx.currency !== currency) return;
+  // Get shared users (same logic as Dashboard)
+  const usersSnap = await getDocs(collection(db, 'users'));
+  usersSnap.forEach((doc) => {
+    const sharedWith = doc.data().sharedWith || [];
+    const docUid = doc.id;
 
-        const amt = Number(tx.amount);
+    if (sharedWith.includes(user.uid) && !allUIDs.includes(docUid)) {
+      allUIDs.push(docUid);
+    }
 
-        if (tx.type === 'income') {
-          if (tx.method === 'cash') cash += amt;
-          if (tx.method === 'card') card += amt;
-        } else if (tx.type === 'expense') {
-          if (tx.method === 'cash') cash -= amt;
-          if (tx.method === 'card') card -= amt;
-        } else if (tx.type === 'transfer') {
-          if (tx.direction === 'to_cash') {
-            card -= amt;
-            cash += amt;
-          } else if (tx.direction === 'to_card') {
-            cash -= amt;
-            card += amt;
-          }
+    if (user.uid === docUid && Array.isArray(sharedWith)) {
+      sharedWith.forEach((uid: string) => {
+        if (!allUIDs.includes(uid)) {
+          allUIDs.push(uid);
         }
       });
+    }
+  });
 
-      setCurrentCash(cash);
-      setCurrentCard(card);
-    };
+  let cash = 0;
+  let card = 0;
+
+  for (const uid of allUIDs) {
+    const snapshot = await getDocs(collection(db, 'users', uid, 'transactions'));
+    snapshot.forEach((doc) => {
+      const tx = doc.data();
+      if (tx.currency !== currency) return;
+
+      const amt = Number(tx.amount);
+
+      if (tx.type === 'income') {
+        if (tx.method === 'cash') cash += amt;
+        if (tx.method === 'card') card += amt;
+      } else if (tx.type === 'expense') {
+        if (tx.method === 'cash') cash -= amt;
+        if (tx.method === 'card') card -= amt;
+      } else if (tx.type === 'transfer') {
+        if (tx.direction === 'to_cash') {
+          card -= amt;
+          cash += amt;
+        } else if (tx.direction === 'to_card') {
+          cash -= amt;
+          card += amt;
+        }
+      }
+    });
+  }
+
+  setCurrentCash(cash);
+  setCurrentCard(card);
+};
+
 
     fetchBalances();
   }, [currency]);
