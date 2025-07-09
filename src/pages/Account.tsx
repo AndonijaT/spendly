@@ -27,10 +27,12 @@ import 'react-confirm-alert/src/react-confirm-alert.css';
 import { useLanguage } from '../context/LanguageContext';
 
 declare global {
-    interface Window {
-        recaptchaVerifier?: RecaptchaVerifier;
-    }
+  interface Window {
+    grecaptcha: any;
+    recaptchaVerifier?: RecaptchaVerifier;
+  }
 }
+
 
 export default function Account() {
     const [user, setUser] = useState<any>(null);
@@ -202,23 +204,7 @@ const { t } = useLanguage();
         }
     };
 
-    const setupRecaptcha = () => {
-        if (!window.recaptchaVerifier) {
-            window.recaptchaVerifier = new RecaptchaVerifier(
-                auth,
-                'recaptcha-container',
-                {
-                    size: 'invisible',
-                    callback: (response: string) => {
-                        console.log('reCAPTCHA solved:', response);
-                    },
-                    'expired-callback': () => {
-                        console.warn('reCAPTCHA expired.');
-                    },
-                }
-            );
-        }
-    };
+
 
     const reauthenticateUser = async () => {
         const password = prompt('Re-enter your password:');
@@ -227,31 +213,74 @@ const { t } = useLanguage();
         await reauthenticateWithCredential(user, credential);
     };
 
-    const sendVerificationCode = async () => {
-        if (!user || !phoneNumber) return;
-        try {
-            await user.reload();
-            await reauthenticateUser();
-            setupRecaptcha();
-            const session = await multiFactor(user).getSession();
-            const phoneAuthProvider = new PhoneAuthProvider(auth);
-            const verificationId = await phoneAuthProvider.verifyPhoneNumber(
-                { phoneNumber, session },
-                window.recaptchaVerifier!
-            );
-            setVerificationId(verificationId);
-            toast.success('SMS code sent.');
-        } catch (err: any) {
-            console.error('SMS send failed:', err);
-            toast.error(err.message);
-        }
-    };
+ const sendVerificationCode = async () => {
+  if (!user || !phoneNumber) return;
+
+  try {
+    await user.reload();
+    await reauthenticateUser();
+
+    // Clean up previous verifier
+    if (window.recaptchaVerifier) {
+      window.recaptchaVerifier.clear();
+      window.recaptchaVerifier = undefined;
+    }
+
+    // Ensure container is visible
+    const container = document.getElementById('recaptcha-container');
+    if (!container) {
+      toast.error('reCAPTCHA container missing. Please refresh the page.');
+      return;
+    }
+
+    // Create verifier ONCE
+  const verifier = new RecaptchaVerifier(
+  auth,
+  'recaptcha-container',
+  {
+    size: 'invisible',
+    callback: (response: string) => {
+      console.log('reCAPTCHA solved:', response);
+    },
+    'expired-callback': () => {
+      console.warn('reCAPTCHA expired.');
+    },
+  }
+);
+
+
+
+    window.recaptchaVerifier = verifier;
+    await verifier.render();
+
+    const session = await multiFactor(user).getSession();
+    const phoneAuthProvider = new PhoneAuthProvider(auth);
+
+    const verificationIdResult = await phoneAuthProvider.verifyPhoneNumber(
+      {
+        phoneNumber,
+        session,
+      },
+      verifier
+    );
+
+    setVerificationId(verificationIdResult);
+    toast.success('SMS code sent.');
+  } catch (err: any) {
+    console.error('SMS send failed:', err);
+    toast.error(err.message || 'Failed to send SMS code.');
+  }
+};
+
+
+
 
     const verifyCodeAndEnable2FA = async () => {
         try {
             const cred = PhoneAuthProvider.credential(verificationId, code);
             const assertion = PhoneMultiFactorGenerator.assertion(cred);
-            await multiFactor(auth.currentUser!).enroll(assertion, 'Phone Number');
+if (!auth.currentUser) throw new Error('User not authenticated.');
+await multiFactor(auth.currentUser).enroll(assertion, 'Phone Number');
             setMfaEnabled(true);
             toast.success('2FA enabled successfully!');
         } catch (err: any) {
@@ -296,6 +325,8 @@ const { t } = useLanguage();
 
     return (
   <div className="account-page">
+              <div id="recaptcha-container" />
+
     <h2>{t('account.myAccount') || 'My Account'}</h2>
 
     <div className="account-header">
@@ -367,7 +398,6 @@ const { t } = useLanguage();
               {t('account.verifyEnable') || 'Verify & Enable'}
             </button>
           </div>
-          <div id="recaptcha-container" />
         </>
       )}
     </div>

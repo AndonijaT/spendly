@@ -34,10 +34,10 @@ function RegisterForm({
     try {
       const userCred = await createUserWithEmailAndPassword(auth, email, password);
       await updateProfile(userCred.user, { displayName: name });
+      await userCred.user.reload(); // 🔧 ensures metadata is fresh
       await sendEmailVerification(userCred.user, {
-        url: 'https://spendly-f30b5.web.app/?verified=true',
+        url: 'https://spendly-971fa.web.app/?verified=true',
       });
-
       toast.success(t('verificationSent') || 'Verification email sent. Please check your inbox.');
       await auth.signOut();
       onSuccess();
@@ -90,28 +90,28 @@ function RegisterForm({
           onChange={(e) => setPassword(e.target.value)}
           required
         />
-      <span
-    className="toggle-password"
-    onClick={() => setShowPassword((prev) => !prev)}
-    style={{
-      userSelect: 'none',
-      cursor: 'pointer',
-      position: 'absolute',
-      right: '10px',
-      top: '50%',
-      transform: 'translateY(-50%)',
-      color: '#555',
-      fontSize: '20px',
-    }}
-    role="button"
-    tabIndex={0}
-    onKeyDown={(e) => {
-      if (e.key === 'Enter' || e.key === ' ') setShowPassword((prev) => !prev);
-    }}
-    aria-label={showPassword ? 'Hide password' : 'Show password'}
-  >
-    {showPassword ? <AiOutlineEyeInvisible /> : <AiOutlineEye />}
-  </span>
+        <span
+          className="toggle-password"
+          onClick={() => setShowPassword((prev) => !prev)}
+          style={{
+            userSelect: 'none',
+            cursor: 'pointer',
+            position: 'absolute',
+            right: '10px',
+            top: '50%',
+            transform: 'translateY(-50%)',
+            color: '#555',
+            fontSize: '20px',
+          }}
+          role="button"
+          tabIndex={0}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter' || e.key === ' ') setShowPassword((prev) => !prev);
+          }}
+          aria-label={showPassword ? 'Hide password' : 'Show password'}
+        >
+          {showPassword ? <AiOutlineEyeInvisible /> : <AiOutlineEye />}
+        </span>
       </div>
 
 

@@ -35,20 +35,52 @@ function LoginForm({
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
 
-  useEffect(() => {
-    if (!window.recaptchaVerifier && typeof window !== 'undefined') {
-      window.recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
-        size: 'invisible',
-        callback: () => {
-          console.log('reCAPTCHA solved');
-        },
-      });
+ useEffect(() => {
+  if (typeof window !== 'undefined' && !window.recaptchaVerifier) {
+    const container = document.getElementById('recaptcha-container');
 
-      window.recaptchaVerifier.render().catch((err) => {
+    if (!container) {
+      console.error('Missing reCAPTCHA container');
+      return;
+    }
+
+    try {
+      const verifier = new RecaptchaVerifier(
+        auth,
+        'recaptcha-container',
+        {
+          size: 'invisible',
+          callback: (response: string) => {
+            console.log('reCAPTCHA solved:', response);
+          },
+          'expired-callback': () => {
+            console.warn('reCAPTCHA expired.');
+          },
+        }
+      );
+
+      verifier.render().then(() => {
+        window.recaptchaVerifier = verifier;
+        console.log('reCAPTCHA rendered.');
+      }).catch((err) => {
         console.error('Failed to render reCAPTCHA:', err);
       });
+    } catch (error) {
+      console.error('Error initializing reCAPTCHA:', error);
     }
-  }, []);
+  }
+
+  return () => {
+    // Cleanup
+    if (window.recaptchaVerifier) {
+      try {
+        window.recaptchaVerifier.clear();
+        window.recaptchaVerifier = undefined;
+      } catch {}
+    }
+  };
+}, []);
+
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -68,30 +100,42 @@ function LoginForm({
       onSuccess();
     } catch (err: any) {
       const code = err?.code;
+if (code === 'auth/multi-factor-auth-required') {
+  try {
+    const resolver = getMultiFactorResolver(auth, err);
+    const phoneInfoOptions = {
+      multiFactorHint: resolver.hints[0],
+      session: resolver.session,
+    };
 
-      if (code === 'auth/multi-factor-auth-required') {
-        try {
-          const resolver = getMultiFactorResolver(auth, err);
-          const phoneInfoOptions = {
-            multiFactorHint: resolver.hints[0],
-            session: resolver.session,
-          };
+    // Wait for reCAPTCHA to render if it hasn’t
+    if (!window.recaptchaVerifier) {
+      throw new Error('reCAPTCHA not initialized.');
+    }
 
-          const phoneProvider = new PhoneAuthProvider(auth);
-          const verificationId = await phoneProvider.verifyPhoneNumber(
-            phoneInfoOptions,
-            window.recaptchaVerifier
-          );
+    const verifier = window.recaptchaVerifier;
 
-          setResolver(resolver);
-          setVerificationId(verificationId);
-          setMfaVisible(true);
-          return;
-        } catch {
-          toast.error(t('smsFailed') || 'Failed to send SMS verification code.');
-          return;
-        }
-      }
+    if (verifier.render) {
+      await verifier.render();
+    }
+
+    const phoneProvider = new PhoneAuthProvider(auth);
+    const verificationId = await phoneProvider.verifyPhoneNumber(
+      phoneInfoOptions,
+      verifier
+    );
+
+    setResolver(resolver);
+    setVerificationId(verificationId);
+    setMfaVisible(true);
+    return;
+  } catch (mfaErr: any) {
+    console.error('MFA SMS send failed:', mfaErr);
+    toast.error(t('smsFailed') || 'Failed to send SMS verification code.');
+    return;
+  }
+}
+
 
       if (code === 'auth/network-request-failed') {
         toast.warning(t('networkIssue') || 'Network issue. Retrying...');
