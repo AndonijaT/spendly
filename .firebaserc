@@ -1,5 +1,7 @@
 {
   "projects": {
-    "default": "spendly-f30b5"
-  }
+    "default": "spendly-971fa"
+  },
+  "targets": {},
+  "etags": {}
 }

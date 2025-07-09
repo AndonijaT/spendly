@@ -8,7 +8,7 @@ export function useAIAdvice() {
   const getAdvice = async (budgets: any[], transactions: any[]) => {
     setLoading(true);
     try {
-      const res = await axios.post('https://us-central1-spendly-f30b5.cloudfunctions.net/getAdvice', {
+      const res = await axios.post('https://us-central1-spendly-971fa.cloudfunctions.net/getAdvice', {
         budgets,
         transactions,
       });

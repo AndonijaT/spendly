@@ -16,18 +16,20 @@
   default-src 'self';
   media-src 'self' https://firebasestorage.googleapis.com https://*.googleusercontent.com;
   script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.gstatic.com https://www.google.com https://apis.google.com;
-  connect-src 'self' https://us-central1-spendly-f30b5.cloudfunctions.net https://api.emailjs.com https://*.firebaseio.com https://*.googleapis.com https://*.gstatic.com https://identitytoolkit.googleapis.com https://securetoken.googleapis.com https://content-firebaseappcheck.googleapis.com;
+  connect-src 'self' https://us-central1-spendly-971fa.cloudfunctions.net https://api.emailjs.com https://*.firebaseio.com https://*.googleapis.com https://*.gstatic.com https://identitytoolkit.googleapis.com https://securetoken.googleapis.com https://content-firebaseappcheck.googleapis.com https://www.google.com;
   style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
   font-src 'self' https://fonts.gstatic.com;
   img-src 'self' data: https://firebasestorage.googleapis.com https://*.googleusercontent.com;
-  frame-src https://www.google.com https://www.gstatic.com https://spendly-f30b5.firebaseapp.com https://*.firebaseapp.com;
+  frame-src https://www.google.com https://www.gstatic.com https://spendly-971fa.firebaseapp.com https://*.firebaseapp.com;
 ">
 
 
 
 
+<!-- This must be present in your public/index.html (or equivalent) -->
+<script src="https://www.google.com/recaptcha/api.js?render=explicit" async defer></script>
 
-  <script src="https://www.gstatic.com/firebasejs/ui/6.0.2/firebase-ui-auth.js"></script>
+
 
 </head>
 
