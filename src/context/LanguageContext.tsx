@@ -294,7 +294,10 @@ const translations: Record<Language, Record<string, string>> = {
   "fact7": "Budgeters are 2x more likely to reach savings goals.",
   "fact8": "Young adults using budget apps save 15% more yearly.",
   "fact9": "Most overspending happens in the last 5 days of the month.",
-  "fact10": "Visual graphs boost budget retention by 70%."
+  "fact10": "Visual graphs boost budget retention by 70%.",
+"account.currentlySharing": "You are currently sharing with",
+"account.stopCollaborating": "Stop Collaborating"
+
 
 
 
@@ -590,8 +593,9 @@ const translations: Record<Language, Record<string, string>> = {
   "fact7": "Uporabniki proračunov 2x pogosteje dosežejo varčevalne cilje.",
   "fact8": "Mladi odrasli z aplikacijami za proračun prihranijo 15 % več letno.",
   "fact9": "Največ prekomerne porabe se zgodi v zadnjih 5 dneh v mesecu.",
-  "fact10": "Vizualni grafi povečajo zapomnitev proračuna za 70 %."
-
+  "fact10": "Vizualni grafi povečajo zapomnitev proračuna za 70 %.",
+  "account.currentlySharing": "Trenutno si delite podatke z",
+  "account.stopCollaborating": "Prekini sodelovanje"
 
 
     }

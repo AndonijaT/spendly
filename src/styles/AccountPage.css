@@ -326,3 +326,39 @@
   font-size: 1.4rem;
   margin-bottom: 1rem;
 }
+.sharing-box {
+  background-color: #fdf8e4;
+  padding: 1rem 1.2rem;
+  border-radius: 12px;
+  border: 1px solid #ffe58f;
+  margin-top: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+}
+
+.sharing-info {
+  font-size: 0.95rem;
+  color: #444;
+}
+
+.shared-email {
+  font-weight: 600;
+  color: #1a1a1a;
+  font-size: 1rem;
+}
+
+.stop-collab-button {
+  background-color: #d4af0c;
+  border: none;
+  padding: 0.6rem 1.2rem;
+  font-weight: bold;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  color: white;
+}
+
+.stop-collab-button:hover {
+  background-color: #b99300;
+}

@@ -25,7 +25,7 @@ import '../styles/AccountPage.css';
 import { confirmAlert } from 'react-confirm-alert';
 import 'react-confirm-alert/src/react-confirm-alert.css';
 import { useLanguage } from '../context/LanguageContext';
-
+import { getDoc } from 'firebase/firestore';
 declare global {
   interface Window {
     grecaptcha: any;
@@ -48,6 +48,7 @@ export default function Account() {
     const [inviteEmail, setInviteEmail] = useState('');
     const [inviteStatus, setInviteStatus] = useState('');
 const { t } = useLanguage();
+const [sharedWithUser, setSharedWithUser] = useState<{ email: string; uid: string } | null>(null);
 
     useEffect(() => {
         console.log('auth object:', auth);
@@ -60,11 +61,36 @@ const { t } = useLanguage();
                 setPhotoURL(firebaseUser.photoURL || '/default-avatar.png');
                 setMfaEnabled(multiFactor(firebaseUser).enrolledFactors.length > 0);
                 checkForPendingInvites(firebaseUser.uid);
-            }
+fetchSharedUserInfo(firebaseUser.uid);
+
+              }
         });
         return () => unsubscribe();
     }, []);
 
+
+const fetchSharedUserInfo = async (uid: string) => {
+  const userDocRef = doc(db, `users/${uid}`);
+  const userSnap = await getDoc(userDocRef); // ✅ Use getDoc, not getDocs
+
+  const data = userSnap.data();
+  const sharedWith = data?.sharedWith;
+
+  if (sharedWith && sharedWith.length > 0) {
+    const sharedUid = sharedWith[0]; // assuming 1:1 collaboration
+    const sharedUserRef = doc(db, `users/${sharedUid}`);
+    const sharedUserSnap = await getDoc(sharedUserRef);
+
+    if (sharedUserSnap.exists()) {
+      setSharedWithUser({
+        uid: sharedUid,
+        email: sharedUserSnap.data().email,
+      });
+    }
+  } else {
+    setSharedWithUser(null);
+  }
+};
 
 
     const checkForPendingInvites = async (uid: string) => {
@@ -205,6 +231,27 @@ const { t } = useLanguage();
     };
 
 
+const handleStopCollaborating = async () => {
+  if (!user || !sharedWithUser) return;
+
+  const currentRef = doc(db, `users/${user.uid}`);
+  const sharedRef = doc(db, `users/${sharedWithUser.uid}`);
+
+  try {
+    await updateDoc(currentRef, {
+      sharedWith: [],
+    });
+
+    await updateDoc(sharedRef, {
+      sharedWith: [],
+    });
+
+    setSharedWithUser(null);
+    toast.success('Collaboration ended.');
+  } catch (err: any) {
+    toast.error(err.message || 'Failed to stop collaboration.');
+  }
+};
 
     const reauthenticateUser = async () => {
         const password = prompt('Re-enter your password:');
@@ -404,23 +451,35 @@ await multiFactor(auth.currentUser).enroll(assertion, 'Phone Number');
 
     <div className="account-section collaborate-section">
       <h3>{t('account.collaborateTitle') || 'Collaborate'}</h3>
-      <p className="collab-description">
-        {t('account.collabDescription') ||
-          "Want to track finances with a partner, friend, or family member? Enter their email address below to invite them. Once they accept, you'll both see the same budget and transactions — in real-time."}
-      </p>
-      <div className="collab-input-group">
-        <input
-          type="email"
-          className="collab-input"
-          placeholder={t('account.emailPlaceholder') || 'e.g. partner@email.com'}
-          value={inviteEmail}
-          onChange={(e) => setInviteEmail(e.target.value)}
-        />
-        <button className="collab-button" onClick={handleInvite}>
-          {t('sendInvite') || 'Send Invite'}
-        </button>
-      </div>
-      {inviteStatus && <p className="invite-status">{inviteStatus}</p>}
+     {sharedWithUser ? (
+  <>
+    <p className="collab-description">
+      {t('account.currentlySharing') || 'You are currently sharing with'}: <strong>{sharedWithUser.email}</strong>
+    </p>
+    <button className="collab-button stop-collab-button" onClick={handleStopCollaborating}>
+      {t('account.stopCollaborating') || 'Stop Collaborating'}
+    </button>
+  </>
+) : (
+  <>
+    <p className="collab-description">
+      {t('account.collabDescription') || "Want to track finances with a partner, friend, or family member?..."}
+    </p>
+    <div className="collab-input-group">
+      <input
+        type="email"
+        className="collab-input"
+        placeholder={t('account.emailPlaceholder') || 'e.g. partner@email.com'}
+        value={inviteEmail}
+        onChange={(e) => setInviteEmail(e.target.value)}
+      />
+      <button className="collab-button" onClick={handleInvite}>
+        {t('sendInvite') || 'Send Invite'}
+      </button>
+    </div>
+    {inviteStatus && <p className="invite-status">{inviteStatus}</p>}
+  </>
+)}
     </div>
 
     <div className="account-buttons">
