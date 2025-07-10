@@ -26,6 +26,8 @@ import { confirmAlert } from 'react-confirm-alert';
 import 'react-confirm-alert/src/react-confirm-alert.css';
 import { useLanguage } from '../context/LanguageContext';
 import { getDoc } from 'firebase/firestore';
+import type { UserInfo } from 'firebase/auth';
+
 declare global {
   interface Window {
     grecaptcha: any;
@@ -49,24 +51,28 @@ export default function Account() {
     const [inviteStatus, setInviteStatus] = useState('');
 const { t } = useLanguage();
 const [sharedWithUser, setSharedWithUser] = useState<{ email: string; uid: string } | null>(null);
+const [isPasswordUser, setIsPasswordUser] = useState(false);
 
     useEffect(() => {
-        console.log('auth object:', auth);
+  const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
+    if (firebaseUser) {
+      setUser(firebaseUser);
+      setName(firebaseUser.displayName || '');
+      setEmail(firebaseUser.email || '');
+      setPhotoURL(firebaseUser.photoURL || '/default-avatar.png');
+      setMfaEnabled(multiFactor(firebaseUser).enrolledFactors.length > 0);
+      checkForPendingInvites(firebaseUser.uid);
+      fetchSharedUserInfo(firebaseUser.uid);
 
-        const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
-            if (firebaseUser) {
-                setUser(firebaseUser);
-                setName(firebaseUser.displayName || '');
-                setEmail(firebaseUser.email || '');
-                setPhotoURL(firebaseUser.photoURL || '/default-avatar.png');
-                setMfaEnabled(multiFactor(firebaseUser).enrolledFactors.length > 0);
-                checkForPendingInvites(firebaseUser.uid);
-fetchSharedUserInfo(firebaseUser.uid);
-
-              }
-        });
-        return () => unsubscribe();
-    }, []);
+      // ✅ Determine if user signed in with email/password
+      const usesPassword = firebaseUser.providerData.some(
+        (provider: UserInfo) => provider.providerId === 'password'
+      );
+      setIsPasswordUser(usesPassword);
+    }
+  });
+  return () => unsubscribe();
+}, []);
 
 
 const fetchSharedUserInfo = async (uid: string) => {
@@ -419,35 +425,40 @@ await multiFactor(auth.currentUser).enroll(assertion, 'Phone Number');
       )}
     </div>
 
-    <div className="account-section collaborate-section twofa-section">
-      <h3>{t('account.twofaTitle') || 'Two-Factor Authentication'}</h3>
-      {mfaEnabled ? (
-        <p>{t('account.twofaEnabled') || '✅ 2FA is enabled on your account.'}</p>
-      ) : (
-        <>
-          <div className="twofa-input-row">
-            <input
-              type="tel"
-              placeholder={t('account.phonePlaceholder') || 'Phone Number (e.g. +386...)'}
-              value={phoneNumber}
-              onChange={(e) => setPhoneNumber(e.target.value)}
-            />
-            <button onClick={sendVerificationCode}>{t('account.sendCode') || 'Send Code'}</button>
-          </div>
-          <div className="twofa-input-row">
-            <input
-              type="text"
-              placeholder={t('account.enterCode') || 'Enter Code'}
-              value={code}
-              onChange={(e) => setCode(e.target.value)}
-            />
-            <button onClick={verifyCodeAndEnable2FA}>
-              {t('account.verifyEnable') || 'Verify & Enable'}
-            </button>
-          </div>
-        </>
-      )}
-    </div>
+    {isPasswordUser && (
+  <div className="account-section collaborate-section twofa-section">
+    <h3>{t('account.twofaTitle') || 'Two-Factor Authentication'}</h3>
+    {mfaEnabled ? (
+      <p>{t('account.twofaEnabled') || '✅ 2FA is enabled on your account.'}</p>
+    ) : (
+      <>
+        <div className="twofa-input-row">
+          <input
+            type="tel"
+            placeholder={t('account.phonePlaceholder') || 'Phone Number (e.g. +386...)'}
+            value={phoneNumber}
+            onChange={(e) => setPhoneNumber(e.target.value)}
+          />
+          <button onClick={sendVerificationCode}>
+            {t('account.sendCode') || 'Send Code'}
+          </button>
+        </div>
+        <div className="twofa-input-row">
+          <input
+            type="text"
+            placeholder={t('account.enterCode') || 'Enter Code'}
+            value={code}
+            onChange={(e) => setCode(e.target.value)}
+          />
+          <button onClick={verifyCodeAndEnable2FA}>
+            {t('account.verifyEnable') || 'Verify & Enable'}
+          </button>
+        </div>
+      </>
+    )}
+  </div>
+)}
+
 
     <div className="account-section collaborate-section">
       <h3>{t('account.collaborateTitle') || 'Collaborate'}</h3>

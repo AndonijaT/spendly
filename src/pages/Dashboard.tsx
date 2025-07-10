@@ -16,7 +16,6 @@ import { addDoc, serverTimestamp } from 'firebase/firestore';
 import AIAdviceModal from '../components/AIAdviceModal';
 import BudgetManager from '../components/BudgetManager';
 import { onSnapshot } from 'firebase/firestore';
-import Footer from '../components/Footer';
 import { useCurrency, } from '../context/CurrencyContext';
 import { useLanguage } from '../context/LanguageContext';
 
@@ -887,7 +886,6 @@ export default function Dashboard() {
         </div>
       )}
 
-      <Footer />
 
 
     </div>
