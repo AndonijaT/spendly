@@ -542,12 +542,15 @@ export default function Dashboard() {
     <div className="dashboard-container">
 
       <div className="dashboard-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <div className="floating-tutorial" onClick={() => {
-          setStepIndex(0);
-          setRunTour(true);
-        }}>
-          🎓
-        </div>
+      {!showSettings && (
+  <div className="floating-tutorial" onClick={() => {
+    setStepIndex(0);
+    setRunTour(true);
+  }}>
+    🎓
+  </div>
+)}
+
 
       </div>
       <div className="account-toggle">
@@ -837,7 +840,10 @@ export default function Dashboard() {
 
 
       {showAddModal && (
-        <AddTransactionModal onClose={() => setShowAddModal(false)} />
+<AddTransactionModal
+  onClose={() => setShowAddModal(false)}
+  viewMode={viewMode}
+/>
       )}
 
       {showSettings && (
