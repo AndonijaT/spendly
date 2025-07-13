@@ -27,7 +27,7 @@ import 'react-confirm-alert/src/react-confirm-alert.css';
 import { useLanguage } from '../context/LanguageContext';
 import { getDoc } from 'firebase/firestore';
 import type { UserInfo } from 'firebase/auth';
-
+import { onSnapshot } from 'firebase/firestore';
 declare global {
   interface Window {
     grecaptcha: any;
@@ -53,7 +53,9 @@ const { t } = useLanguage();
 const [sharedWithUser, setSharedWithUser] = useState<{ email: string; uid: string } | null>(null);
 const [isPasswordUser, setIsPasswordUser] = useState(false);
 
-    useEffect(() => {
+useEffect(() => {
+  let unsubscribeShared: () => void;
+
   const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
     if (firebaseUser) {
       setUser(firebaseUser);
@@ -62,41 +64,63 @@ const [isPasswordUser, setIsPasswordUser] = useState(false);
       setPhotoURL(firebaseUser.photoURL || '/default-avatar.png');
       setMfaEnabled(multiFactor(firebaseUser).enrolledFactors.length > 0);
       checkForPendingInvites(firebaseUser.uid);
-      fetchSharedUserInfo(firebaseUser.uid);
 
-      // ✅ Determine if user signed in with email/password
+      // Determine if user signed in with email/password
       const usesPassword = firebaseUser.providerData.some(
         (provider: UserInfo) => provider.providerId === 'password'
       );
       setIsPasswordUser(usesPassword);
+
+      // 🔁 Listen for changes in sharedWith
+      unsubscribeShared = onSnapshot(doc(db, `users/${firebaseUser.uid}`), async (userSnap) => {
+        const data = userSnap.data();
+        const sharedWith = data?.sharedWith;
+
+        if (sharedWith && sharedWith.length > 0) {
+          const sharedUid = sharedWith[0];
+          const sharedUserSnap = await getDoc(doc(db, `users/${sharedUid}`));
+          if (sharedUserSnap.exists()) {
+            setSharedWithUser({
+              uid: sharedUid,
+              email: sharedUserSnap.data().email,
+            });
+          }
+        } else {
+          setSharedWithUser(null);
+        }
+      });
     }
   });
-  return () => unsubscribe();
+
+  return () => {
+    unsubscribe();
+    if (unsubscribeShared) unsubscribeShared();
+  };
 }, []);
 
 
-const fetchSharedUserInfo = async (uid: string) => {
-  const userDocRef = doc(db, `users/${uid}`);
-  const userSnap = await getDoc(userDocRef); // ✅ Use getDoc, not getDocs
+// const fetchSharedUserInfo = async (uid: string) => {
+//   const userDocRef = doc(db, `users/${uid}`);
+//   const userSnap = await getDoc(userDocRef); // ✅ Use getDoc, not getDocs
 
-  const data = userSnap.data();
-  const sharedWith = data?.sharedWith;
+//   const data = userSnap.data();
+//   const sharedWith = data?.sharedWith;
 
-  if (sharedWith && sharedWith.length > 0) {
-    const sharedUid = sharedWith[0]; // assuming 1:1 collaboration
-    const sharedUserRef = doc(db, `users/${sharedUid}`);
-    const sharedUserSnap = await getDoc(sharedUserRef);
+//   if (sharedWith && sharedWith.length > 0) {
+//     const sharedUid = sharedWith[0]; // assuming 1:1 collaboration
+//     const sharedUserRef = doc(db, `users/${sharedUid}`);
+//     const sharedUserSnap = await getDoc(sharedUserRef);
 
-    if (sharedUserSnap.exists()) {
-      setSharedWithUser({
-        uid: sharedUid,
-        email: sharedUserSnap.data().email,
-      });
-    }
-  } else {
-    setSharedWithUser(null);
-  }
-};
+//     if (sharedUserSnap.exists()) {
+//       setSharedWithUser({
+//         uid: sharedUid,
+//         email: sharedUserSnap.data().email,
+//       });
+//     }
+//   } else {
+//     setSharedWithUser(null);
+//   }
+// };
 
 
     const checkForPendingInvites = async (uid: string) => {
