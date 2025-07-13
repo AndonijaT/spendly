@@ -362,3 +362,14 @@
 .stop-collab-button:hover {
   background-color: #b99300;
 }
+.collab-list {
+  list-style: none;
+  padding: 0;
+}
+
+.collab-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin: 0.25rem 0;
+}

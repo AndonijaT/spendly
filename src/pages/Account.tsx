@@ -28,6 +28,8 @@ import { useLanguage } from '../context/LanguageContext';
 import { getDoc } from 'firebase/firestore';
 import type { UserInfo } from 'firebase/auth';
 import { onSnapshot } from 'firebase/firestore';
+import { arrayRemove } from 'firebase/firestore';
+
 declare global {
   interface Window {
     grecaptcha: any;
@@ -50,7 +52,8 @@ export default function Account() {
     const [inviteEmail, setInviteEmail] = useState('');
     const [inviteStatus, setInviteStatus] = useState('');
 const { t } = useLanguage();
-const [sharedWithUser, setSharedWithUser] = useState<{ email: string; uid: string } | null>(null);
+const [sharedWithUsers, setSharedWithUsers] = useState<{ email: string; uid: string }[]>([]);
+
 const [isPasswordUser, setIsPasswordUser] = useState(false);
 
 useEffect(() => {
@@ -65,29 +68,23 @@ useEffect(() => {
       setMfaEnabled(multiFactor(firebaseUser).enrolledFactors.length > 0);
       checkForPendingInvites(firebaseUser.uid);
 
-      // Determine if user signed in with email/password
       const usesPassword = firebaseUser.providerData.some(
         (provider: UserInfo) => provider.providerId === 'password'
       );
       setIsPasswordUser(usesPassword);
 
-      // 🔁 Listen for changes in sharedWith
       unsubscribeShared = onSnapshot(doc(db, `users/${firebaseUser.uid}`), async (userSnap) => {
         const data = userSnap.data();
-        const sharedWith = data?.sharedWith;
+        const sharedWith = data?.sharedWith || [];
 
-        if (sharedWith && sharedWith.length > 0) {
-          const sharedUid = sharedWith[0];
-          const sharedUserSnap = await getDoc(doc(db, `users/${sharedUid}`));
-          if (sharedUserSnap.exists()) {
-            setSharedWithUser({
-              uid: sharedUid,
-              email: sharedUserSnap.data().email,
-            });
-          }
-        } else {
-          setSharedWithUser(null);
-        }
+        const collaborators = await Promise.all(sharedWith.map(async (uid: string) => {
+          const userDoc = await getDoc(doc(db, `users/${uid}`));
+          return userDoc.exists()
+            ? { uid, email: userDoc.data().email }
+            : null;
+        }));
+
+        setSharedWithUsers(collaborators.filter(Boolean) as { uid: string; email: string }[]);
       });
     }
   });
@@ -97,6 +94,7 @@ useEffect(() => {
     if (unsubscribeShared) unsubscribeShared();
   };
 }, []);
+
 
 
 // const fetchSharedUserInfo = async (uid: string) => {
@@ -261,22 +259,22 @@ useEffect(() => {
     };
 
 
-const handleStopCollaborating = async () => {
-  if (!user || !sharedWithUser) return;
+const handleStopCollaborating = async (collaboratorUid: string) => {
+  if (!user) return;
 
   const currentRef = doc(db, `users/${user.uid}`);
-  const sharedRef = doc(db, `users/${sharedWithUser.uid}`);
+  const sharedRef = doc(db, `users/${collaboratorUid}`);
 
   try {
     await updateDoc(currentRef, {
-      sharedWith: [],
+      sharedWith: arrayRemove(collaboratorUid),
     });
 
     await updateDoc(sharedRef, {
-      sharedWith: [],
+      sharedWith: arrayRemove(user.uid),
     });
 
-    setSharedWithUser(null);
+    setSharedWithUsers(prev => prev.filter(u => u.uid !== collaboratorUid));
     toast.success('Collaboration ended.');
   } catch (err: any) {
     toast.error(err.message || 'Failed to stop collaboration.');
@@ -485,37 +483,45 @@ await multiFactor(auth.currentUser).enroll(assertion, 'Phone Number');
 
 
     <div className="account-section collaborate-section">
-      <h3>{t('account.collaborateTitle') || 'Collaborate'}</h3>
-     {sharedWithUser ? (
-  <>
+  <h3>{t('account.collaborateTitle') || 'Collaborate'}</h3>
+
+  {sharedWithUsers.length > 0 && (
+    <>
+      <p className="collab-description">{t('account.currentlySharing') || 'You are currently sharing with'}:</p>
+      <ul className="collab-list">
+        {sharedWithUsers.map(({ email, uid }) => (
+          <li key={uid} className="collab-item">
+            <strong>{email}</strong>
+            <button
+              className="collab-button stop-collab-button"
+              onClick={() => handleStopCollaborating(uid)}
+            >
+              {t('account.stopCollaborating') || 'Stop Collaborating'}
+            </button>
+          </li>
+        ))}
+      </ul>
+    </>
+  )}
+
+  <div className="collab-input-group">
     <p className="collab-description">
-      {t('account.currentlySharing') || 'You are currently sharing with'}: <strong>{sharedWithUser.email}</strong>
+      {t('account.collabDescription') || "Want to track finances with a partner, friend, or family member?..." }
     </p>
-    <button className="collab-button stop-collab-button" onClick={handleStopCollaborating}>
-      {t('account.stopCollaborating') || 'Stop Collaborating'}
+    <input
+      type="email"
+      className="collab-input"
+      placeholder={t('account.emailPlaceholder') || 'e.g. partner@email.com'}
+      value={inviteEmail}
+      onChange={(e) => setInviteEmail(e.target.value)}
+    />
+    <button className="collab-button" onClick={handleInvite}>
+      {t('sendInvite') || 'Send Invite'}
     </button>
-  </>
-) : (
-  <>
-    <p className="collab-description">
-      {t('account.collabDescription') || "Want to track finances with a partner, friend, or family member?..."}
-    </p>
-    <div className="collab-input-group">
-      <input
-        type="email"
-        className="collab-input"
-        placeholder={t('account.emailPlaceholder') || 'e.g. partner@email.com'}
-        value={inviteEmail}
-        onChange={(e) => setInviteEmail(e.target.value)}
-      />
-      <button className="collab-button" onClick={handleInvite}>
-        {t('sendInvite') || 'Send Invite'}
-      </button>
-    </div>
     {inviteStatus && <p className="invite-status">{inviteStatus}</p>}
-  </>
-)}
-    </div>
+  </div>
+</div>
+
 
     <div className="account-buttons">
       <button className="delete-account-outlined-btn" onClick={handleDeleteAccount}>
