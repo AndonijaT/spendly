@@ -553,20 +553,21 @@ export default function Dashboard() {
 
 
       </div>
-      <div className="account-toggle">
-        <button
-          className={viewMode === 'shared' ? 'active' : ''}
-          onClick={() => setViewMode('shared')}
-        >
-          Shared View
-        </button>
-        <button
-          className={viewMode === 'personal' ? 'active' : ''}
-          onClick={() => setViewMode('personal')}
-        >
-          My View
-        </button>
-      </div>
+    <div className="account-toggle">
+  <button
+    className={viewMode === 'shared' ? 'active' : ''}
+    onClick={() => setViewMode('shared')}
+  >
+    {t('sharedView') || 'Shared View'}
+  </button>
+  <button
+    className={viewMode === 'personal' ? 'active' : ''}
+    onClick={() => setViewMode('personal')}
+  >
+    {t('personalView') || 'My View'}
+  </button>
+</div>
+
 
 
 
