@@ -24,11 +24,12 @@ function RegisterForm({
   const [acceptedTerms, setAcceptedTerms] = useState(false);
   const { t } = useLanguage();
   const [showPassword, setShowPassword] = useState(false);
+  const [error, setError] = useState('');
 
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!acceptedTerms) {
-      toast.error(t('acceptTerms') || 'Please accept the terms and privacy policy.');
+      setError(t('acceptTerms') || 'Please accept the terms and privacy policy.');
       return;
     }
     try {
@@ -38,22 +39,22 @@ function RegisterForm({
       await sendEmailVerification(userCred.user, {
         url: 'https://spendly-971fa.web.app/?verified=true',
       });
-      toast.success(t('verificationSent') || 'Verification email sent. Please check your inbox.');
+      toast.success(t('verificationSent') || 'Verification email sent. Please check your inbox or spam folder.');
       await auth.signOut();
       onSuccess();
     } catch (err: any) {
       switch (err.code) {
         case 'auth/email-already-in-use':
-          toast.error(t('emailInUse') || 'An account with this email already exists.');
+          setError(t('emailInUse') || 'An account with this email already exists.');
           break;
         case 'auth/invalid-email':
-          toast.error(t('invalidEmail') || 'Invalid email address.');
+          setError(t('invalidEmail') || 'Invalid email address.');
           break;
         case 'auth/weak-password':
-          toast.error(t('weakPassword') || 'Password must be at least 6 characters.');
+          setError(t('weakPassword') || 'Password must be at least 6 characters.');
           break;
         default:
-          toast.error(t('signupFailed') || 'Something went wrong. Please try again.');
+          setError(t('signupFailed') || 'Something went wrong. Please try again.');
       }
     }
   };
@@ -64,7 +65,7 @@ function RegisterForm({
       await signInWithPopup(auth, provider);
       onSuccess();
     } catch (err: any) {
-      toast.error(t('googleSignupFailed') || 'Google sign-up failed.');
+      setError(t('googleSignupFailed') || 'Google sign-up failed.');
     }
   };
 
@@ -120,7 +121,10 @@ function RegisterForm({
           type="checkbox"
           id="accept"
           checked={acceptedTerms}
-          onChange={(e) => setAcceptedTerms(e.target.checked)}
+          onChange={(e) => {
+            setAcceptedTerms(e.target.checked);
+            setError('');
+          }}
           required
         />
         <label htmlFor="accept" className="terms-label">
@@ -135,7 +139,7 @@ function RegisterForm({
         </label>
       </div>
 
-      <button type="submit" disabled={!acceptedTerms}>
+      <button type="submit">
         {t('signUp') || 'Sign Up'}
       </button>
 
@@ -145,6 +149,18 @@ function RegisterForm({
         <img src="/google-icon.png" alt="Google" style={{ width: '20px', marginRight: '8px' }} />
         {t('continueWithGoogle') || 'Continue with Google'}
       </button>
+      {error && (
+        <p
+          style={{
+            color: 'red',
+            fontSize: '0.9rem',
+            marginTop: '10px',
+            textAlign: 'center',
+          }}
+        >
+          {error}
+        </p>
+      )}
 
       <p className="form-footer">
         {t('alreadyHaveAccount') || 'Already have an account?'}{' '}

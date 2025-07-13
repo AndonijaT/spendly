@@ -296,7 +296,23 @@ const translations: Record<Language, Record<string, string>> = {
   "fact9": "Most overspending happens in the last 5 days of the month.",
   "fact10": "Visual graphs boost budget retention by 70%.",
 "account.currentlySharing": "You are currently sharing with",
-"account.stopCollaborating": "Stop Collaborating"
+"account.stopCollaborating": "Stop Collaborating",
+  "fullName": "Full Name",
+  "termsConfirm": "I have read and accepted the ",
+  "termsOfService": "Terms of Service",
+  "and": "and",
+  "privacyPolicy": "Privacy Policy",
+  "continueWithGoogle": "Continue with Google",
+  "alreadyHaveAccount": "Already have an account?",
+  "signIn": "Sign in",
+  "acceptTerms": "Please accept the terms and privacy policy.",
+  "verificationSent": "Verification email sent. Please check your inbox.",
+  "emailInUse": "An account with this email already exists.",
+  "invalidEmail": "Invalid email address.",
+  "weakPassword": "Password must be at least 6 characters.",
+  "signupFailed": "Something went wrong. Please try again.",
+  "googleSignupFailed": "Google sign-up failed.",
+  
 
 
 
@@ -595,10 +611,24 @@ const translations: Record<Language, Record<string, string>> = {
   "fact9": "Največ prekomerne porabe se zgodi v zadnjih 5 dneh v mesecu.",
   "fact10": "Vizualni grafi povečajo zapomnitev proračuna za 70 %.",
   "account.currentlySharing": "Trenutno si delite podatke z",
-  "account.stopCollaborating": "Prekini sodelovanje"
-
-
-    }
+  "account.stopCollaborating": "Prekini sodelovanje",
+  "fullName": "Polno ime",
+  "termsConfirm": "Prebral/-a sem in sprejemam ",
+  "termsOfService": "Pogoje uporabe",
+  "and": "in",
+  "privacyPolicy": "Politiko zasebnosti",
+  "continueWithGoogle": "Nadaljuj z Googlom",
+  "alreadyHaveAccount": "Že imate račun?",
+  "signIn": "Prijava",
+  "acceptTerms": "Prosimo, da sprejmete pogoje uporabe in politiko zasebnosti.",
+  "verificationSent": "Potrditveno e-poštno sporočilo je bilo poslano. Preverite svoj nabiralnik.",
+  "emailInUse": "Račun s tem e-poštnim naslovom že obstaja.",
+  "invalidEmail": "Neveljaven e-poštni naslov.",
+  "weakPassword": "Geslo mora imeti vsaj 6 znakov.",
+  "signupFailed": "Prišlo je do napake. Poskusite znova.",
+  "googleSignupFailed": "Registracija z Googlom ni uspela.",
+  
+ }
 };
 
 const LanguageContext = createContext<LangContextType>({

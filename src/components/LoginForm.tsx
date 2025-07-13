@@ -92,7 +92,7 @@ function LoginForm({
       const userCred = await signInWithEmailAndPassword(auth, email, password);
 
       if (!userCred.user.emailVerified) {
-        toast.warn(t('emailNotVerified') || 'Email not verified. Please check your inbox.');
+setError(t('emailNotVerified') || 'Email not verified. Please check your inbox.');
         await auth.signOut();
         return;
       }
@@ -131,14 +131,14 @@ if (code === 'auth/multi-factor-auth-required') {
     return;
   } catch (mfaErr: any) {
     console.error('MFA SMS send failed:', mfaErr);
-    toast.error(t('smsFailed') || 'Failed to send SMS verification code.');
+setError(t('smsFailed') || 'Failed to send SMS verification code.');
     return;
   }
 }
 
 
       if (code === 'auth/network-request-failed') {
-        toast.warning(t('networkIssue') || 'Network issue. Retrying...');
+setError(t('networkIssue') || 'Network issue. Retrying...');
         setTimeout(() => handleLogin(e), 2000);
         return;
       }
@@ -177,7 +177,7 @@ if (code === 'auth/multi-factor-auth-required') {
 
       const user = auth.currentUser;
       if (user && !user.emailVerified) {
-        toast.warn(t('emailNotVerifiedGoogle') || 'Google account is not verified.');
+setError(t('emailNotVerifiedGoogle') || 'Google account is not verified.');
         await auth.signOut();
         return;
       }
@@ -214,7 +214,7 @@ if (code === 'auth/multi-factor-auth-required') {
 
       if (!userCred.user.emailVerified) {
         await auth.signOut();
-        toast.error(t('emailNotVerified') || 'Please verify your email.');
+setError(t('emailNotVerified') || 'Please verify your email.');
         return;
       }
 
@@ -222,7 +222,7 @@ if (code === 'auth/multi-factor-auth-required') {
       setMfaVisible(false);
       onSuccess();
     } catch {
-      toast.error(t('smsInvalid') || 'Invalid code. Please try again.');
+setError(t('smsInvalid') || 'Invalid code. Please try again.');
     }
   };
 
