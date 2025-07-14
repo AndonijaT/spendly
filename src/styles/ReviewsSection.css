@@ -137,3 +137,45 @@
   background: #e1ecfa;
   transform: translateY(-50%) scale(1.1);
 }
+@media (max-width: 768px) {
+  .reviews-section {
+    padding: 2rem 1rem;
+  }
+
+  .reviews-section h2 {
+    font-size: 1.8rem;
+    margin-bottom: 2rem;
+  }
+
+  .review-carousel {
+    padding: 1rem 0;
+  }
+
+  .swiper-slide {
+    transform: scale(1);
+    opacity: 1;
+  }
+
+  .review-card {
+    padding: 1.5rem;
+    font-size: 1rem;
+  }
+
+  .custom-arrow {
+    display: none; /* hhide arrows on small screens */
+  }
+
+  .review-form {
+    padding: 0 1rem;
+  }
+
+  .review-form textarea {
+    font-size: 0.95rem;
+    padding: 0.8rem;
+  }
+
+  .review-form button {
+    padding: 0.7rem 1.2rem;
+    font-size: 0.95rem;
+  }
+}
