@@ -68,15 +68,18 @@ function Navbar() {
           <Link to="/">Spendly</Link>
         </div>
 
-        <button
-          className="hamburger"
-          onClick={() => setMenuOpen(!menuOpen)}
-          aria-label="Toggle menu"
-        >
-          ☰
-        </button>
+      {user && (
+  <button
+    className="hamburger"
+    onClick={() => setMenuOpen(!menuOpen)}
+    aria-label="Toggle menu"
+  >
+    ☰
+  </button>
+)}
 
-        <ul className={`navbar-links ${menuOpen ? 'open' : ''}`}>
+
+<ul className={`navbar-links ${menuOpen ? 'open' : ''} ${!user ? 'guest' : ''}`}>
 {location.pathname !== '/' && (
   <li>
     <Link to="/" onClick={() => setMenuOpen(false)}>Home</Link>
