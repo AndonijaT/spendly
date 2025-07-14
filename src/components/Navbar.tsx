@@ -77,7 +77,11 @@ function Navbar() {
         </button>
 
         <ul className={`navbar-links ${menuOpen ? 'open' : ''}`}>
-          <li><Link to="/" onClick={() => setMenuOpen(false)}>Home</Link></li>
+{location.pathname !== '/' && (
+  <li>
+    <Link to="/" onClick={() => setMenuOpen(false)}>Home</Link>
+  </li>
+)}
           {user && <li><Link to="/dashboard" onClick={() => setMenuOpen(false)}>Dashboard</Link></li>}
 
           <li>
