@@ -9,6 +9,7 @@ import ForgotPasswordForm from '../components/ForgotPasswordForm';
 import Footer from '../components/Footer';
 import { useEffect, useState } from 'react';
 import { useLanguage } from '../context/LanguageContext';
+import ImageStackSection from '../components/ImageStackSection';
 
 
 
@@ -63,47 +64,9 @@ function Home() {
             </div>
           )}
         </div>
-        <div className="convincing-section">
-  <h2 className="section-title">{t('whyJoinSpendly') || 'Why Join Spendly?'}</h2>
-  
-  <div className="feature-scroll">
-    <div className="feature-card">
-      <img src="/dashboard1.png" alt="Overview" className="feature-wavy-img" />
-      <div className="feature-content">
-        <h3>{t('overviewAtGlance') || 'Overview at a glance'}</h3>
-        <p>{t('overviewText') || 'Instantly see your financial health with clear, beautiful visuals.'}</p>
-      </div>
-    </div>
-
-    
-    <div className="feature-card">
-      <img src="/dashboard3.png" alt="Categorization" className="feature-wavy-img" />
-      <div className="feature-content">
-        <h3>{t('categorizeExpenses') || 'Categorize Expenses'}</h3>
-        <p>{t('categorizeText') || 'Sort your spending into categories with ease.'}</p>
-      </div>
-    </div>
-
-    <div className="feature-card reverse">
-      <img src="/dashboard4.png" alt="Analytics" className="feature-wavy-img flipped" />
-      <div className="feature-content">
-        <h3>{t('detailedAnalytics') || 'Detailed Analytics'}</h3>
-        <p>{t('analyticsText') || 'Understand your spending habits with insightful analytics.'}</p>
-      </div>
-    </div>
-
-    <div className="feature-card">
-      <img src="/dashboard5.png" alt="Full History" className="feature-wavy-img" />
-      <div className="feature-content">
-        <h3>{t('fullHistory') || 'Full Transaction History'}</h3>
-        <p>{t('historyText') || 'Your entire spending history, beautifully displayed.'}</p>
-      </div>
-    </div>
-
-   
-  </div>
-</div>
-
+        
+        
+<ImageStackSection/>
 
         {showAuthModal && (
           <Modal onClose={() => setShowAuthModal(false)}>

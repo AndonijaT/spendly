@@ -351,7 +351,8 @@ const translations: Record<Language, Record<string, string>> = {
 "confirmDeleteBudget": "Delete budget for",
 "deletedBudget": "Deleted",
 "deleteBudgetFailed": "Failed to delete budget",
-"saveFailed": "Save failed"
+"saveFailed": "Save failed",
+"personalView": "My View",
 
 
 

@@ -1,0 +1,116 @@
+.image-stack-section {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 4rem 2rem;
+  background-color: #f9f5e9;
+  gap: 2rem;
+  flex-wrap: wrap;
+}
+
+.text-side {
+  max-width: 400px;
+}
+
+.text-side h2 {
+  font-size: 2rem;
+  margin-bottom: 1rem;
+}
+
+.text-side p {
+  font-size: 1.1rem;
+  margin-bottom: 1.5rem;
+}
+
+.text-side .cta-button {
+  padding: 0.8rem 1.5rem;
+  background-color: #d2b109;
+  border: none;
+  border-radius: 8px;
+  color: white;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.image-stack {
+  position: relative;
+ width: 950px; /* Was 800px */
+  height: 620px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* Shared image styles */
+.img-stack {
+  position: absolute;
+  width: 100%;
+  max-width: 300px;
+  transition: transform 0.4s ease, opacity 0.4s ease;
+  border-radius: 20px;
+}
+
+/* Laptop (far left) */
+/* Laptop (far left) */
+.img-stack.back {
+  z-index: 1;
+  transform: scale(0.82) translate(-300px, 60px) rotate(-10deg);
+}
+
+/* Middle phone (far right) */
+.img-stack.middle {
+  z-index: 2;
+  transform: scale(0.90) translate(260px, 35px) rotate(10deg);
+}
+
+/* Front phone (centered) */
+.img-stack.front {
+  z-index: 3;
+  transform: scale(1) translate(0, 0);
+  opacity: 1;
+}
+
+
+.img-stack.back:hover {
+  transform: scale(1.03) translate(-300px, 30px) rotate(0deg);
+  z-index: 4;
+  box-shadow: 0 25px 60px rgba(0, 0, 0, 0.3);
+}
+
+.img-stack.middle:hover {
+  transform: scale(1.03) translate(260px, 15px) rotate(0deg);
+  z-index: 4;
+  box-shadow: 0 25px 60px rgba(0, 0, 0, 0.3);
+}
+
+.img-stack.front:hover {
+  transform: scale(1.05) translate(0, -10px) rotate(0deg);
+  z-index: 4;
+  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.35);
+}
+
+
+@media (max-width: 768px) {
+  .image-stack {
+    width: 100%;
+    height: auto;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .img-stack {
+    position: static;
+    transform: none !important;
+    opacity: 1 !important;
+    margin-bottom: 1rem;
+  }
+}
+.text-side .cta-button {
+  display: block;
+  margin: 0 auto; /* centers horizontally */
+}
+.text-side .cta-button {
+  display: block;
+  margin-left: auto;
+  margin-right: 0;
+}
