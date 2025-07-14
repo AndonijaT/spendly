@@ -42,6 +42,8 @@ function Navbar() {
     location.pathname.startsWith('/statistics') ||
     location.pathname.startsWith('/about') ||
     location.pathname.startsWith('/features') ||
+        location.pathname.startsWith('/contact') ||
+
     location.pathname.startsWith('/reports');
     
   const isAboutPage = location.pathname === '/about';
@@ -76,8 +78,6 @@ function Navbar() {
 
         <ul className={`navbar-links ${menuOpen ? 'open' : ''}`}>
           <li><Link to="/" onClick={() => setMenuOpen(false)}>Home</Link></li>
-          <li><Link to="/about" onClick={() => setMenuOpen(false)}>About Us</Link></li>
-          <li><Link to="/features" onClick={() => setMenuOpen(false)}>Features</Link></li>
           {user && <li><Link to="/dashboard" onClick={() => setMenuOpen(false)}>Dashboard</Link></li>}
 
           <li>

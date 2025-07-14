@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import emailjs from '@emailjs/browser';
 import '../styles/ContactPage.css';
-import Footer from '../components/Footer'; 
 import { useLanguage } from '../context/LanguageContext';
 
 function Contact() {
@@ -90,7 +89,6 @@ const { t } = useLanguage();
       💛 {t('contactThanks') || 'Thanks for taking the time to connect with us. Your feedback helps make Spendly better!'}
     </p>
 
-    <Footer />
   </div>
 );
 }

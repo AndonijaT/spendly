@@ -10,7 +10,7 @@ import Footer from '../components/Footer';
 import { useEffect, useState } from 'react';
 import { useLanguage } from '../context/LanguageContext';
 import ImageStackSection from '../components/ImageStackSection';
-
+import ReviewsSection from '../components/ReviewSection';
 
 
 function Home() {
@@ -67,6 +67,35 @@ function Home() {
         
         
 <ImageStackSection/>
+<section className="home-mission-section">
+  <div className="mission-grid">
+    <div className="mission-text">
+      <h2>We’re on a mission to make money feel simple, human, and stress-free.</h2>
+      <p>
+        Spendly is not just an app. It's a mindset shift. We believe that personal finance should feel empowering — not overwhelming. 
+        That’s why we’ve built a tool that helps you understand your finances visually, manually, and meaningfully.
+      </p>
+      <p>
+        Our goal is to make budgeting something you actually enjoy. Whether you're splitting groceries with a partner,
+        planning for a big move, or just want to know where your coffee money went — Spendly is here to help you see clearly and act wisely.
+      </p>
+      <p>
+        We design Spendly with real humans in mind. No bank syncing. No subscription traps. Just clarity, control, and a bit of joy in every click.
+      </p>
+      <p>
+        And we’re just getting started. From personalized AI tips to shared budgets and real-time alerts,
+        we’re building the future of mindful money management — together.
+      </p>
+      <button className="about-link-button" onClick={() => window.location.href = '/about'}>
+        Learn More About Our Vision
+      </button>
+    </div>
+    <div className="mission-images">
+      <img src="/man.png" alt="Man holding phone" />
+      <img src="/people.png" alt="Analytics chart" />
+    </div>
+  </div>
+</section>
 
         {showAuthModal && (
           <Modal onClose={() => setShowAuthModal(false)}>
@@ -87,10 +116,10 @@ function Home() {
           </Modal>
         )}
       </div>
+        <ReviewsSection />
 
-      <div className="footer-wrapper">
+
         <Footer />
-      </div>
     </>
   );
 }
