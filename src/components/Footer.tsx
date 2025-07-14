@@ -25,11 +25,18 @@ export default function Footer() {
 
         <div className="footer-col contact">
           <h3>Contact Information</h3>
-          <ul>
-            <li><FaHome /> <span>Spendly <br />Maribor, Slovenia</span></li>
-            <li><FaPhone /> <span>+386 69 446 201</span></li>
-            <li><FaEnvelope /> <span>contact@spendly.app</span></li>
-          </ul>
+         <ul>
+  <li><FaHome /> <span>Spendly <br />Maribor, Slovenia</span></li>
+  <li>
+    <FaPhone />
+    <a href="tel:+38669446201">+386 69 446 201</a>
+  </li>
+  <li>
+    <FaEnvelope />
+    <a href="mailto:contact@spendly.app">contact@spendly.app</a>
+  </li>
+</ul>
+
         </div>
       </div>
 
