@@ -442,7 +442,7 @@ export default function Dashboard() {
 
   const expensesRef = useRef<HTMLDivElement>(null);
   const [showAdviceModal, setShowAdviceModal] = useState(false);
-  const [hideAdviceTrigger, setHideAdviceTrigger] = useState(false);
+  const [hideAdviceTrigger] = useState(false);
   useEffect(() => {
     const user = auth.currentUser;
     if (!user || !selectedMonth) return;
@@ -886,12 +886,14 @@ export default function Dashboard() {
           </div>
         </div>
       )}
-      {!hideAdviceTrigger && (
-        <div className="floating-advice-button">
-          <span onClick={() => setShowAdviceModal(true)}>💬 {t('assistantMessage') || 'Hey! I am here to help!'}</span>
-          <button className="close-advice" onClick={() => setHideAdviceTrigger(true)}>×</button>
-        </div>
-      )}
+    {!hideAdviceTrigger && (
+  <div className="floating-advice-icon-wrapper">
+    <div className="floating-advice-icon" onClick={() => setShowAdviceModal(true)} title="Need advice?">
+      💬
+    </div>
+  </div>
+)}
+
 
 
 
