@@ -353,6 +353,7 @@ const translations: Record<Language, Record<string, string>> = {
 "deleteBudgetFailed": "Failed to delete budget",
 "saveFailed": "Save failed",
 "personalView": "My View",
+"account.profilePhotoAlt": "Add picture",
 
 
 
