@@ -20,14 +20,14 @@ export default function ReviewsSection() {
     const [comment, setComment] = useState('');
     const [reviews, setReviews] = useState<Review[]>([]);
     const [user, setUser] = useState(() => auth.currentUser);
-const handleDelete = async (reviewId: string) => {
-  try {
-    await deleteDoc(doc(db, 'reviews', reviewId));
-    setReviews((prev) => prev.filter((r) => r.id !== reviewId));
-  } catch (error) {
-    console.error('Failed to delete review:', error);
-  }
-};
+    const handleDelete = async (reviewId: string) => {
+        try {
+            await deleteDoc(doc(db, 'reviews', reviewId));
+            setReviews((prev) => prev.filter((r) => r.id !== reviewId));
+        } catch (error) {
+            console.error('Failed to delete review:', error);
+        }
+    };
     useEffect(() => {
         const unsubscribe = auth.onAuthStateChanged(setUser);
         return () => unsubscribe();
@@ -65,6 +65,7 @@ const handleDelete = async (reviewId: string) => {
     return (
         <section className="reviews-section">
             <h2>Why our users use this app</h2>
+<div className="swiper-wrapper-relative">
 
             <Swiper
                 effect="coverflow"
@@ -87,28 +88,28 @@ const handleDelete = async (reviewId: string) => {
                 modules={[EffectCoverflow, Autoplay, Navigation]}
                 className="review-carousel"
             ><div className="swiper-button-prev custom-arrow">←</div>
-<div className="swiper-button-next custom-arrow">→</div>
+                <div className="swiper-button-next custom-arrow">→</div>
 
                 {reviews.map((r) => (
-                   <SwiperSlide key={r.id} className="review-slide">
-  <div className="review-card">
-    {r.uid === user?.uid && (
-      <button
-        className="delete-review-btn"
-        onClick={() => handleDelete(r.id)}
-        aria-label="Delete Review"
-      >
-        ×
-      </button>
-    )}
-    <strong>{r.name}</strong>
-    <p>{r.comment}</p>
-  </div>
-</SwiperSlide>
+                    <SwiperSlide key={r.id} className="review-slide">
+                        <div className="review-card">
+                            {r.uid === user?.uid && (
+                                <button
+                                    className="delete-review-btn"
+                                    onClick={() => handleDelete(r.id)}
+                                    aria-label="Delete Review"
+                                >
+                                    ×
+                                </button>
+                            )}
+                            <strong>{r.name}</strong>
+                            <p>{r.comment}</p>
+                        </div>
+                    </SwiperSlide>
 
                 ))}
             </Swiper>
-
+</div>
             {user ? (
                 <form onSubmit={handleSubmit} className="review-form">
                     <textarea
