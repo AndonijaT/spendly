@@ -179,3 +179,25 @@
     font-size: 0.95rem;
   }
 }
+.review-card {
+  position: relative;
+  padding: 1rem;
+  background: #fff;
+  border-radius: 10px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.delete-review-btn {
+  position: absolute;
+  top: 6px;
+  right: 10px;
+  background: none;
+  border: none;
+  font-size: 1.1rem;
+  color: #c00;
+  cursor: pointer;
+}
+
+.delete-review-btn:hover {
+  color: #900;
+}

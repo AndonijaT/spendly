@@ -5,19 +5,29 @@ import './../styles/ReviewsSection.css';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { EffectCoverflow, Autoplay, Navigation } from 'swiper/modules'; // ← ADD Navigation
 import 'swiper/css';
+import { deleteDoc, doc } from 'firebase/firestore'; // 👈 Add this
 
 type Review = {
     id: string;
+    uid: string;
     name: string;
     comment: string;
     timestamp?: { seconds: number };
 };
 
+
 export default function ReviewsSection() {
     const [comment, setComment] = useState('');
     const [reviews, setReviews] = useState<Review[]>([]);
     const [user, setUser] = useState(() => auth.currentUser);
-
+const handleDelete = async (reviewId: string) => {
+  try {
+    await deleteDoc(doc(db, 'reviews', reviewId));
+    setReviews((prev) => prev.filter((r) => r.id !== reviewId));
+  } catch (error) {
+    console.error('Failed to delete review:', error);
+  }
+};
     useEffect(() => {
         const unsubscribe = auth.onAuthStateChanged(setUser);
         return () => unsubscribe();
@@ -80,12 +90,22 @@ export default function ReviewsSection() {
 <div className="swiper-button-next custom-arrow">→</div>
 
                 {reviews.map((r) => (
-                    <SwiperSlide key={r.id} className="review-slide">
-                        <div className="review-card">
-                            <strong>{r.name}</strong>
-                            <p>{r.comment}</p>
-                        </div>
-                    </SwiperSlide>
+                   <SwiperSlide key={r.id} className="review-slide">
+  <div className="review-card">
+    {r.uid === user?.uid && (
+      <button
+        className="delete-review-btn"
+        onClick={() => handleDelete(r.id)}
+        aria-label="Delete Review"
+      >
+        ×
+      </button>
+    )}
+    <strong>{r.name}</strong>
+    <p>{r.comment}</p>
+  </div>
+</SwiperSlide>
+
                 ))}
             </Swiper>
 

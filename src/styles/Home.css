@@ -318,3 +318,37 @@ html, body {
     margin: 0.5rem;
   }
 }
+@media (max-width: 768px) {
+  .hero {
+    align-items: flex-end;
+    padding: 20px 20px 70px; /* reduce bottom padding */
+  }
+
+  .hero-text.guest {
+    margin-bottom: 50px; /* move up  */
+  }
+}
+@media (max-width: 768px) {
+  .hero {
+    align-items: flex-end;
+    padding: 20px 20px 60px; /* less bottom padding */
+  }
+
+  .hero-text.guest,
+  .hero-text.user {
+    margin-bottom: 40px; /* lift  */
+  }
+
+  .hero-text h1 {
+    font-size: 1.4rem;
+  }
+
+  .hero-text p {
+    font-size: 0.95rem;
+  }
+
+  .cta-button {
+    font-size: 0.95rem;
+    padding: 0.6rem 1.2rem;
+  }
+}
