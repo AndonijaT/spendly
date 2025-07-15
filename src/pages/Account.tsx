@@ -488,7 +488,7 @@ export default function Account() {
       )}
 
 
-      <div className="account-section collaborate-section">
+<div className="account-section collaborate-section highlight-collaborate">
         <h3>{t('account.collaborateTitle') || 'Collaborate'}</h3>
 
         {sharedWithUsers.length > 0 && (
