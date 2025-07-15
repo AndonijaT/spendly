@@ -96,7 +96,7 @@ function Navbar() {
           {user && (
             <li>
               <button
-                className="account-button"
+                className="account-button sign-out-button"
                 onClick={() => { handleSignOut(); setMenuOpen(false); }}
               >
                 Sign Out
