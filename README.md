@@ -51,10 +51,9 @@ npm run dev
 ## 👨‍💻 Author
 --- bash
 **Andonija Todorova**  
-Frontend & UX Developer | Firebase Enthusiast | AI Explorer  
 📍 Slovenia  
-🔗 [GitHub](https://github.com/andonijaaa)  
-📧 andonija.todorova@gmail.com 
+🔗 [GitHub](https://github.com/andonijaT)  
+📧 andonijat@gmail.com 
 
 ---
 
