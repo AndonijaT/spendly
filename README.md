@@ -41,7 +41,7 @@ Spendly is a progressive web app (PWA) for manually tracking income and expenses
 
 ## 🔧 Setup Instructions
 
-git clone https://github.com/yourusername/spendly.git
+git clone 
 cd spendly
 npm install
 npm run dev
